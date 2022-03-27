@@ -1,5 +1,5 @@
-[Listing|+uuid: UUID; +creationDate: Date; +name: String; +description: String; address: Address; +published: bool; +pictures: Picture (aC); +sqm: int; +type: ListingType; +furnished: bool; +availableTo: bool (aC); +available: bool +rent: int; +deposit: int]
-[User|+uuid: UUID; +creationDate: Date; +firstname: String; +lastname: String; +email: String; +password: String; +role: Role; token: String; +address: Address; gender: Gender; details: String; group: Group;]
+[Listing|+uuid: UUID; +creationDate: Date; +name: String; +description: String; +address: Address; +published: bool; +pictures: Picture (aC); +sqm: int; +type: ListingType; +furnished: bool; +availableTo: bool (aC); +available: bool; +rent: int; +deposit: int]
+[User|+uuid: UUID; +creationDate: Date; +firstname: String; +lastname: String; +email: String; +password: String; +role: Role; +token: String; +address: Address; gender: Gender; details: String; group: Group;]
 [Address]
 [Role|+ADMIN; +TEAM; +LANDLORD; +STUDENT]
 [Group|+uuid: UUID; +creationDate: Date; +members: User (aC); +applications: GroupApplication (aC)]
