@@ -4,10 +4,10 @@ plugins {
     id 'java'
     id 'idea'
     id 'jacoco'
-    id "org.sonarqube" version "3.3"
+    id "org.sonarqube" version "3.1.1"
 }
 
-group 'ch.uzh.ifi.fs22.sel.group15'
+group 'ch.uzh.ifi.fs22.sel.group15.cozycave.server'
 version '1.0.0'
 
 java {
@@ -28,7 +28,7 @@ repositories {
 }
 
 springBoot {
-    mainClass.set('ch.uzh.ifi.fs22.sel.group15.Application')
+    mainClass.set('ch.uzh.ifi.fs22.sel.group15.cozycave.server.Application')
 }
 
 dependencies {
