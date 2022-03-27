@@ -1,0 +1,35 @@
+[Listing|+uuid: UUID; +creationDate: Date; +name: String; +description: String; address: Address; +published: bool; +pictures: Picture (aC); +sqm: int; +type: ListingType; +furnished: bool; +availableTo: bool (aC); +available: bool +rent: int; +deposit: int]
+[User|+uuid: UUID; +creationDate: Date; +firstname: String; +lastname: String; +email: String; +password: String; token: String; +address: Address; gender: Gender; details: String; group: Group;]
+[Address]
+[Group|+uuid: UUID; +creationDate: Date; +members: User (aC); +applications: GroupApplication (aC)]
+[ListingType|+FLAT; +ROOM]
+[GroupApplication|+uuid: UUID; +creationDate: Date; +listing: Listing; +applications: Application (aC); +agreedMembers: User (aC)]
+[Application|+uuid: UUID; +creationDate: Date;  +user: User; listing: Listing; +status: ApplicationStatus; +linkedGroupApplication: GroupApplication]
+[ApplicationStatus| +PENDING; +DENIED; +ACCEPTED]
+[Picture|+uuid: UUID; +creationDate: Date; +creator: User ;+path: String]
+[Gender|+FEMALE; +MALE; +OTHER]
+
+[Listing]->[ListingType]
+[Listing]->[Gender]
+[Listing]<->[User]
+[Listing]<>->[Application]
+[Listing]++->[Picture]
+[Listing]<>->[Address]
+
+[User]<>->[Address]
+[User]++->[Picture]
+[User]<>->[Application]
+[User]<->[Group]
+[User]->[Gender]
+
+[Application]++->[GroupApplication]
+[Application]->[ApplicationStatus]
+
+[Group]<>->[GroupApplication]
+
+[GroupApplication]->[Listing]
+[GroupApplication]->[User]
+
+[note: aC = as Collection / Array]-[Listing]
+[note: aC = as Collection / Array]-[Group]
+[note: aC = as Collection / Array]-[GroupApplication]
