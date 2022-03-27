@@ -1,6 +1,7 @@
 [Listing|+uuid: UUID; +creationDate: Date; +name: String; +description: String; address: Address; +published: bool; +pictures: Picture (aC); +sqm: int; +type: ListingType; +furnished: bool; +availableTo: bool (aC); +available: bool +rent: int; +deposit: int]
-[User|+uuid: UUID; +creationDate: Date; +firstname: String; +lastname: String; +email: String; +password: String; token: String; +address: Address; gender: Gender; details: String; group: Group;]
+[User|+uuid: UUID; +creationDate: Date; +firstname: String; +lastname: String; +email: String; +password: String; +role: Role; token: String; +address: Address; gender: Gender; details: String; group: Group;]
 [Address]
+[Role|+ADMIN; +TEAM; +LANDLORD; +STUDENT]
 [Group|+uuid: UUID; +creationDate: Date; +members: User (aC); +applications: GroupApplication (aC)]
 [ListingType|+FLAT; +ROOM]
 [GroupApplication|+uuid: UUID; +creationDate: Date; +listing: Listing; +applications: Application (aC); +agreedMembers: User (aC)]
@@ -21,6 +22,7 @@
 [User]<>->[Application]
 [User]<->[Group]
 [User]->[Gender]
+[User]->[Role]
 
 [Application]++->[GroupApplication]
 [Application]->[ApplicationStatus]
