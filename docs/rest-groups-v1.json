@@ -1,171 +1,28 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "CozyCave.ch Server REST API",
-    "description": "This is the REST API documentation for the cozycave.ch server.",
+    "title": "CozyCave.ch Server REST API (group calls only)",
+    "description": "This is the REST API documentation (group calls only) for the cozycave.ch server.",
     "version": "1.1.0"
   },
   "tags": [
     {
-      "name": "authentication",
-      "description": "handles the authentication part of the api"
-    },
-    {
-      "name": "users",
-      "description": "everything about the user"
-    },
-    {
-      "name": "listings",
-      "description": "listings and their applications"
+      "name": "groups",
+      "description": "groups, members and their applications"
     },
     {
       "name": "applications",
       "description": "a list including all application endpoints"
-    },
-    {
-      "name": "pictures",
-      "description": "pictures of users and listings"
-    },
-    {
-      "name": "chat",
-      "description": "a list including all chat endpoints"
     }
   ],
   "paths": {
-    "/login/": {
-      "put": {
-        "summary": "login endpoint for a user",
-        "operationId": "loginUser",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "properties": {
-                  "email": {
-                    "type": "string"
-                  },
-                  "password_hashed": {
-                    "type": "string",
-                    "description": "SHA3-512 is used for hashing"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/UnknownLoginDataError"
-          },
-          "200": {
-            "description": "send when logged in successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "token": {
-                      "type": "string",
-                      "description": "JWT"
-                    },
-                    "user": {
-                      "$ref": "#/components/schemas/User"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "authentication"
-        ]
-      }
-    },
-    "/register/": {
-      "post": {
-        "summary": "registered a new user in the system",
-        "operationId": "registerUser",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "properties": {
-                  "firstname": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "lastname": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "email": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "password_hashed": {
-                    "type": "string",
-                    "required": "true"
-                  },
-                  "address": {
-                    "$ref": "#/components/schemas/Address"
-                  },
-                  "gender": {
-                    "$ref": "#/components/schemas/Gender"
-                  },
-                  "details": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "409": {
-            "$ref": "#/components/responses/UserAlreadyExistsError"
-          },
-          "201": {
-            "description": "send when registered successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "token": {
-                      "type": "string",
-                      "description": "JWT"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "authentication"
-        ]
-      }
-    },
-    "/logout/": {
-      "put": {
-        "summary": "logs out an user",
-        "operationId": "logoutUser",
+    "/groups/": {
+      "get": {
+        "summary": "gets all groups",
+        "operationId": "getGroups",
         "security": [
           {
             "bearerAuth": [
-              "student",
-              "landlord",
               "team",
               "admin"
             ]
@@ -178,22 +35,145 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "200": {
+            "description": "send when executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
-          "authentication"
+          "groups"
+        ]
+      },
+      "post": {
+        "summary": "creates a new group",
+        "operationId": "createGroup",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Group"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "201": {
+            "$ref": "#/components/responses/Group"
+          }
+        },
+        "tags": [
+          "groups"
         ]
       }
     },
-    "/users/": {
+    "/groups/{groupId}": {
       "get": {
-        "summary": "returns a full list of all users",
-        "operationId": "getUsers",
+        "summary": "gets a single group",
+        "operationId": "getGroup",
+        "description": "students can only access their own group",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/Group"
+          }
+        },
+        "tags": [
+          "groups"
+        ]
+      },
+      "put": {
+        "summary": "changes a group",
+        "operationId": "changeGroup",
+        "description": "students can only access their own group",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Group"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/Group"
+          }
+        },
+        "tags": [
+          "groups"
+        ]
+      },
+      "delete": {
+        "summary": "deletes a group",
+        "operationId": "deleteGroup",
         "security": [
           {
             "bearerAuth": [
@@ -204,13 +184,7 @@
         ],
         "parameters": [
           {
-            "name": "email",
-            "description": "shows only users with the provided email",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "required": false
+            "$ref": "#/components/parameters/GroupID"
           }
         ],
         "responses": {
@@ -223,12 +197,55 @@
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
           },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "204": {
+            "description": "send when executed successfully"
+          }
+        },
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}/members": {
+      "get": {
+        "summary": "gets all members of the group",
+        "operationId": "getGroupMembers",
+        "description": "students can only access their own group",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
           "200": {
-            "description": "send the request was executed successfully",
+            "description": "send when executed successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/User"
                   }
@@ -238,52 +255,17 @@
           }
         },
         "tags": [
-          "users"
+          "groups"
         ]
       },
       "post": {
-        "summary": "creates a new user",
-        "operationId": "createUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/User"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "201": {
-            "$ref": "#/components/responses/User"
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/users/{userId}": {
-      "get": {
-        "summary": "returns a user",
-        "operationId": "getUser",
-        "description": "students and landlords can only access their own profile",
+        "summary": "adds a group member",
+        "operationId": "addGroupMember",
+        "description": "students can only access their own group",
         "security": [
           {
             "bearerAuth": [
               "student",
-              "landlord",
               "team",
               "admin"
             ]
@@ -291,786 +273,16 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/User"
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "put": {
-        "summary": "changes a user",
-        "operationId": "changeUser",
-        "description": "students and landlords can only access their own profile",
-        "security": [
-          {
-            "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/User"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/User"
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "delete": {
-        "summary": "deletes a user",
-        "operationId": "deleteUser",
-        "description": "team member accounts can only be deleted by admins",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "204": {
-            "description": "send when the request was executed successfully"
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/users/{userId}/applications/": {
-      "get": {
-        "summary": "list all applications of a user",
-        "operationId": "getApplicationsOfUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "description": "send when the request was executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Application"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "users",
-          "applications"
-        ]
-      }
-    },
-    "/users/{userId}/applications/{applicationId}": {
-      "get": {
-        "summary": "get an application of a user",
-        "operationId": "getApplicationOfUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          },
-          {
-            "$ref": "#/components/parameters/ApplicationID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "users",
-          "applications"
-        ]
-      },
-      "put": {
-        "summary": "change an application of a user",
-        "operationId": "changeApplicationOfUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          },
-          {
-            "$ref": "#/components/parameters/ApplicationID"
-          }
-        ],
-        "responses": {
-
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "users",
-          "applications"
-        ]
-      },
-      "delete": {
-        "summary": "delete an application of a user",
-        "operationId": "deleteApplicationOfUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          },
-          {
-            "$ref": "#/components/parameters/ApplicationID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "204": {
-            "description": "send when the request was executed successfully"
-          }
-        },
-        "tags": [
-          "users",
-          "applications"
-        ]
-      }
-    },
-    "/listings/": {
-      "get": {
-        "summary": "returns all listings",
-        "operationId": "getListings",
-        "parameters": [
-          {
-            "name": "gender-of-inhabitants",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Gender"
-              }
-            }
-          },
-          {
-            "name": "gender-of-searched-inhabitants",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Gender"
-              }
-            }
-          },
-          {
-            "name": "price",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "sqm_total",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "sqm_room",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "NAME_ASC",
-                "NAME_DESC",
-                "PRICE_ASC",
-                "PRICE_DESC",
-                "SQM_TOTAL_ASC",
-                "SQM_TOTAL_DESC",
-                "SQM_ROOM_ASC",
-                "SQM_ROOM_DESC",
-                "TOTAL_ROOMS_ASC",
-                "TOTAL_ROOMS_DESC",
-                "NUMBER_OF_INHABITANTS_ASC",
-                "NUMBER_OF_INHABITANTS_DESC"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "200": {
-            "description": "send when the request was executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Listing"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "listings"
-        ]
-      },
-      "post": {
-        "summary": "creates a new listing",
-        "operationId": "createListing",
-        "security": [
-          {
-            "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Listing"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "201": {
-            "$ref": "#/components/responses/Listing"
-          }
-        },
-        "tags": [
-          "listings"
-        ]
-      }
-    },
-    "/listings/{listingId}": {
-      "get": {
-        "summary": "gets a listing",
-        "operationId": "getListing",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ListingID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Listing"
-          }
-        },
-        "tags": [
-          "listings"
-        ]
-      },
-      "put": {
-        "summary": "changes a listing",
-        "operationId": "changeListing",
-        "security": [
-          {
-            "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ListingID"
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Listing"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Listing"
-          }
-        },
-        "tags": [
-          "listings"
-        ]
-      },
-      "delete": {
-        "summary": "deletes a listing and all its subcomponents",
-        "operationId": "deleteListing",
-        "security": [
-          {
-            "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ListingID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "204": {
-            "description": "send when executed successfully"
-          }
-        },
-        "tags": [
-          "listings"
-        ]
-      }
-    },
-    "/listings/{listingId}/applications/": {
-      "get": {
-        "summary": "returns all applications on a specific listing",
-        "operationId": "getListingApplications",
-        "security": [
-          {
-            "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ListingID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "description": "send when executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Application"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "listings",
-          "applications"
-        ]
-      },
-      "post": {
-        "summary": "creates a new application to a listing",
-        "operationId": "createListingApplication",
-        "security": [
-          {
-            "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Application"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "201": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "listings",
-          "applications"
-        ]
-      }
-    },
-    "/listings/{listingId}/applications/{applicationId}": {
-      "get": {
-        "summary": "returns a listings application",
-        "operationId": "getListingApplication",
-        "description": "students can only access their own application",
-        "security": [
-          {
-            "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ListingID"
-          },
-          {
-            "$ref": "#/components/parameters/ApplicationID"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "listings",
-          "applications"
-        ]
-      },
-      "put": {
-        "summary": "changes a listings application",
-        "operationId": "changeListingApplication",
-        "security": [
-          {
-            "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Application"
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "listings",
-          "applications"
-        ]
-      },
-      "delete": {
-        "summary": "deletes a listings application",
-        "operationId": "deleteListingApplication",
-        "security": [
-          {
-            "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "204": {
-            "description": "send when executed successfully"
-          }
-        },
-        "tags": [
-          "listings",
-          "applications"
-        ]
-      }
-    },
-    "/listings/{listingId}/applications/{applicationId}/chat/": {
-      "put": {
-        "summary": "chat interface, api unknown",
-        "operationId": "chatListingApplication",
-        "parameters": [
-        ],
-        "responses": {
-        },
-        "tags": [
-          "listings",
-          "applications",
-          "chat"
-        ]
-      }
-    },
-    "/pictures/": {
-      "get": {
-        "summary": "gets all pictures",
-        "operationId": "getPictures",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "200": {
-            "description": "send when executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Picture"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "pictures"
-        ]
-      },
-      "post": {
-        "summary": "upload of a new picture",
-        "operationId": "uploadPicture",
-        "security": [
-          {
-            "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
-            ]
+            "$ref": "#/components/parameters/GroupID"
           }
         ],
         "requestBody": {
           "content": {
-            "image/jpeg": {},
-            "image/png": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UUID"
+              }
+            }
           }
         },
         "responses": {
@@ -1083,56 +295,27 @@
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
           },
-          "201": {
-            "description": "send when executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "path": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "pictures"
-        ]
-      }
-    },
-    "/pictures/{pictureId}": {
-      "get": {
-        "summary": "returns a single pictures information",
-        "operationId": "getPictureInformation",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/PictureID"
-          }
-        ],
-        "responses": {
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "$ref": "#/components/responses/Picture"
+          "204": {
+            "description": "send when executed successfully"
           }
         },
         "tags": [
-          "pictures"
+          "groups"
         ]
-      },
+      }
+    },
+    "/groups/{groupId}/members/{userId}": {
       "delete": {
-        "summary": "deletes a picture",
-        "operationId": "delete picture",
-        "description": "only the owner, team and admins can delete a picture",
+        "summary": "gets information about a group member",
+        "operationId": "getGroupMember",
+        "description": "students can only access their own group membership",
         "security": [
           {
             "bearerAuth": [
               "student",
-              "landlord",
               "team",
               "admin"
             ]
@@ -1140,7 +323,10 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/PictureID"
+            "$ref": "#/components/parameters/GroupID"
+          },
+          {
+            "$ref": "#/components/parameters/UserID"
           }
         ],
         "responses": {
@@ -1153,37 +339,243 @@
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
           },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
           "204": {
             "description": "send when executed successfully"
           }
         },
         "tags": [
-          "pictures"
+          "groups"
         ]
       }
     },
-    "/pictures/{pictureId}/view": {
+    "/groups/{groupId}/applications/": {
       "get": {
-        "summary": "vews a picture",
-        "operationId": "getPicture",
+        "summary": "gets the applications from a specific group",
+        "operationId": "getGroupApplication",
+        "description": "students can only access their own groups' application",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/PictureID"
+            "$ref": "#/components/parameters/GroupID"
           }
         ],
         "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
           "200": {
-            "description": "picture",
+            "description": "send when executed successfully",
             "content": {
-              "image/jpeg": {}
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupApplication"
+                  }
+                }
+              }
             }
           }
         },
         "tags": [
-          "pictures"
+          "groups",
+          "applications"
+        ]
+      },
+      "post": {
+        "summary": "creates a new group application",
+        "operationId": "createGroupApplication",
+        "description": "students can only access their own groups' application",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GroupApplication"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "201": {
+            "$ref": "#/components/responses/GroupApplication"
+          }
+        },
+        "tags": [
+          "groups",
+          "applications"
+        ]
+      }
+    },
+    "/groups/{groupId}/applications/{applicationId}": {
+      "get": {
+        "summary": "gets a single group application",
+        "operationId": "getGroupApplication",
+        "description": "students can only access their own groups' application",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationID"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/GroupApplication"
+          }
+        },
+        "tags": [
+          "groups",
+          "applications"
+        ]
+      },
+      "put": {
+        "summary": "changes a group application",
+        "operationId": "changeGroupApplication",
+        "description": "students can only access their own groups' application",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationID"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GroupApplication"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "description": "send when executed successfully"
+          }
+        },
+        "tags": [
+          "groups",
+          "applications"
+        ]
+      },
+      "delete": {
+        "summary": "deletes a group application",
+        "operationId": "deleteGroupApplication",
+        "description": "students can only access their own groups' application",
+        "security": [
+          {
+            "bearerAuth": [
+              "student",
+              "team",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupID"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationID"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/NoPermissionsError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "204": {
+            "description": "send when executed successfully"
+          }
+        },
+        "tags": [
+          "groups",
+          "applications"
         ]
       }
     }
