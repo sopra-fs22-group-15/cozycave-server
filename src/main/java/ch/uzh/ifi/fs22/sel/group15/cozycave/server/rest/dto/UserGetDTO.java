@@ -1,9 +1,22 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Address;
+
+import java.util.Date;
+
 public class UserGetDTO {
     private Long id;
+    private Date creation;
+    private String firstname;
     private String name;
-    private String username;
+    private String email;
+    private Role role;
+    private String token;
+    private Address address;
+    private Gender gender;
+    private Date birthday;
+    private String details;
 
     public Long getId() {
         return id;
@@ -11,6 +24,22 @@ public class UserGetDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Date getCreation() {
+        return creation;
+    }
+
+    public void setCreation(Date creation) {
+        this.creation = creation;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
     }
 
     public String getName() {
@@ -21,11 +50,61 @@ public class UserGetDTO {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
 }

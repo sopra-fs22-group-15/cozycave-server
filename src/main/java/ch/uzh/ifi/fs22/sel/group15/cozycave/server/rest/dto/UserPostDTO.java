@@ -1,53 +1,22 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Address;
 
-import javax.persistence.*;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Date;
 
-@Entity
-@Table(name = "USER")
-public class User implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue
+public class UserPostDTO {
     private Long id;
-
-    @Column(nullable = false)
     private Date creation;
-
-    @Column(nullable = false)
     private String firstname;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false)
     private Role role;
-
-    @Column(nullable = false)
     private String token;
-
-    @Column(nullable = false)
     private Address address;
-
-    @Column(nullable = false)
     private Gender gender;
-
-    @Column(nullable = false)
     private Date birthday;
-
-    @Column(nullable = true,length = 20000)
     private String details;
 
     public Long getId() {
