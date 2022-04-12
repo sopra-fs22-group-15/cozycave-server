@@ -1,11 +1,12 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Address;
-
 import java.util.Date;
 
 public class UserPutDTO {
+
     private Long id;
     private Date creation;
     private String firstname;

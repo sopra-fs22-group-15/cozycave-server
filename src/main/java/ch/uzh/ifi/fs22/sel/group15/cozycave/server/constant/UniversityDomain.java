@@ -5,7 +5,8 @@ import java.util.List;
 
 
 public enum UniversityDomain {
-    uzh, eth;
+    uzh,
+    eth;
 
     private List<String> domains;
 

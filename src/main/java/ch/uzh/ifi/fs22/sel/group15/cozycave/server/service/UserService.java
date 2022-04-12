@@ -2,6 +2,10 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityNotFoundException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 @Service
 @Transactional
 public class UserService {
+
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
@@ -55,8 +54,6 @@ public class UserService {
     }
 
     public User updateUser(User userInput) {
-
-
         if (!userInput.getToken().equals(userRepository.getOne(userInput.getId()).getToken())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "token does not match");
         }
@@ -119,10 +116,8 @@ public class UserService {
     }
 
     /**
-     * This is a helper method that will check the uniqueness criteria of the
-     * username and the name
-     * defined in the User entity. The method will do nothing if the input is unique
-     * and throw an error otherwise.
+     * This is a helper method that will check the uniqueness criteria of the username and the name defined in the User
+     * entity. The method will do nothing if the input is unique and throw an error otherwise.
      *
      * @param userToBeCreated
      * @throws org.springframework.web.server.ResponseStatusException
@@ -136,9 +131,8 @@ public class UserService {
         //TODO: only makes sense when more is being checked later on
         if (userByEmail != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    String.format(baseErrorMessage, "username and the name", "are"));
-        }
-        else if (userByEmail != null) {
+                String.format(baseErrorMessage, "username and the name", "are"));
+        } else if (userByEmail != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
         }
     }

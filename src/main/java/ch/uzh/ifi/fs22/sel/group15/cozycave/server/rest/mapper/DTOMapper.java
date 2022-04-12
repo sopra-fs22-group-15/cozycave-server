@@ -1,13 +1,16 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.*;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDTO;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostDTO;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPutDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface DTOMapper {
+
     DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
     @Mapping(source = "id", target = "id")
@@ -37,6 +40,7 @@ public interface DTOMapper {
     @Mapping(source = "birthday", target = "birthday")
     @Mapping(source = "details", target = "details")
     User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
+
     UserPutDTO convertEntityToUserPutDTO(User user);
 
     @Mapping(source = "id", target = "id")
@@ -52,5 +56,6 @@ public interface DTOMapper {
     @Mapping(source = "birthday", target = "birthday")
     @Mapping(source = "details", target = "details")
     User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
+
     UserPostDTO convertEntityToUserPostDTO(User user);
 }

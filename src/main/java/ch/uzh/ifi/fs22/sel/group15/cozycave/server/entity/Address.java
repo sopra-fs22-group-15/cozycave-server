@@ -1,12 +1,17 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
 
-import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "ADDRESS")
 public class Address implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 

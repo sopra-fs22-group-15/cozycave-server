@@ -1,15 +1,20 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.*;
-
-import javax.persistence.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +52,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private Date birthday;
 
-    @Column(nullable = true,length = 20000)
+    @Column(nullable = true, length = 20000)
     private String details;
 
     public Long getId() {
