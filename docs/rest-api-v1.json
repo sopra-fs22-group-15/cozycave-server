@@ -25,10 +25,6 @@
     {
       "name": "pictures",
       "description": "pictures of users and listings"
-    },
-    {
-      "name": "chat",
-      "description": "a list including all chat endpoints"
     }
   ],
   "paths": {
@@ -997,21 +993,6 @@
         "tags": [
           "listings",
           "applications"
-        ]
-      }
-    },
-    "/listings/{listingId}/applications/{applicationId}/chat/": {
-      "put": {
-        "summary": "chat interface, api unknown",
-        "operationId": "chatListingApplication",
-        "parameters": [
-        ],
-        "responses": {
-        },
-        "tags": [
-          "listings",
-          "applications",
-          "chat"
         ]
       }
     },

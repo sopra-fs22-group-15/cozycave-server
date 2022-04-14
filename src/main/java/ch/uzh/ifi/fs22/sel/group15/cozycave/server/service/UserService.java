@@ -1,11 +1,13 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import javax.persistence.EntityNotFoundException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-@Service
-@Transactional
-public class UserService {
+@Service @Transactional public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    @Autowired public UserService(@Qualifier("userRepository") UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -32,108 +31,109 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    public User createUser(User newUser) {
-        newUser.setToken(UUID.randomUUID().toString());
+    public @NotNull User createUser(User newUser) {
+        newUser.setCreationDate(new Date());
 
-        Date dNow = new Date();
-        newUser.setCreation(dNow);
-        checkIfUserExists(newUser);
+        // global checks
+        checkIfUserAlreadyExists(newUser);
+        checkIfDataIsValid(newUser, true);
 
-        // saves the given entity but data is only persisted in the database once
-        // flush() is called
-        newUser = userRepository.save(newUser);
-        userRepository.flush();
+        newUser = userRepository.saveAndFlush(newUser);
 
         log.debug("Created Information for User: {}", newUser);
         return newUser;
     }
 
-    public User findUserID(Long inputUser) throws EntityNotFoundException {
-        //find user
-        return userRepository.getOne(inputUser);
+    public @NotNull Optional<User> findUserID(UUID uuid) {
+        return userRepository.findById(uuid);
     }
 
-    public User updateUser(User userInput) {
-        if (!userInput.getToken().equals(userRepository.getOne(userInput.getId()).getToken())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "token does not match");
-        }
-        User updatedUser = userRepository.getOne(userInput.getId());
+    public @NotNull User updateUser(User userInput, User updatedBy) {
+        User updatedUser = userRepository.findById(userInput.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        // change firstname
-        if (userInput.getFirstname() != null) {
-            updatedUser.setFirstname(userInput.getFirstname());
-            log.debug("Firstname updated on: {}", updatedUser);
-        }
+        // update authentication data
+        if (updatedUser.getAuthenticationData() != null) {
+            // TODO: confirm email change by sending email with link to confirm
+            if (userInput.getAuthenticationData().getEmail() != null) {
+                // TODO: verify valid email
+                updatedUser.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
+            }
 
-        // change name
-        if (userInput.getName() != null) {
-            updatedUser.setName(userInput.getName());
-            log.debug("Name updated on: {}", updatedUser);
-        }
+            if (userInput.getAuthenticationData().getPassword() != null) {
+                // TODO: encrypt password
+                updatedUser.getAuthenticationData().setPassword(userInput.getAuthenticationData().getPassword());
+            }
 
-        // change email
-        // TODO: might cause a problem between Roles <-> depending on implementation
-        if (userInput.getEmail() != null) {
-            updatedUser.setEmail(userInput.getEmail());
-            // TODO: Student verfication must be called to change Role
-            log.debug("Email updated on: {}", updatedUser);
+            if (userInput.getAuthenticationData().getToken() != null
+                && updatedBy.getRole().greaterEquals(Role.TEAM)) {
+                updatedUser.getAuthenticationData().setToken(null);
+            }
         }
 
-        // change password
-        if (userInput.getPassword() != null) {
-            updatedUser.setPassword(userInput.getPassword());
-            log.debug("Password updated on: {}", updatedUser);
+        // update role
+        if ((updatedBy.getRole().equals(Role.TEAM)
+            && userInput.getRole().lessThan(Role.TEAM))
+            || updatedBy.getRole().equals(Role.ADMIN)) {
+            updatedUser.setRole(userInput.getRole());
         }
 
-        // change Address
-        if (userInput.getAddress() != null) {
-            updatedUser.setAddress(userInput.getAddress());
-            log.debug("Address updated on: {}", updatedUser);
-        }
-        // change gender
-        if (userInput.getGender() != null) {
-            updatedUser.setGender(userInput.getGender());
-            log.debug("Gender updated on: {}", updatedUser);
-        }
-
-        // change birthday
-        if (userInput.getBirthday() != null) {
-            updatedUser.setBirthday(userInput.getBirthday());
-            log.debug("Birthday updated on: {}", updatedUser);
-        }
-
-        // update profile details
+        // update details
         if (userInput.getDetails() != null) {
-            updatedUser.setDetails(userInput.getDetails());
-            log.debug("Details updated on: {}", updatedUser);
+            if (userInput.getDetails().getFirstname() != null) {
+                updatedUser.getDetails().setFirstname(userInput.getDetails().getFirstname());
+            }
+
+            if (userInput.getDetails().getLastname() != null) {
+                updatedUser.getDetails().setLastname(userInput.getDetails().getLastname());
+            }
+
+            if (userInput.getDetails().getGender() != null) {
+                updatedUser.getDetails().setGender(userInput.getDetails().getGender());
+            }
+
+            if (userInput.getDetails().getBirthday() != null) {
+                updatedUser.getDetails().setBirthday(userInput.getDetails().getBirthday());
+            }
+
+            if (userInput.getDetails().getAddress() != null) {
+                // TODO: check if address has to be created first
+                // TODO: verify address
+                updatedUser.getDetails().setAddress(userInput.getDetails().getAddress());
+            }
+
+            if (userInput.getDetails().getBiography() != null) {
+                updatedUser.getDetails().setBiography(userInput.getDetails().getBiography());
+            }
+
+            if (userInput.getDetails().getPicture() != null) {
+                updatedUser.getDetails().setPicture(userInput.getDetails().getPicture());
+            }
         }
 
-        return updatedUser;
+        return userRepository.saveAndFlush(updatedUser);
     }
 
-    public void deleteUser() {
-
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 
-    /**
-     * This is a helper method that will check the uniqueness criteria of the username and the name defined in the User
-     * entity. The method will do nothing if the input is unique and throw an error otherwise.
-     *
-     * @param userToBeCreated
-     * @throws org.springframework.web.server.ResponseStatusException
-     * @see User
-     */
-    private void checkIfUserExists(User userToBeCreated) {
-        User userByEmail = userRepository.findByEmail(userToBeCreated.getEmail());
+    public void deleteUser(UUID uuid) {
+        userRepository.delete(userRepository.findById(uuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")));
+    }
 
-        String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
+    private void checkIfUserAlreadyExists(User userToBeCreated) {
+        Optional<User> userByEmail = userRepository.findByAuthenticationData_Email(
+            userToBeCreated.getAuthenticationData().getEmail());
 
-        //TODO: only makes sense when more is being checked later on
-        if (userByEmail != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                String.format(baseErrorMessage, "username and the name", "are"));
-        } else if (userByEmail != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
+        if (userByEmail.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "a user with this email already exists");
         }
+    }
+
+    //TODO
+    private void checkIfDataIsValid(User userToBeCreated, boolean mandatoryFieldsAreFilled) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
