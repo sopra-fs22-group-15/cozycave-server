@@ -65,6 +65,11 @@ class UserServiceTest {
     }
 
     @Test
+    public void createUserEmpty() {
+
+    }
+
+    @Test
     public void createUserDuplicateEmailException() {
         userService.createUser(testUser);
 
@@ -88,6 +93,82 @@ class UserServiceTest {
         given(userService.findUserEmail(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         assertThrows(ResponseStatusException.class, () -> userService.findUserEmail(testUser.getAuthenticationData().getEmail()));
+
+    }
+
+    @Test
+    public void deleteUserEmpty() {
+
+    }
+
+    @Test
+    public void deleteUserException() throws ResponseStatusException {
+        User createdUser = userService.createUser(testUser);
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.when(userService.findUserEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
+
+        //given(userService.deleteUser(createdUser)).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+
+        assertThrows(ResponseStatusException.class, () -> userService.deleteUser(testUser));
+
+    }
+
+    @Test
+    public void getUsersSuccess() {
+
+    }
+    @Test
+    public void getUsersEmpty() {
+
+    }
+
+    @Test
+    public void getUsersException(){
+
+    }
+
+    @Test
+    public void findUserIDSuccess() {
+
+    }
+
+    @Test
+    public void findUserIDEmpty() {
+
+    }
+
+    @Test
+    public void findUserIDNonSuccess() {
+
+    }
+
+    @Test
+    public void findUserEmailSuccess() {
+
+    }
+
+    @Test
+    public void findUserEmailEmpty() {
+
+    }
+
+    @Test
+    public void findUserEmailNonSuccess() {
+
+    }
+
+    @Test
+    public void updateUserSuccess() {
+
+    }
+
+    @Test
+    public void updateUserException() {
+
+    }
+
+    @Test
+    public void updateUserNonSuccess() {
 
     }
 
