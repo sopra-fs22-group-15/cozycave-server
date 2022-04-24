@@ -2,6 +2,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.UUID;
 // TODO: add @JsonProperty annotations
 public class UserPutDto implements Serializable {
 
+    @JsonProperty("authentication")
     private AuthenticationDataDto authenticationData;
     private Role role;
     private UserDetailsDto details;
@@ -119,6 +121,7 @@ public class UserPutDto implements Serializable {
         private Date birthday;
         private LocationDto address;
         private String biography;
+        @JsonProperty("picture_id")
         private UUID pictureId;
 
         public UserDetailsDto() {

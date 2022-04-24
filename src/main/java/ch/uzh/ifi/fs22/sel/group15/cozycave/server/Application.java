@@ -36,4 +36,38 @@ public class Application {
             }
         };
     }
+
+//    @Bean
+//    public CommandLineRunner createTestData(UserService userService) {
+//        return args -> {
+//            userService.createUser(new User(
+//                UUID.randomUUID(),
+//                new Date(),
+//                new AuthenticationData(
+//                    UUID.randomUUID(),
+//                    "test@uzh.ch",
+//                    "hashedPassword",
+//                    "SaLt",
+//                    "no token"
+//                ),
+//                Role.STUDENT,
+//                new UserDetails(
+//                    UUID.randomUUID(),
+//                    "Max",
+//                    "Mustermann",
+//                    Gender.MALE,
+//                    new Date(),
+//                    new Location(
+//                        "Hauptstrasse",
+//                        "24",
+//                        5312,
+//                        "Döttingen",
+//                        "Switzerland"
+//                    ),
+//                    "bio",
+//                    null
+//                )
+//            ));
+//        };
+//    }
 }

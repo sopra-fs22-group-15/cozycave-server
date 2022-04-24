@@ -2,6 +2,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -11,7 +12,9 @@ import java.util.UUID;
 public class UserGetDto implements Serializable {
 
     private UUID id;
+    @JsonProperty("creation_date")
     private Date creationDate;
+    @JsonProperty("authentication")
     private AuthenticationDataDto authenticationData;
     private Role role;
     private UserDetailsDto details;

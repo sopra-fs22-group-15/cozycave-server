@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -9,7 +10,9 @@ public class LocationDto implements Serializable {
     private String name;
     private String description;
     private String street;
+    @JsonProperty("street_number")
     private String streetNumber;
+    @JsonProperty("zip_code")
     private int zipCode;
     private String village;
     private String country;
