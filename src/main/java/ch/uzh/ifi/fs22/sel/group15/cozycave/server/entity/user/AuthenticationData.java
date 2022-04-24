@@ -7,13 +7,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "authentification_data")
+@Table(name = "authentication_data")
 public class AuthenticationData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(type = "uuid-char")
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -78,5 +80,15 @@ public class AuthenticationData {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @Override public String toString() {
+        return "AuthenticationData{" +
+            "id=" + id +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            ", salt='" + salt + '\'' +
+            ", token='" + token + '\'' +
+            '}';
     }
 }

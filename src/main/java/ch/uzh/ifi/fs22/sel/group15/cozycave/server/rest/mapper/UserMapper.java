@@ -19,6 +19,11 @@ public interface UserMapper {
 
     User userGetDtoToUser(UserGetDto userGetDto);
 
+    /*@Mapping(source = "id", target = "id")
+    @Mapping(source = "creationDate", target = "creationDate")
+    @Mapping(source = "authenticationData", target = "authenticationData")
+    @Mapping(source = "role", target = "role")
+    @Mapping(source = "details", target = "details")*/
     UserGetDto userToUserGetDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

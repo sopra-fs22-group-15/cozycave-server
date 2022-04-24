@@ -32,42 +32,45 @@ public class Application {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*").allowedMethods("*");
+                registry.addMapping("/").allowedOrigins("*").allowedMethods("*");
+                registry.addMapping("/v1/**").allowedOrigins("*").allowedMethods(MediaType.APPLICATION_JSON_VALUE);
             }
         };
     }
 
-//    @Bean
-//    public CommandLineRunner createTestData(UserService userService) {
-//        return args -> {
-//            userService.createUser(new User(
-//                UUID.randomUUID(),
-//                new Date(),
-//                new AuthenticationData(
-//                    UUID.randomUUID(),
-//                    "test@uzh.ch",
-//                    "hashedPassword",
-//                    "SaLt",
-//                    "no token"
-//                ),
-//                Role.STUDENT,
-//                new UserDetails(
-//                    UUID.randomUUID(),
-//                    "Max",
-//                    "Mustermann",
-//                    Gender.MALE,
-//                    new Date(),
-//                    new Location(
-//                        "Hauptstrasse",
-//                        "24",
-//                        5312,
-//                        "Döttingen",
-//                        "Switzerland"
-//                    ),
-//                    "bio",
-//                    null
-//                )
-//            ));
-//        };
-//    }
+    /*
+    @Bean
+    public CommandLineRunner createTestData(UserService userService) {
+        return args -> {
+            userService.createUser(new User(
+                UUID.randomUUID(),
+                new Date(),
+                new AuthenticationData(
+                    UUID.randomUUID(),
+                    "test2@uzh.ch",
+                    "hashedPassword",
+                    "SaLt2",
+                    "no token"
+                ),
+                Role.STUDENT,
+                new UserDetails(
+                    UUID.randomUUID(),
+                    "Erika",
+                    "Mustermann",
+                    Gender.FEMALE,
+                    new Date(),
+                    new Location(
+                        "Hauptstrasse",
+                        "24",
+                        5312,
+                        "Döttingen",
+                        "Switzerland"
+                    ),
+                    "bio",
+                    null
+                )
+            ));
+        };
+    }
+    */
 }

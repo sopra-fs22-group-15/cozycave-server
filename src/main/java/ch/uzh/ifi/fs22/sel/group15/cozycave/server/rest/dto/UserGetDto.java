@@ -36,20 +36,41 @@ public class UserGetDto implements Serializable {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public Date getCreationDate() {
         return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public AuthenticationDataDto getAuthenticationData() {
         return authenticationData;
     }
 
+    public void setAuthenticationData(
+        AuthenticationDataDto authenticationData) {
+        this.authenticationData = authenticationData;
+    }
+
     public Role getRole() {
         return role;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public UserDetailsDto getDetails() {
         return details;
+    }
+
+    public void setDetails(UserDetailsDto details) {
+        this.details = details;
     }
 
     @Override
@@ -86,47 +107,41 @@ public class UserGetDto implements Serializable {
     public static class AuthenticationDataDto implements Serializable {
 
         private String email;
-        private String salt;
 
         public AuthenticationDataDto() {
         }
 
-        public AuthenticationDataDto(String email, String salt) {
+        public AuthenticationDataDto(String email) {
             this.email = email;
-            this.salt = salt;
         }
 
         public String getEmail() {
             return email;
         }
 
-        public String getSalt() {
-            return salt;
+        public void setEmail(String email) {
+            this.email = email;
         }
 
-        @Override
-        public boolean equals(Object o) {
+        @Override public boolean equals(Object o) {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof AuthenticationDataDto)) {
                 return false;
             }
-            AuthenticationDataDto entity = (AuthenticationDataDto) o;
-            return Objects.equals(this.email, entity.email) &&
-                Objects.equals(this.salt, entity.salt);
+            AuthenticationDataDto that = (AuthenticationDataDto) o;
+            return getEmail().equals(that.getEmail());
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(email, salt);
+        @Override public int hashCode() {
+            return Objects.hash(getEmail());
         }
 
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + "(" +
-                "email = " + email + ", " +
-                "salt = " + salt + ")";
+        @Override public String toString() {
+            return "AuthenticationDataDto{" +
+                "email='" + email + '\'' +
+                '}';
         }
     }
 
@@ -160,28 +175,56 @@ public class UserGetDto implements Serializable {
             return firstname;
         }
 
+        public void setFirstname(String firstname) {
+            this.firstname = firstname;
+        }
+
         public String getLastname() {
             return lastname;
+        }
+
+        public void setLastname(String lastname) {
+            this.lastname = lastname;
         }
 
         public Gender getGender() {
             return gender;
         }
 
+        public void setGender(Gender gender) {
+            this.gender = gender;
+        }
+
         public Date getBirthday() {
             return birthday;
+        }
+
+        public void setBirthday(Date birthday) {
+            this.birthday = birthday;
         }
 
         public LocationDto getAddress() {
             return address;
         }
 
+        public void setAddress(LocationDto address) {
+            this.address = address;
+        }
+
         public String getBiography() {
             return biography;
         }
 
+        public void setBiography(String biography) {
+            this.biography = biography;
+        }
+
         public PictureDto getPicture() {
             return picture;
+        }
+
+        public void setPicture(PictureDto picture) {
+            this.picture = picture;
         }
 
         @Override
@@ -221,8 +264,11 @@ public class UserGetDto implements Serializable {
 
         public static class PictureDto implements Serializable {
 
-            private final UUID id;
-            private final UUID uploaderId;
+            private UUID id;
+            private UUID uploaderId;
+
+            public PictureDto() {
+            }
 
             public PictureDto(UUID id, UUID uploaderId) {
                 this.id = id;
@@ -233,8 +279,16 @@ public class UserGetDto implements Serializable {
                 return id;
             }
 
+            public void setId(UUID id) {
+                this.id = id;
+            }
+
             public UUID getUploaderId() {
                 return uploaderId;
+            }
+
+            public void setUploaderId(UUID uploaderId) {
+                this.uploaderId = uploaderId;
             }
 
             @Override

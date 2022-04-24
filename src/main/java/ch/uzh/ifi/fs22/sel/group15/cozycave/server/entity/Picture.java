@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "picture")
@@ -20,6 +21,7 @@ public class Picture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(type = "uuid-char")
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -55,5 +57,10 @@ public class Picture {
         return ROOT_PATH + id + ".jpg";
     }
 
-
+    @Override public String toString() {
+        return "Picture{" +
+            "id=" + id +
+            ", uploader=" + uploader +
+            '}';
+    }
 }

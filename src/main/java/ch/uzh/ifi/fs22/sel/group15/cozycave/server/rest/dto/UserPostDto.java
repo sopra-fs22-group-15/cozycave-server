@@ -30,12 +30,25 @@ public class UserPostDto implements Serializable {
         return authenticationData;
     }
 
+    public void setAuthenticationData(
+        AuthenticationDataDto authenticationData) {
+        this.authenticationData = authenticationData;
+    }
+
     public Role getRole() {
         return role;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public UserDetailsDto getDetails() {
         return details;
+    }
+
+    public void setDetails(UserDetailsDto details) {
+        this.details = details;
     }
 
     @Override
@@ -82,8 +95,16 @@ public class UserPostDto implements Serializable {
             return email;
         }
 
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
         public String getPassword() {
             return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
 
         @Override
@@ -139,24 +160,48 @@ public class UserPostDto implements Serializable {
             return firstname;
         }
 
+        public void setFirstname(String firstname) {
+            this.firstname = firstname;
+        }
+
         public String getLastname() {
             return lastname;
+        }
+
+        public void setLastname(String lastname) {
+            this.lastname = lastname;
         }
 
         public Gender getGender() {
             return gender;
         }
 
+        public void setGender(Gender gender) {
+            this.gender = gender;
+        }
+
         public Date getBirthday() {
             return birthday;
+        }
+
+        public void setBirthday(Date birthday) {
+            this.birthday = birthday;
         }
 
         public LocationDto getAddress() {
             return address;
         }
 
+        public void setAddress(LocationDto address) {
+            this.address = address;
+        }
+
         public String getBiography() {
             return biography;
+        }
+
+        public void setBiography(String biography) {
+            this.biography = biography;
         }
 
         @Override

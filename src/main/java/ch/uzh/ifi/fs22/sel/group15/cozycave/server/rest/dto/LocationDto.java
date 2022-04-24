@@ -35,28 +35,56 @@ public class LocationDto implements Serializable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStreet() {
         return street;
     }
 
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
     public String getStreetNumber() {
         return streetNumber;
+    }
+
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
     }
 
     public int getZipCode() {
         return zipCode;
     }
 
+    public void setZipCode(int zipCode) {
+        this.zipCode = zipCode;
+    }
+
     public String getVillage() {
         return village;
     }
 
+    public void setVillage(String village) {
+        this.village = village;
+    }
+
     public String getCountry() {
         return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     @Override

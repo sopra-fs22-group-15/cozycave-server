@@ -19,6 +19,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "user_details")
@@ -26,6 +27,7 @@ public class UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(type = "uuid-char")
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -43,7 +45,7 @@ public class UserDetails {
     @Column(name = "birthday")
     private Date birthday;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location address;
 
@@ -132,5 +134,18 @@ public class UserDetails {
 
     public void setPicture(Picture picture) {
         this.picture = picture;
+    }
+
+    @Override public String toString() {
+        return "UserDetails{" +
+            "id=" + id +
+            ", firstname='" + firstname + '\'' +
+            ", lastname='" + lastname + '\'' +
+            ", gender=" + gender +
+            ", birthday=" + birthday +
+            ", address=" + address +
+            ", biography='" + biography + '\'' +
+            ", picture=" + picture +
+            '}';
     }
 }

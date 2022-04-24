@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "users")
@@ -23,6 +24,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(type = "uuid-char")
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -30,7 +32,7 @@ public class User {
     @Column(name = "creation_date", updatable = false)
     private Date creationDate;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "authentication_data_id")
     private AuthenticationData authenticationData;
 
@@ -38,7 +40,7 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role;
 
-    @OneToOne(cascade = CascadeType.PERSIST, optional = false, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "details_id", nullable = false, unique = true)
     private UserDetails details;
 
@@ -94,5 +96,15 @@ public class User {
 
     public void setDetails(UserDetails details) {
         this.details = details;
+    }
+
+    @Override public String toString() {
+        return "User{" +
+            "id=" + id +
+            ", creationDate=" + creationDate +
+            ", authenticationData=" + authenticationData +
+            ", role=" + role +
+            ", details=" + details +
+            '}';
     }
 }
