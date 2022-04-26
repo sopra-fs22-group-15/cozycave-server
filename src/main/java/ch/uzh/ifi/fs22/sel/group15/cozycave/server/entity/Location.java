@@ -32,7 +32,7 @@ public class Location {
     private String streetNumber;
 
     @Column(name = "zip_code", nullable = false)
-    private int zipCode;
+    private String zipCode;
 
     @Column(name = "village", nullable = false)
     private String village;
@@ -43,7 +43,7 @@ public class Location {
     public Location() {
     }
 
-    public Location(String name, String street, String streetNumber, int zipCode, String village, String country) {
+    public Location(String name, String street, String streetNumber, String zipCode, String village, String country) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.street = street;
@@ -53,7 +53,7 @@ public class Location {
         this.country = country;
     }
 
-    public Location(String street, String streetNumber, int zipCode, String village, String country) {
+    public Location(String street, String streetNumber, String zipCode, String village, String country) {
         this.id = UUID.randomUUID();
         this.street = street;
         this.streetNumber = streetNumber;
@@ -62,7 +62,7 @@ public class Location {
         this.country = country;
     }
 
-    public Location(UUID id, String name, String description, String street, String streetNumber, int zipCode,
+    public Location(UUID id, String name, String description, String street, String streetNumber, String zipCode,
         String village, String country) {
         this.id = id;
         this.name = name;
@@ -114,11 +114,11 @@ public class Location {
         this.streetNumber = streetNumber;
     }
 
-    public int getZipCode() {
+    public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(int zipCode) {
+    public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
     }
 

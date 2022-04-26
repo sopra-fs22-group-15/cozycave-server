@@ -12,14 +12,14 @@ public class LocationDto implements Serializable {
     @JsonProperty("street_number")
     private String streetNumber;
     @JsonProperty("zip_code")
-    private int zipCode;
+    private String zipCode;
     private String village;
     private String country;
 
     public LocationDto() {
     }
 
-    public LocationDto(String name, String description, String street, String streetNumber, int zipCode,
+    public LocationDto(String name, String description, String street, String streetNumber, String zipCode,
         String village, String country) {
         this.name = name;
         this.description = description;
@@ -62,11 +62,11 @@ public class LocationDto implements Serializable {
         this.streetNumber = streetNumber;
     }
 
-    public int getZipCode() {
+    public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(int zipCode) {
+    public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
     }
 
