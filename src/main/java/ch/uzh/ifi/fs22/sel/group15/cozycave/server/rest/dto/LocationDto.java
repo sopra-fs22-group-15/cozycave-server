@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Objects;
 
-// TODO: add @JsonProperty annotations
 public class LocationDto implements Serializable {
 
     private String name;

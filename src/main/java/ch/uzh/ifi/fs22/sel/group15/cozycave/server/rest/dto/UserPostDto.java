@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
-// TODO: add @JsonProperty annotations
 public class UserPostDto implements Serializable {
 
     @JsonProperty("authentication")

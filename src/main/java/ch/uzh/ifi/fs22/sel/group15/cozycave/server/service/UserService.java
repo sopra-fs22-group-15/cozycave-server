@@ -1,7 +1,10 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service @Transactional public class UserService {
@@ -33,6 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
 
     public @NotNull User createUser(User newUser) {
         newUser.setCreationDate(new Date());
+        newUser.getAuthenticationData().setSalt(Utils.generateSalt(16));
 
         // global checks
         checkIfUserAlreadyExists(newUser);
@@ -56,7 +61,11 @@ import org.springframework.web.server.ResponseStatusException;
         if (updatedUser.getAuthenticationData() != null) {
             // TODO: confirm email change by sending email with link to confirm
             if (userInput.getAuthenticationData().getEmail() != null) {
-                // TODO: verify valid email
+
+                if (!Utils.checkValidEmail(userInput.getAuthenticationData().getEmail())) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
+                }
+
                 updatedUser.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
             }
 
@@ -97,7 +106,6 @@ import org.springframework.web.server.ResponseStatusException;
             }
 
             if (userInput.getDetails().getAddress() != null) {
-                // TODO: check if address has to be created first
                 // TODO: verify address
                 updatedUser.getDetails().setAddress(userInput.getDetails().getAddress());
             }
@@ -132,8 +140,42 @@ import org.springframework.web.server.ResponseStatusException;
         }
     }
 
-    //TODO
+    //TODO: add more checks if required
     private void checkIfDataIsValid(User userToBeCreated, boolean mandatoryFieldsAreFilled) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (userToBeCreated.getAuthenticationData() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "authentication data is missing");
+        }
+        AuthenticationData ad = userToBeCreated.getAuthenticationData();
+
+        if (userToBeCreated.getDetails() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "details are missing");
+        }
+        UserDetails details = userToBeCreated.getDetails();
+
+        if (mandatoryFieldsAreFilled) {
+            if (!Utils.checkValidEmail(ad.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
+            }
+            if (!StringUtils.hasText(ad.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is missing");
+            }
+            if (!StringUtils.hasText(details.getFirstname())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstname is missing");
+            }
+            if (!StringUtils.hasText(details.getLastname())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lastname is missing");
+            }
+            if (details.getGender() != null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "gender is missing");
+            }
+            if (details.getBirthday() != null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is missing");
+            }
+        }
+
+        if (StringUtils.hasText(ad.getPassword())
+            && ad.getPassword().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
+        }
     }
 }

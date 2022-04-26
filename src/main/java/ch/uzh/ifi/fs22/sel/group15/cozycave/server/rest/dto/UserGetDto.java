@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-// TODO: add @JsonProperty annotations
 public class UserGetDto implements Serializable {
 
     private UUID id;
