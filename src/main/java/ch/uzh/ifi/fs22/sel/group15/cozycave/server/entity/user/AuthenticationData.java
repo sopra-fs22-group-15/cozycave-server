@@ -25,21 +25,17 @@ public class AuthenticationData {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "salt", nullable = false, unique = true, updatable = false)
+    @Column(name = "salt", nullable = false, unique = true, updatable = false, length = 16)
     private String salt;
-
-    @Column(name = "token", unique = true, columnDefinition = "TEXT")
-    private String token;
 
     public AuthenticationData() {
     }
 
-    public AuthenticationData(UUID id, String email, String password, String salt, String token) {
+    public AuthenticationData(UUID id, String email, String password, String salt) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.salt = salt;
-        this.token = token;
     }
 
     public UUID getId() {
@@ -74,21 +70,12 @@ public class AuthenticationData {
         this.salt = salt;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     @Override public String toString() {
         return "AuthenticationData{" +
             "id=" + id +
             ", email='" + email + '\'' +
             ", password='" + password + '\'' +
             ", salt='" + salt + '\'' +
-            ", token='" + token + '\'' +
             '}';
     }
 }

@@ -46,10 +46,11 @@ public class UserController {
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
+    //TODO: update
     public UserGetDto createUser(@RequestBody UserPostDto userPostDto) {
         User userInput = UserMapper.INSTANCE.userPostDtoToUser(userPostDto);
 
-        User createdUser = userService.createUser(userInput);
+        User createdUser = userService.createUser(userInput, null);
 
         return UserMapper.INSTANCE.userToUserGetDto(createdUser);
     }

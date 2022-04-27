@@ -6,7 +6,8 @@ public enum Role {
     LANDLORD(1),
     STUDENT(2),
     TEAM(100),
-    ADMIN(999);
+    ADMIN(999),
+    INTERNAL(1000);
 
     private final int id;
 

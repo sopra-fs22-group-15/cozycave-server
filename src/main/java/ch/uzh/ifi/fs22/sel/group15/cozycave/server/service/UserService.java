@@ -2,6 +2,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,18 +30,47 @@ import javax.persistence.EntityNotFoundException;
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UniversityDomains universityDomains;
 
-    @Autowired public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    @Autowired
+    public UserService(@Qualifier("userRepository") UserRepository userRepository,
+        PasswordEncoder passwordEncoder, UniversityDomains universityDomains) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.universityDomains = universityDomains;
     }
 
     public List<User> getUsers() {
         return this.userRepository.findAll();
     }
 
-    public @NotNull User createUser(User newUser) {
+    public @NotNull User createUser(User newUser, User createdBy) {
+        newUser.setId(null);
         newUser.setCreationDate(new Date());
-        newUser.getAuthenticationData().setSalt(Utils.generateSalt(16));
+
+        AuthenticationData ad = newUser.getAuthenticationData();
+        ad.setId(null);
+        ad.setSalt(Utils.generateSalt());
+
+        if (StringUtils.hasText(ad.getPassword())
+            && ad.getPassword().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
+        }
+
+        ad.setPassword(passwordEncoder.encode(ad.getPassword() + ad.getSalt()));
+
+        if (createdBy == null || newUser.getRole() == null) {
+            newUser.setRole(universityDomains
+                .matchesEmail(newUser.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+        } else if (createdBy.getRole().lessEquals(Role.TEAM)
+            || createdBy.getRole().equals(Role.TEAM)
+            && newUser.getRole().greaterEquals(Role.TEAM)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
+        }
+
+        UserDetails ud = newUser.getDetails();
+        ud.setId(null);
 
         // global checks
         checkIfUserAlreadyExists(newUser);
@@ -83,14 +114,15 @@ import javax.persistence.EntityNotFoundException;
             }
 
             if (userInput.getAuthenticationData().getPassword() != null) {
-                // TODO: encrypt password
+                // TODO: encrypt password, check password length
                 updatedUser.getAuthenticationData().setPassword(userInput.getAuthenticationData().getPassword());
             }
 
-            if (userInput.getAuthenticationData().getToken() != null
-                && updatedBy.getRole().greaterEquals(Role.TEAM)) {
-                updatedUser.getAuthenticationData().setToken(null);
-            }
+            //TODO: check
+//            if (userInput.getAuthenticationData().getToken() != null
+//                && updatedBy.getRole().greaterEquals(Role.TEAM)) {
+//                updatedUser.getAuthenticationData().setToken(null);
+//            }
         }
 
         // update role
@@ -119,7 +151,7 @@ import javax.persistence.EntityNotFoundException;
             }
 
             if (userInput.getDetails().getAddress() != null) {
-                // TODO: verify address
+                // TODO: verify address, change role
                 updatedUser.getDetails().setAddress(userInput.getDetails().getAddress());
             }
 
@@ -184,11 +216,6 @@ import javax.persistence.EntityNotFoundException;
             if (details.getBirthday() != null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is missing");
             }
-        }
-
-        if (StringUtils.hasText(ad.getPassword())
-            && ad.getPassword().length() < 8) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
         }
     }
 }

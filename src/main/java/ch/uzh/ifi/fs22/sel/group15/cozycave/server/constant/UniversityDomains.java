@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.neovisionaries.i18n.CountryCode;
 import com.sun.istack.NotNull;
 import java.io.IOException;
 import java.net.URI;
@@ -13,32 +14,21 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UniversityDomains {
-
-    private static UniversityDomains instance;
 
     private HashSet<University> universities;
 
-    private UniversityDomains() {
-        instance = this;
-
+    public UniversityDomains() {
         new Thread(() -> {
             universities = generateUniversities();
         }, "get university email addresses").start();
-    }
-
-    public static @NotNull UniversityDomains getInstance() {
-        if (instance == null) {
-            instance = new UniversityDomains();
-        }
-
-        return instance;
     }
 
     public ImmutableSet<University> getUniversities() {
@@ -104,8 +94,7 @@ public class UniversityDomains {
             HashSet<String> domains = new HashSet<>();
             jsonDomains.forEach(d -> domains.add(d.getAsString().toLowerCase()));
 
-            Locale.IsoCountryCode country = Locale.IsoCountryCode.valueOf(
-                o.get("country").getAsString().toUpperCase());
+            CountryCode country = CountryCode.findByName(o.get("country").getAsString()).get(0);
 
             universities.add(new University(name, country, ImmutableSet.copyOf(domains)));
         }
@@ -115,7 +104,7 @@ public class UniversityDomains {
 
     private record University(
         @NotNull String name,
-        @NotNull Locale.IsoCountryCode county,
+        @NotNull CountryCode county,
         @NotNull ImmutableSet<String> domains
     ) {
 
