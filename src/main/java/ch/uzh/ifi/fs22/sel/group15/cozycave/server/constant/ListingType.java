@@ -5,5 +5,5 @@ public enum ListingType {
     ROOM,
     HOUSE,
     DORM,
-    SEELISTING;
+    SEE_LISTING;
 }

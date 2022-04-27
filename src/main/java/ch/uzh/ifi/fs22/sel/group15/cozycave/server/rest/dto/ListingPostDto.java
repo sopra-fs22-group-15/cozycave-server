@@ -1,4 +1,4 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
@@ -6,77 +6,56 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 
-import javax.persistence.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
-@Entity
-@Table(name = "listings")
-public class Listing {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false, updatable = false)
+
+public class ListingPostDto implements Serializable {
+
     private UUID id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date", updatable = false)
     private Date creationDate;
 
-    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
     private String description;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "location_id")
     private Location address;
 
-    @Column(name = "published")
     private Boolean published;
 
-    //@OneToMany(targetEntity=Picture.class, mappedBy="id", fetch=FetchType.EAGER)
-    @OneToMany(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "picture_id")
     private List<Picture> pictures;
 
-    @Column(name = "sqm")
     private int sqm;
 
-    @Column(name = "listingtype")
     private ListingType listingtype;
 
-
-    @Column(name = "furnished")
     private Boolean furnished;
 
-    //TODO: change to have multiple options
-    @Enumerated(EnumType.STRING)
     private Gender availableTo;
 
-    @Column(name = "available")
     private Boolean available;
 
-    @Column(name = "rent")
     private double rent;
 
-    @Column(name = "deposit")
     private double deposit;
 
-    @Column(name = "rooms")
     private int rooms;
 
-    @OneToOne
-    @JoinColumn(name = "publisher_id")
     private User publisher;
 
-    public Listing() {
+
+    public ListingPostDto() {
 
     }
 
-    public Listing(UUID id, Date creationDate, String name, String description,
-                   Location address, Boolean published, Picture picture,
-                   int sqm, ListingType listingtype, Boolean furnished, Gender availableTo,
-                   Boolean available, double rent, double deposit, int rooms, User publisher) {
+    public ListingPostDto(UUID id, Date creationDate, String name, String description,
+                          Location address, Boolean published, Picture picture,
+                          int sqm, ListingType listingtype, Boolean furnished, Gender availableTo,
+                          Boolean available, double rent, double deposit, int rooms, User publisher) {
         this.id = id;
         this.name = name;
         this.description = description;
