@@ -1,20 +1,31 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.*;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.DTOMapper;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
+@RequestMapping(value = "/v1")
 public class UserController {
+
     private final UserService userService;
 
     UserController(UserService userService) {
@@ -22,91 +33,60 @@ public class UserController {
     }
 
     // Get all users in a list
-    @GetMapping("/v1/users")
+    @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<UserGetDTO> getAllUsers() {
-        // fetch all users in the internal representation
-        List<User> users = userService.getUsers();
-        List<UserGetDTO> userGetDTOs = new ArrayList<>();
-
-        // convert each user to the API representation
-        for (User user : users) {
-            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-        }
-        return userGetDTOs;
+    public List<UserGetDto> getAllUsers() {
+        return userService.getUsers().stream()
+            .map(UserMapper.INSTANCE::userToUserGetDto)
+            .collect(Collectors.toList());
     }
 
     // create user
-    @PostMapping("/v1/users")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public UserPostDTO createUser(@RequestBody UserPostDTO userPostDTO) {
-        // convert API user to internal representation
-        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+    public UserGetDto createUser(@RequestBody UserPostDto userPostDto) {
+        User userInput = UserMapper.INSTANCE.userPostDtoToUser(userPostDto);
 
-        // create user
-        User createdUser = null;
-        createdUser = userService.createUser(userInput);
+        User createdUser = userService.createUser(userInput);
 
-        // convert internal representation of user back to API
-        return DTOMapper.INSTANCE.convertEntityToUserPostDTO(createdUser);
+        return UserMapper.INSTANCE.userToUserGetDto(createdUser);
     }
 
     // get specific userprofile
-    @GetMapping("/v1/users/{id}")
+    @GetMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ResponseEntity<UserGetDTO> findUser(@PathVariable Long id) {
-        User foundUser;
-
-        try {
-            foundUser = userService.findUserID(id);
-            return ResponseEntity.ok(DTOMapper.INSTANCE.convertEntityToUserGetDTO(foundUser));
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID.");
-        }
+    public UserGetDto findUser(@PathVariable UUID id) {
+        return userService.findUserID(id)
+            .map(UserMapper.INSTANCE::userToUserGetDto)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
     }
 
     // update specific user
-    @PutMapping("/v1/users/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserPutDTO updateUser(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
-        // convert API user to internal representation
-        User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
-        try {
-            // update user
-            //TODO: depending on how to authenticate this has to be changed
-            User updatedUser = null;
-            updatedUser = userService.updateUser(userInput);
-            // convert internal representation of user back to API
-            return DTOMapper.INSTANCE.convertEntityToUserPutDTO(updatedUser);
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID.");
-        }
+    public UserGetDto updateUser(@PathVariable UUID id, @RequestBody UserPutDto userPutDto) {
+        User user = userService.findUserID(id)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
+
+        User userInput = UserMapper.INSTANCE.userPutDtoToUser(userPutDto);
+
+        // TODO: change to updating user by using token
+        return UserMapper.INSTANCE.userToUserGetDto(userService.updateUser(user, userInput));
     }
 
     // delete a specific user
     @DeleteMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ResponseBody
-    public UserPutDTO deleteUser(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
-        // convert API user to internal representation
-        User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
-        try {
-            // update user
-            //TODO: depending on how to authenticate this has to be changed
-            User updatedUser = null;
-            //updatedUser = userService.updateUser(userInput.getId(), userInput.getToken(), userInput.getUsername(), userInput.getBirthday());
-            // convert internal representation of user back to API
-            return DTOMapper.INSTANCE.convertEntityToUserPutDTO(updatedUser);
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID.");
-        }
+    public void deleteUser(@PathVariable UUID id, @RequestBody UserPutDto userPutDto) {
+        User userInput = UserMapper.INSTANCE.userPutDtoToUser(userPutDto);
+
+        userService.deleteUser(userInput);
     }
 
 }
