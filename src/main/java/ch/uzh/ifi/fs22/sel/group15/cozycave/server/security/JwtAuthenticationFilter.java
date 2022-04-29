@@ -1,6 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.security;
 
 import java.io.IOException;
+import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,11 +28,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = getJwtFromRequest(request);
 
         if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-            String email = jwtTokenProvider.getMailFromToken(jwt);
-            UserDetails userDetails = iUserDetailsService.loadUserByUsername(email);
+            UUID uuid = jwtTokenProvider.getUuidFromToken(jwt);
+            UserDetails userDetails = iUserDetailsService.loadUserByUsername(uuid.toString());
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
-                null, userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+            );
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);

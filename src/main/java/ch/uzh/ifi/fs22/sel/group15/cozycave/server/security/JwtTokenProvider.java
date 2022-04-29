@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,12 +21,12 @@ public class JwtTokenProvider {
     @Value("${cozycave.security.jwt.secret}")
     private String jwtSecret;
 
-    public String generateToken(String email) {
+    public String generateToken(UUID uuid) {
         Instant now = Instant.now();
         Instant expiryTime = now.plus(7, ChronoUnit.DAYS);
 
         return Jwts.builder()
-            .setSubject(email)
+            .setSubject(uuid.toString())
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(expiryTime))
             .signWith(SignatureAlgorithm.HS512, jwtSecret)
@@ -35,15 +36,15 @@ public class JwtTokenProvider {
     public String generateToken(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
 
-        return generateToken(user.getUsername());
+        return generateToken(UUID.fromString(user.getUsername()));
     }
 
-    public String getMailFromToken(String token) {
-        return Jwts.parser()
+    public UUID getUuidFromToken(String token) {
+        return UUID.fromString(Jwts.parser()
             .setSigningKey(jwtSecret)
             .parseClaimsJws(token)
             .getBody()
-            .getSubject();
+            .getSubject());
     }
 
     public boolean validateToken(String token) {
