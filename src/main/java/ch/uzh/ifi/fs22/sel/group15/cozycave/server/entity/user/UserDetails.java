@@ -59,19 +59,6 @@ public class UserDetails {
     public UserDetails() {
     }
 
-    public UserDetails(UUID id, String firstname, String lastname,
-        Gender gender, Date birthday, Location address, String biography) {
-        this.id = id;
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.gender = gender;
-        this.birthday = birthday;
-        this.address = address;
-        this.biography = biography;
-        // deadlock, as the picture requires a user to be specified through constructor, but the user cannot be created without first specifying the userDetails.
-        // this.picture = picture;
-    }
-
     public UserDetails(UUID id, String firstname, String lastname, Gender gender, Date birthday, Location address,
         String biography) {
         this.id = id;

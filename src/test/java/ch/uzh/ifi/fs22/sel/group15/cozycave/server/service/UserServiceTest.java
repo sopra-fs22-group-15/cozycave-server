@@ -48,7 +48,7 @@ class UserServiceTest {
         Date dNow = new Date();
         UUID userId = UUID.randomUUID();
         UUID locationId = UUID.randomUUID();
-        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", 8000, "Zurich", "Switzerland");
+        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", "8000", "Zurich", "Switzerland");
         testAuthenticationData = new AuthenticationData(userId, "testUser@uzh.ch", "Test1234!?", "Test1234!?", "Test1234!?");
         testUserDetails = new UserDetails(userId, "Test", "User", Gender.OTHER, dNow, testLocation, "Simple Bioagraphy of the TestUser");
         testUser = new User(userId, dNow, testAuthenticationData, Role.STUDENT, testUserDetails);
@@ -86,13 +86,13 @@ class UserServiceTest {
     public void deleteUserSuccess() throws ResponseStatusException {
         User createdUser = userService.createUser(testUser);
         Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        Mockito.when(userService.findUserEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
+        Mockito.when(userService.findUserByEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
 
         userService.deleteUser(createdUser);
 
-        given(userService.findUserEmail(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+        given(userService.findUserByEmail(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
-        assertThrows(ResponseStatusException.class, () -> userService.findUserEmail(testUser.getAuthenticationData().getEmail()));
+        assertThrows(ResponseStatusException.class, () -> userService.findUserByEmail(testUser.getAuthenticationData().getEmail()));
 
     }
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository("listingRepository")
-public interface ListingRepository extends JpaRepository<Listing, Long> {
+public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
     @NotNull Optional<Listing> findById(UUID uuid);
 

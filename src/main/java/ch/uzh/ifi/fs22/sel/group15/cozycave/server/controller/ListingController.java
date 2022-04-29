@@ -1,11 +1,9 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.*;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ListingMapper;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import java.util.List;
 import java.util.UUID;
@@ -71,24 +69,23 @@ public class ListingController {
     @PutMapping("/listing/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ListingGetDto updateUser(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
+    public ListingGetDto updateListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
         Listing listing = listingService.findListingID(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
-        Listing userInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
 
-        // TODO: change to updating user by using token
-        return ListingMapper.INSTANCE.listingToListingGetDto(listingService.updateListing(userInput));
+        return ListingMapper.INSTANCE.listingToListingGetDto(listingService.updateListing(listingInput));
     }
 
-    // delete a specific user
+    // delete a specific listing
     @DeleteMapping("/listing/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
-        Listing userInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+    public void deleteListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
+        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
 
-        listingService.deleteUser(userInput);
+        listingService.deleteListing(listingInput);
     }
 
 }

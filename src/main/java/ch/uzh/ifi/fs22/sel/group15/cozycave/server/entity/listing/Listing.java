@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import com.google.common.collect.ImmutableList;
 
 import javax.persistence.*;
 import java.util.*;
@@ -32,7 +33,7 @@ public class Listing {
     private Location address;
 
     @Column(name = "published")
-    private Boolean published;
+    private boolean published;
 
     //@OneToMany(targetEntity=Picture.class, mappedBy="id", fetch=FetchType.EAGER)
     @OneToMany(cascade = CascadeType.PERSIST)
@@ -40,21 +41,21 @@ public class Listing {
     private List<Picture> pictures;
 
     @Column(name = "sqm")
-    private int sqm;
+    private double sqm;
 
     @Column(name = "listingtype")
     private ListingType listingtype;
 
 
     @Column(name = "furnished")
-    private Boolean furnished;
+    private boolean furnished;
 
     //TODO: change to have multiple options
     @Enumerated(EnumType.STRING)
     private Gender availableTo;
 
     @Column(name = "available")
-    private Boolean available;
+    private boolean available;
 
     @Column(name = "rent")
     private double rent;
@@ -63,7 +64,7 @@ public class Listing {
     private double deposit;
 
     @Column(name = "rooms")
-    private int rooms;
+    private double rooms;
 
     @OneToOne
     @JoinColumn(name = "publisher_id")
@@ -73,10 +74,11 @@ public class Listing {
 
     }
 
+    // Constructor for single picture
     public Listing(UUID id, Date creationDate, String name, String description,
-                   Location address, Boolean published, Picture picture,
-                   int sqm, ListingType listingtype, Boolean furnished, Gender availableTo,
-                   Boolean available, double rent, double deposit, int rooms, User publisher) {
+                   Location address, boolean published, Picture picture,
+                   double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
+                   boolean available, double rent, double deposit, double rooms, User publisher) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -84,6 +86,29 @@ public class Listing {
         this.published = published;
         this.pictures = new ArrayList<>();
         this.pictures.add(picture);
+        this.sqm = sqm;
+        this.listingtype = listingtype;
+        this.furnished = furnished;
+        this.availableTo = availableTo;
+        this.available = available;
+        this.rent = rent;
+        this.deposit = deposit;
+        this.rooms = rooms;
+        this.publisher = publisher;
+    }
+
+    // Constructor for multiple Picture add
+    public Listing(UUID id, Date creationDate, String name, String description,
+                   Location address, boolean published, List<Picture> pictures,
+                   double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
+                   boolean available, double rent, double deposit, double rooms, User publisher) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.published = published;
+        this.pictures = new ArrayList<>();
+        this.pictures.addAll(pictures);
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
@@ -135,37 +160,40 @@ public class Listing {
         this.address = address;
     }
 
-    public Boolean getPublished() {
+    public boolean getPublished() {
         return published;
     }
 
-    public void setPublished(Boolean published) {
+    public void setPublished(boolean published) {
         this.published = published;
     }
 
     public List<Picture> getPictures() {
-        List<Picture> temp = new ArrayList<>();
-        for (int i = 0; i < pictures.size(); i++) {
-            temp.add(pictures.get(i));
-        }
-        return temp;
+        return Collections.unmodifiableList(pictures);
     }
 
-    public void addPictures(Picture picture) {
+    public void addPicture(Picture picture) {
         this.pictures.add(picture);
     }
 
     public void addPictures(List<Picture> pictures) {
-        for (int i = 0; i < pictures.size(); i++) {
-            this.pictures.add(pictures.get(i));
-        }
+        this.pictures.addAll(pictures);
     }
 
-    public int getSqm() {
+    public void removePicture(Picture picture) {
+        this.pictures.remove(picture);
+    }
+
+    public void removePictures(List<Picture> pictures) {
+        this.pictures.removeAll(pictures);
+    }
+
+
+    public double getSqm() {
         return sqm;
     }
 
-    public void setSqm(int sqm) {
+    public void setSqm(double sqm) {
         this.sqm = sqm;
     }
 
@@ -177,11 +205,11 @@ public class Listing {
         this.listingtype = listingtype;
     }
 
-    public Boolean getFurnished() {
+    public boolean getFurnished() {
         return furnished;
     }
 
-    public void setFurnished(Boolean furnished) {
+    public void setFurnished(boolean furnished) {
         this.furnished = furnished;
     }
 
@@ -189,9 +217,9 @@ public class Listing {
 
     public void setAvailableTo(Gender availableTo) { this.availableTo = availableTo; }
 
-    public Boolean getAvailable() { return available; }
+    public boolean getAvailable() { return available; }
 
-    public void setAvailable(Boolean available) { this.available = available; }
+    public void setAvailable(boolean available) { this.available = available; }
 
     public double getRent() {
         return rent;
@@ -209,11 +237,11 @@ public class Listing {
         this.deposit = deposit;
     }
 
-    public int getRooms() {
+    public double getRooms() {
         return rooms;
     }
 
-    public void setRooms(int rooms) {
+    public void setRooms(double rooms) {
         this.rooms = rooms;
     }
 

@@ -50,91 +50,73 @@ import javax.persistence.EntityNotFoundException;
 
 
 
-    public @NotNull Listing updateListing(Listing userInput) {
-        Listing updatedListing = listingRepository.findById(userInput.getId())
+    public @NotNull Listing updateListing(Listing listingInput) {
+        Listing updatedListing = listingRepository.findById(listingInput.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
-
-        // update authentication data
-        if (updatedListing.getPublisher().getAuthenticationData() != null) {
-            // TODO: confirm email change by sending email with link to confirm
-            if (updatedListing.getPublisher().getAuthenticationData().getEmail() != null) {
-                // TODO: verify valid email
-                updatedListing.getPublisher().getAuthenticationData().setEmail(userInput.getPublisher().getAuthenticationData().getEmail());
-            }
-
-            if (userInput.getPublisher().getAuthenticationData().getPassword() != null) {
-                // TODO: encrypt password
-                updatedListing.getPublisher().getAuthenticationData().setPassword(userInput.getPublisher().getAuthenticationData().getPassword());
-            }
-
-            if (userInput.getPublisher().getAuthenticationData().getToken() != null){
-                updatedListing.getPublisher().getAuthenticationData().setToken(null);
-            }
-        }
 
         // TODO: Use Design Pattern
         // update details
-        if (userInput.getName() != null) {
-            updatedListing.setName(userInput.getName());
+        if (listingInput.getName() != null) {
+            updatedListing.setName(listingInput.getName());
         }
 
-        if (userInput.getDescription() != null) {
-            updatedListing.setDescription(userInput.getDescription());
+        if (listingInput.getDescription() != null) {
+            updatedListing.setDescription(listingInput.getDescription());
         }
 
-        if (userInput.getAddress() != null) {
-            updatedListing.setAddress(userInput.getAddress());
+        if (listingInput.getAddress() != null) {
+            updatedListing.setAddress(listingInput.getAddress());
         }
 
         // TODO: Will cause problems
-        if (userInput.getPictures() != null) {
-            updatedListing.addPictures(userInput.getPictures());
+        if (listingInput.getPictures() != null) {
+            updatedListing.addPictures(listingInput.getPictures());
         }
 
-        if (userInput.getSqm() > 0) {
-            updatedListing.setName(userInput.getName());
+        if (listingInput.getSqm() > 0) {
+            updatedListing.setName(listingInput.getName());
         }
 
-        if (userInput.getPublished() != null) {
-            updatedListing.setPublished(userInput.getPublished());
+        if (!listingInput.getPublished()) {
+            updatedListing.setPublished(listingInput.getPublished());
         }
 
-        if (userInput.getListingtype() != null) {
-            updatedListing.setListingtype(userInput.getListingtype());
+        if (listingInput.getListingtype() != null) {
+            updatedListing.setListingtype(listingInput.getListingtype());
         }
 
-        if (userInput.getFurnished() != null) {
-            updatedListing.setFurnished(userInput.getFurnished());
+        if (!listingInput.getFurnished()) {
+            updatedListing.setFurnished(listingInput.getFurnished());
         }
 
-        if (userInput.getAvailableTo() != null) {
-            updatedListing.setAvailableTo(userInput.getAvailableTo());
+        if (listingInput.getAvailableTo() != null) {
+            updatedListing.setAvailableTo(listingInput.getAvailableTo());
         }
 
-        if (userInput.getAvailable() != null) {
-            updatedListing.setAvailable(userInput.getAvailable());
+        if (!listingInput.getAvailable()) {
+            updatedListing.setAvailable(listingInput.getAvailable());
         }
 
-        if (userInput.getRent() >= 0) {
-            updatedListing.setRent(userInput.getRent());
+        if (listingInput.getRent() >= 0) {
+            updatedListing.setRent(listingInput.getRent());
         }
 
-        if (userInput.getDeposit() >= 0) {
-            updatedListing.setDeposit(userInput.getDeposit());
+        if (listingInput.getDeposit() >= 0) {
+            updatedListing.setDeposit(listingInput.getDeposit());
         }
 
-        if (userInput.getRooms() > 0) {
-            updatedListing.setRooms(userInput.getRooms());
+        if (listingInput.getRooms() > 0) {
+            updatedListing.setRooms(listingInput.getRooms());
         }
 
-        if (userInput.getPublisher() != null) {
-            updatedListing.setPublisher(userInput.getPublisher());
+        if (listingInput.getPublisher() != null) {
+            updatedListing.setPublisher(listingInput.getPublisher());
         }
 
         return listingRepository.saveAndFlush(updatedListing);
     }
 
-    public void deleteUser(Listing listing) {
+    public void deleteListing(Listing listing) {
         listingRepository.delete(listing);
     }
 

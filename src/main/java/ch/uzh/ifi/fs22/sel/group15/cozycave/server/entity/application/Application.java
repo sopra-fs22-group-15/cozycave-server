@@ -22,8 +22,8 @@ public class Application {
     private Date creationDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "applicationstatus", nullable = false)
-    private ApplicationStatus applicationstatus;
+    @Column(name = "application_status", nullable = false)
+    private ApplicationStatus application_status;
 
     //TODO: GroupApplication, UserApplication
 
@@ -32,10 +32,10 @@ public class Application {
     private User owner;
 
 
-    public Application(UUID id, Date creationDate, ApplicationStatus applicationStatus, User owner)  {
+    public Application(UUID id, Date creationDate, ApplicationStatus application_status, User owner)  {
         this.id = id;
         this.creationDate = creationDate;
-        this.applicationstatus = applicationStatus;
+        this.application_status = application_status;
         this.owner = owner;
     }
 }

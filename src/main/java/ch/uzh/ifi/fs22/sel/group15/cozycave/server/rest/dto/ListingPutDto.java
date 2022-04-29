@@ -7,10 +7,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class ListingPutDto implements Serializable {
@@ -23,25 +20,25 @@ public class ListingPutDto implements Serializable {
 
     private Location address;
 
-    private Boolean published;
+    private boolean published;
 
     private List<Picture> pictures;
 
-    private int sqm;
+    private double sqm;
 
     private ListingType listingtype;
 
-    private Boolean furnished;
+    private boolean furnished;
 
     private Gender availableTo;
 
-    private Boolean available;
+    private boolean available;
 
     private double rent;
 
     private double deposit;
 
-    private int rooms;
+    private double rooms;
 
     private User publisher;
 
@@ -50,10 +47,11 @@ public class ListingPutDto implements Serializable {
 
     }
 
+    // Constructor for single picture
     public ListingPutDto(UUID id, String name, String description,
-                         Location address, Boolean published, Picture picture,
-                         int sqm, ListingType listingtype, Boolean furnished, Gender availableTo,
-                         Boolean available, double rent, double deposit, int rooms, User publisher) {
+                         Location address, boolean published, Picture picture,
+                         double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
+                         boolean available, double rent, double deposit, double rooms, User publisher) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -61,6 +59,28 @@ public class ListingPutDto implements Serializable {
         this.published = published;
         this.pictures = new ArrayList<>();
         this.pictures.add(picture);
+        this.sqm = sqm;
+        this.listingtype = listingtype;
+        this.furnished = furnished;
+        this.availableTo = availableTo;
+        this.available = available;
+        this.rent = rent;
+        this.deposit = deposit;
+        this.rooms = rooms;
+    }
+
+    // Constructor for multiple Picture add
+    public ListingPutDto(UUID id, String name, String description,
+                         Location address, boolean published, List<Picture> pictures,
+                         double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
+                         boolean available, double rent, double deposit, double rooms, User publisher) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.published = published;
+        this.pictures = new ArrayList<>();
+        this.pictures.addAll(pictures);
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
@@ -95,37 +115,39 @@ public class ListingPutDto implements Serializable {
         this.address = address;
     }
 
-    public Boolean getPublished() {
+    public boolean getPublished() {
         return published;
     }
 
-    public void setPublished(Boolean published) {
+    public void setPublished(boolean published) {
         this.published = published;
     }
 
     public List<Picture> getPictures() {
-        List<Picture> temp = new ArrayList<>();
-        for (int i = 0; i < pictures.size(); i++) {
-            temp.add(pictures.get(i));
-        }
-        return temp;
+        return Collections.unmodifiableList(pictures);
     }
 
-    public void addPictures(Picture picture) {
+    public void addPicture(Picture picture) {
         this.pictures.add(picture);
     }
 
     public void addPictures(List<Picture> pictures) {
-        for (int i = 0; i < pictures.size(); i++) {
-            this.pictures.add(pictures.get(i));
-        }
+        this.pictures.addAll(pictures);
     }
 
-    public int getSqm() {
+    public void removePicture(Picture picture) {
+        this.pictures.remove(picture);
+    }
+
+    public void removePictures(List<Picture> pictures) {
+        this.pictures.removeAll(pictures);
+    }
+
+    public double getSqm() {
         return sqm;
     }
 
-    public void setSqm(int sqm) {
+    public void setSqm(double sqm) {
         this.sqm = sqm;
     }
 
@@ -137,11 +159,11 @@ public class ListingPutDto implements Serializable {
         this.listingtype = listingtype;
     }
 
-    public Boolean getFurnished() {
+    public boolean getFurnished() {
         return furnished;
     }
 
-    public void setFurnished(Boolean furnished) {
+    public void setFurnished(boolean furnished) {
         this.furnished = furnished;
     }
 
@@ -149,9 +171,9 @@ public class ListingPutDto implements Serializable {
 
     public void setAvailableTo(Gender availableTo) { this.availableTo = availableTo; }
 
-    public Boolean getAvailable() { return available; }
+    public boolean getAvailable() { return available; }
 
-    public void setAvailable(Boolean available) { this.available = available; }
+    public void setAvailable(boolean available) { this.available = available; }
 
     public double getRent() {
         return rent;
@@ -169,11 +191,11 @@ public class ListingPutDto implements Serializable {
         this.deposit = deposit;
     }
 
-    public int getRooms() {
+    public double getRooms() {
         return rooms;
     }
 
-    public void setRooms(int rooms) {
+    public void setRooms(double rooms) {
         this.rooms = rooms;
     }
 
