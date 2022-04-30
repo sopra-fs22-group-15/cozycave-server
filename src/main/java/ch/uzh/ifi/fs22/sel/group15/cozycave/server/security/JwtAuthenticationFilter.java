@@ -27,13 +27,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
         String jwt = getJwtFromRequest(request);
 
+        logger.info("filter");
+        logger.debug(StringUtils.hasText(jwt) + "" + jwtTokenProvider.validateToken(jwt));
+
         if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
             UUID uuid = jwtTokenProvider.getUuidFromToken(jwt);
             UserDetails userDetails = iUserDetailsService.loadUserByUsername(uuid.toString());
 
+            logger.error("UserDetails: " + userDetails.getPassword());
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
+                userDetails.getUsername(),
+                userDetails.getPassword(),
                 userDetails.getAuthorities()
             );
 

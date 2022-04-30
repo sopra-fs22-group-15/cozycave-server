@@ -15,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -100,6 +102,31 @@ public class AuthenticationController {
             jwtTokenProvider.generateToken(authentication)
         );
         System.out.println("test5");
+
+        return result;
+    }
+
+    @PutMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDto login(@RequestBody UserPostDto userPostDto) {
+        log.error("new user login try: {}", userPostDto.toString());
+
+        User user = userService.findUserByEmail(userPostDto.getAuthenticationData().getEmail())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                user.getId().toString(),
+                userPostDto.getAuthenticationData().getPassword() + user.getAuthenticationData().getSalt()
+            )
+        );
+
+        UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
+
+        result.getAuthenticationData().setToken(
+            jwtTokenProvider.generateToken(authentication)
+        );
 
         return result;
     }

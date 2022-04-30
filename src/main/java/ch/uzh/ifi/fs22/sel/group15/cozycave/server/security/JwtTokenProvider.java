@@ -53,6 +53,6 @@ public class JwtTokenProvider {
             .parseClaimsJws(token)
             .getBody()
             .getExpiration()
-            .before(Date.from(Instant.now()));
+            .after(Date.from(Instant.now()));
     }
 }

@@ -95,14 +95,7 @@ import javax.persistence.EntityNotFoundException;
     }
 
     public @NotNull Optional<User> findUserByEmail(String email) {
-        Optional<User> foundUser;
-        try {
-            foundUser = userRepository.findByAuthenticationData_Email(email);
-            return foundUser;
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
-        }
+        return userRepository.findByAuthenticationData_Email(email);
     }
 
     public @NotNull User updateUser(User userInput, User updatedBy) {
