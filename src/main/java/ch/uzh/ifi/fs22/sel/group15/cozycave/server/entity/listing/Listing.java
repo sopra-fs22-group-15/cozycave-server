@@ -35,8 +35,7 @@ public class Listing {
     @Column(name = "published")
     private boolean published;
 
-    //@OneToMany(targetEntity=Picture.class, mappedBy="id", fetch=FetchType.EAGER)
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "picture_id")
     private List<Picture> pictures;
 
@@ -50,9 +49,14 @@ public class Listing {
     @Column(name = "furnished")
     private boolean furnished;
 
-    //TODO: change to have multiple options
-    @Enumerated(EnumType.STRING)
-    private Gender availableTo;
+    //@Enumerated(EnumType.STRING)
+    //@ElementCollection
+    //@Column(name ="available_to")
+    @ElementCollection(targetClass=Gender.class)
+    @Enumerated(EnumType.STRING) // Possibly optional (I'm not sure) but defaults to ORDINAL.
+    @CollectionTable(name="Gender")
+    @Column(name="available_to") // Column name in person_interest
+    private List<Gender> availableTo;
 
     @Column(name = "available")
     private boolean available;
@@ -66,58 +70,69 @@ public class Listing {
     @Column(name = "rooms")
     private double rooms;
 
-    @OneToOne
-    @JoinColumn(name = "publisher_id")
-    private User publisher;
+    @Column(name = "publisher_id")
+    private UUID publisherID;
 
     public Listing() {
 
     }
 
-    // Constructor for single picture
+    // Constructor with generics for single/list of picture
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, Picture picture,
-                   double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
-                   boolean available, double rent, double deposit, double rooms, User publisher) {
+                   double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
+                   boolean available, double rent, double deposit, double rooms, UUID publisherID) {
         this.id = id;
+        this.creationDate = creationDate;
         this.name = name;
         this.description = description;
         this.address = address;
         this.published = published;
         this.pictures = new ArrayList<>();
-        this.pictures.add(picture);
+        if (pictures != null) {
+            this.pictures.add(picture);
+        }
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
-        this.availableTo = availableTo;
+        this.availableTo = new ArrayList<>();
+        if (availableTo != null) {
+            this.availableTo.addAll(availableTo);
+        }
         this.available = available;
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisher = publisher;
+        this.publisherID = publisherID;
     }
 
     // Constructor for multiple Picture add
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, List<Picture> pictures,
-                   double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
-                   boolean available, double rent, double deposit, double rooms, User publisher) {
+                   double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
+                   boolean available, double rent, double deposit, double rooms, UUID publisherID) {
         this.id = id;
+        this.creationDate = creationDate;
         this.name = name;
         this.description = description;
         this.address = address;
         this.published = published;
         this.pictures = new ArrayList<>();
-        this.pictures.addAll(pictures);
+        if (pictures != null) {
+            this.pictures.addAll(pictures);
+        }
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
-        this.availableTo = availableTo;
+        this.availableTo = new ArrayList<>();
+        if (availableTo != null) {
+            this.availableTo.addAll(availableTo);
+        }
         this.available = available;
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisher = publisher;
+        this.publisherID = publisherID;
     }
 
     public UUID getId() {
@@ -169,14 +184,15 @@ public class Listing {
     }
 
     public List<Picture> getPictures() {
-        return Collections.unmodifiableList(pictures);
+        return pictures != null ? Collections.unmodifiableList(pictures) : new ArrayList<Picture>();
     }
 
+    // overloading methods to be able to add single pictures or collections of pictures
     public void addPicture(Picture picture) {
         this.pictures.add(picture);
     }
 
-    public void addPictures(List<Picture> pictures) {
+    public void addPicture(List<Picture> pictures) {
         this.pictures.addAll(pictures);
     }
 
@@ -184,10 +200,9 @@ public class Listing {
         this.pictures.remove(picture);
     }
 
-    public void removePictures(List<Picture> pictures) {
+    public void removePicture(List<Picture> pictures) {
         this.pictures.removeAll(pictures);
     }
-
 
     public double getSqm() {
         return sqm;
@@ -213,9 +228,11 @@ public class Listing {
         this.furnished = furnished;
     }
 
-    public Gender getAvailableTo() { return availableTo; }
+    public List<Gender> getAvailableTo() {
+        return availableTo != null ? Collections.unmodifiableList(availableTo) : new ArrayList<Gender>();
+    }
 
-    public void setAvailableTo(Gender availableTo) { this.availableTo = availableTo; }
+    public void setAvailableTo(List<Gender> availableTo) { this.availableTo = availableTo; }
 
     public boolean getAvailable() { return available; }
 
@@ -245,10 +262,10 @@ public class Listing {
         this.rooms = rooms;
     }
 
-    public User getPublisher() {
-        return publisher;
+    public UUID getPublisher() {
+        return publisherID;
     }
-    public void setPublisher(User publisher) {
-        this.publisher = publisher;
+    public void setPublisher(UUID publisherID) {
+        this.publisherID = publisherID;
     }
 }

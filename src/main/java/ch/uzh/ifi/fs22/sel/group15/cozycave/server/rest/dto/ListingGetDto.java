@@ -33,7 +33,7 @@ public class ListingGetDto implements Serializable {
 
     private boolean furnished;
 
-    private Gender availableTo;
+    private List<Gender> availableTo;
     
     private boolean available;
 
@@ -43,7 +43,7 @@ public class ListingGetDto implements Serializable {
 
     private double rooms;
 
-    private User publisher;
+    private UUID publisherID;
 
 
     public ListingGetDto() {
@@ -53,8 +53,8 @@ public class ListingGetDto implements Serializable {
     // Constructor for single picture
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
                          Location address, boolean published, Picture picture,
-                         double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
-                         boolean available, double rent, double deposit, double rooms, User publisher) {
+                         double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
+                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -62,22 +62,28 @@ public class ListingGetDto implements Serializable {
         this.address = address;
         this.published = published;
         this.pictures = new ArrayList<>();
-        this.pictures.add(picture);
+        if (picture != null) {
+            this.pictures.add(picture);
+        }
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
-        this.availableTo = availableTo;
+        this.availableTo = new ArrayList<>();
+        if (availableTo != null) {
+            this.availableTo.addAll(availableTo);
+        }
         this.available = available;
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
+        this.publisherID = publisherID;
     }
 
     // Constructor for multiple Picture add
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
-                         Location address, boolean published, List<Picture> picture,
-                         double sqm, ListingType listingtype, boolean furnished, Gender availableTo,
-                         boolean available, double rent, double deposit, double rooms, User publisher) {
+                         Location address, boolean published, List<Picture> pictures,
+                         double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
+                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -85,15 +91,21 @@ public class ListingGetDto implements Serializable {
         this.address = address;
         this.published = published;
         this.pictures = new ArrayList<>();
-        this.pictures.addAll(pictures);
+        if (pictures != null) {
+            this.pictures.addAll(pictures);
+        }
         this.sqm = sqm;
         this.listingtype = listingtype;
         this.furnished = furnished;
-        this.availableTo = availableTo;
+        this.availableTo = new ArrayList<>();
+        if (availableTo != null) {
+            this.availableTo.addAll(availableTo);
+        }
         this.available = available;
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
+        this.publisherID = publisherID;
     }
 
     public UUID getId() {
@@ -121,7 +133,7 @@ public class ListingGetDto implements Serializable {
     }
 
     public List<Picture> getPictures() {
-        return Collections.unmodifiableList(pictures);
+        return pictures != null ? Collections.unmodifiableList(pictures) : new ArrayList<Picture>();
     }
 
     public double getSqm() {
@@ -136,8 +148,9 @@ public class ListingGetDto implements Serializable {
         return furnished;
     }
 
-    public Gender getAvailableTo() { return availableTo; }
-
+    public List<Gender> getAvailableTo() {
+        return availableTo != null ? Collections.unmodifiableList(availableTo) : new ArrayList<Gender>();
+    }
 
     public boolean getAvailable() { return available; }
 
@@ -157,10 +170,10 @@ public class ListingGetDto implements Serializable {
         this.rooms = rooms;
     }
 
-    public User getPublisher() {
-        return publisher;
+    public UUID getPublisher() {
+        return publisherID;
     }
-    public void setPublisher(User publisher) {
-        this.publisher = publisher;
+    public void setPublisher(UUID publisherID) {
+        this.publisherID = publisherID;
     }
 }

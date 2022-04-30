@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +37,7 @@ import javax.persistence.EntityNotFoundException;
 
     public @NotNull Listing createListing(Listing newListing) {
         checkIfDataIsValid(newListing, true);
-
+        newListing.setCreationDate(new Date());
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
 
@@ -54,7 +55,6 @@ import javax.persistence.EntityNotFoundException;
         Listing updatedListing = listingRepository.findById(listingInput.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
 
-        // TODO: Use Design Pattern
         // update details
         if (listingInput.getName() != null) {
             updatedListing.setName(listingInput.getName());
@@ -68,15 +68,16 @@ import javax.persistence.EntityNotFoundException;
             updatedListing.setAddress(listingInput.getAddress());
         }
 
-        // TODO: Will cause problems
         if (listingInput.getPictures() != null) {
-            updatedListing.addPictures(listingInput.getPictures());
+            updatedListing.addPicture(listingInput.getPictures());
         }
 
+        // prmitive type do not have null values and get initialized with 0
         if (listingInput.getSqm() > 0) {
             updatedListing.setName(listingInput.getName());
         }
 
+        // prmitive type do not have null values and get initialized with false
         if (!listingInput.getPublished()) {
             updatedListing.setPublished(listingInput.getPublished());
         }
@@ -85,6 +86,7 @@ import javax.persistence.EntityNotFoundException;
             updatedListing.setListingtype(listingInput.getListingtype());
         }
 
+        // prmitive type do not have null values and get initialized with false
         if (!listingInput.getFurnished()) {
             updatedListing.setFurnished(listingInput.getFurnished());
         }
@@ -93,10 +95,12 @@ import javax.persistence.EntityNotFoundException;
             updatedListing.setAvailableTo(listingInput.getAvailableTo());
         }
 
+        // prmitive type do not have null values and get initialized with false
         if (!listingInput.getAvailable()) {
             updatedListing.setAvailable(listingInput.getAvailable());
         }
 
+        // prmitive type do not have null values and get initialized with 0
         if (listingInput.getRent() >= 0) {
             updatedListing.setRent(listingInput.getRent());
         }
@@ -105,7 +109,8 @@ import javax.persistence.EntityNotFoundException;
             updatedListing.setDeposit(listingInput.getDeposit());
         }
 
-        if (listingInput.getRooms() > 0) {
+        // prmitive type do not have null values and get initialized with 0
+        if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
         }
 
