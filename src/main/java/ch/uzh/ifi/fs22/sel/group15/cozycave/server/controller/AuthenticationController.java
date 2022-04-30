@@ -5,10 +5,11 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationDat
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtTokenProvider;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/v1/auth")
-//TODO: add login, logout
+// TODO: add logout possibility if required (individual token for each user)
 public class AuthenticationController {
 
     private final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
@@ -48,60 +49,54 @@ public class AuthenticationController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public UserGetDto register(@RequestBody UserPostDto userPostDto) {
-        log.debug("new user registration try: {}", userPostDto.toString());
+    public UserGetDto register(@RequestBody UserPostPutDto userPostPutDto) {
+        log.debug("new user registration try: {}", userPostPutDto.toString());
 
         Location address = null;
-        if (userPostDto.getDetails().getAddress() != null) {
+        if (userPostPutDto.getDetails().getAddress() != null) {
             address = new Location(
                 "home",
-                userPostDto.getDetails().getAddress().getStreet(),
-                userPostDto.getDetails().getAddress().getStreetNumber(),
-                userPostDto.getDetails().getAddress().getZipCode(),
-                userPostDto.getDetails().getAddress().getVillage(),
-                userPostDto.getDetails().getAddress().getCountry()
+                userPostPutDto.getDetails().getAddress().getStreet(),
+                userPostPutDto.getDetails().getAddress().getStreetNumber(),
+                userPostPutDto.getDetails().getAddress().getZipCode(),
+                userPostPutDto.getDetails().getAddress().getVillage(),
+                userPostPutDto.getDetails().getAddress().getCountry()
             );
         }
-
-        //User test = UserMapper.INSTANCE.userPostDtoToUser(userPostDto);
-        //log.debug("Test: {}", test.toString());
 
         User user = userService.createUser(new User(
             null,
             null,
             new AuthenticationData(
                 null,
-                userPostDto.getAuthenticationData().getEmail(),
-                userPostDto.getAuthenticationData().getPassword(),
+                userPostPutDto.getAuthenticationData().getEmail(),
+                userPostPutDto.getAuthenticationData().getPassword(),
                 null
             ),
-            userPostDto.getRole(),
+            userPostPutDto.getRole(),
             new UserDetails(
                 null,
-                userPostDto.getDetails().getFirstname(),
-                userPostDto.getDetails().getLastname(),
-                userPostDto.getDetails().getGender(),
-                userPostDto.getDetails().getBirthday(),
+                userPostPutDto.getDetails().getFirstname(),
+                userPostPutDto.getDetails().getLastname(),
+                userPostPutDto.getDetails().getGender(),
+                userPostPutDto.getDetails().getBirthday(),
                 address,
-                userPostDto.getDetails().getBiography()
+                userPostPutDto.getDetails().getBiography()
             )
         ), null);
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
-        System.out.println("test3");
 
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                user.getId().toString(),
-                userPostDto.getAuthenticationData().getPassword() + user.getAuthenticationData().getSalt()
-            )
+        Authentication authentication = createAuthentication(
+            user.getId(),
+            userPostPutDto.getAuthenticationData().getPassword()
         );
-        System.out.println("test4");
 
         result.getAuthenticationData().setToken(
             jwtTokenProvider.generateToken(authentication)
         );
-        System.out.println("test5");
+
+        log.debug("new user registered: {}", result);
 
         return result;
     }
@@ -109,18 +104,14 @@ public class AuthenticationController {
     @PutMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetDto login(@RequestBody UserPostDto userPostDto) {
-        log.error("new user login try: {}", userPostDto.toString());
+    public UserGetDto login(@RequestBody UserPostPutDto userPostPutDto) {
+        log.debug("new user login try: {}", userPostPutDto.getAuthenticationData().getEmail());
 
-        User user = userService.findUserByEmail(userPostDto.getAuthenticationData().getEmail())
+        User user = userService.findUserByEmail(userPostPutDto.getAuthenticationData().getEmail())
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                user.getId().toString(),
-                userPostDto.getAuthenticationData().getPassword() + user.getAuthenticationData().getSalt()
-            )
-        );
+        Authentication authentication = createAuthentication(user.getId(),
+            userPostPutDto.getAuthenticationData().getPassword());
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 
@@ -128,6 +119,21 @@ public class AuthenticationController {
             jwtTokenProvider.generateToken(authentication)
         );
 
+        log.debug("new user logged in: {}", result);
+
         return result;
+    }
+
+    private Authentication createAuthentication(UUID uuid, String passwordRaw) {
+        User user = userService.findUserID(uuid)
+            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+
+        return authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                uuid.toString(),
+                passwordRaw + user.getAuthenticationData().getSalt(),
+                user.getRole().generatePermittedAuthoritiesList()
+            )
+        );
     }
 }

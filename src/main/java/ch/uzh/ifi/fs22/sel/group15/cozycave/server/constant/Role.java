@@ -1,6 +1,9 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum Role {
     LANDLORD(1),
@@ -43,5 +46,13 @@ public enum Role {
 
     public boolean lessThan(Role rank) {
         return this.id < rank.getRoleId();
+    }
+
+    public Collection<SimpleGrantedAuthority> generatePermittedAuthoritiesList() {
+        return Arrays.stream(Role.values())
+            .filter(role -> role.getRoleId() <= this.getRoleId())
+            .map(Enum::name)
+            .map(SimpleGrantedAuthority::new)
+            .collect(java.util.stream.Collectors.toList());
     }
 }

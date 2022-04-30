@@ -2,8 +2,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostPutDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -28,19 +27,10 @@ public interface UserMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromUserGetDto(UserGetDto userGetDto, @MappingTarget User user);
 
-    User userPostDtoToUser(UserPostDto userPostDto);
+    User userPostPutDtoToUser(UserPostPutDto userPostPutDto);
 
-    UserPostDto userToUserPostDto(User user);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserFromUserPostDto(
-        UserPostDto userPostDto, @MappingTarget User user);
-
-    User userPutDtoToUser(UserPutDto userPutDto);
-
-    UserPutDto userToUserPutDto(User user);
+    UserPostPutDto userToUserPostPutDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserFromUserPutDto(
-        UserPutDto userPutDto, @MappingTarget User user);
+    void updateUserFromUserPostPutDto(UserPostPutDto userPostPutDto, @MappingTarget User user);
 }

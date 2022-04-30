@@ -2,6 +2,8 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
@@ -105,6 +107,7 @@ public class UserGetDto implements Serializable {
     public static class AuthenticationDataDto implements Serializable {
 
         private String email;
+        @JsonInclude(Include.NON_EMPTY)
         private String token;
 
         public AuthenticationDataDto() {
@@ -141,10 +144,15 @@ public class UserGetDto implements Serializable {
 
         private String firstname;
         private String lastname;
+        @JsonInclude(Include.NON_EMPTY)
         private Gender gender;
+        @JsonInclude(Include.NON_EMPTY)
         private Date birthday;
+        @JsonInclude(Include.NON_EMPTY)
         private LocationDto address;
+        @JsonInclude(Include.NON_EMPTY)
         private String biography;
+        @JsonInclude(Include.NON_EMPTY)
         private PictureDto picture;
 
         public UserDetailsDto() {

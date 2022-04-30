@@ -46,6 +46,8 @@ import javax.persistence.EntityNotFoundException;
     }
 
     public @NotNull User createUser(User newUser, User createdBy) {
+        log.debug("creating user {}", newUser);
+
         newUser.setId(null);
         newUser.setCreationDate(new Date());
 
@@ -58,8 +60,6 @@ import javax.persistence.EntityNotFoundException;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
         }
 
-        System.out.println("Hi");
-
         ad.setPassword(passwordEncoder.encode(ad.getPassword() + ad.getSalt()));
 
         if (createdBy == null || newUser.getRole() == null) {
@@ -71,22 +71,20 @@ import javax.persistence.EntityNotFoundException;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
         }
 
-        System.out.println("Hi2");
+        if (newUser.getRole().equals(Role.INTERNAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
+        }
 
         UserDetails ud = newUser.getDetails();
-        System.out.println("Hi2.1");
         ud.setId(null);
-        System.out.println("Hi2.2");
 
         // global checks
         checkIfUserAlreadyExists(newUser);
-        System.out.println("Hi3");
         checkIfDataIsValid(newUser, true);
-        System.out.println("Hi4");
 
         newUser = userRepository.saveAndFlush(newUser);
 
-        log.debug("Created Information for User: {}", newUser);
+        log.debug("created user {}", newUser);
         return newUser;
     }
 
@@ -102,6 +100,8 @@ import javax.persistence.EntityNotFoundException;
         User updatedUser = userRepository.findById(userInput.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
+        log.debug("updating user {}", updatedUser);
+
         // update authentication data
         if (updatedUser.getAuthenticationData() != null) {
             // TODO: confirm email change by sending email with link to confirm
@@ -114,16 +114,20 @@ import javax.persistence.EntityNotFoundException;
                 updatedUser.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
             }
 
-            if (userInput.getAuthenticationData().getPassword() != null) {
-                // TODO: encrypt password, check password length
-                updatedUser.getAuthenticationData().setPassword(userInput.getAuthenticationData().getPassword());
+            if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
+                && userInput.getAuthenticationData().getPassword().length() > 8) {
+                updatedUser.getAuthenticationData().setPassword(
+                    passwordEncoder.encode(
+                        userInput.getAuthenticationData().getPassword()
+                            + updatedUser.getAuthenticationData().getSalt()
+                    )
+                );
+            } else if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
+                && userInput.getAuthenticationData().getPassword().length() < 8) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
             }
 
-            //TODO: check
-//            if (userInput.getAuthenticationData().getToken() != null
-//                && updatedBy.getRole().greaterEquals(Role.TEAM)) {
-//                updatedUser.getAuthenticationData().setToken(null);
-//            }
+            log.debug("updated user {}", updatedUser);
         }
 
         // update role
@@ -188,40 +192,37 @@ import javax.persistence.EntityNotFoundException;
 
     //TODO: add more checks if required
     private void checkIfDataIsValid(User userToBeCreated, boolean mandatoryFieldsAreFilled) {
-        System.out.println("Hi5");
         if (userToBeCreated.getAuthenticationData() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "authentication data is missing");
         }
         AuthenticationData ad = userToBeCreated.getAuthenticationData();
-        System.out.println("Hi6");
 
         if (userToBeCreated.getDetails() == null) {
-            System.out.println("Hi7");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "details are missing");
         }
+
         UserDetails details = userToBeCreated.getDetails();
-        System.out.println("Hi8");
+
         if (mandatoryFieldsAreFilled) {
             if (!Utils.checkValidEmail(ad.getEmail())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
             }
+
             if (!StringUtils.hasText(ad.getPassword())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is missing");
             }
+
             if (!StringUtils.hasText(details.getFirstname())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstname is missing");
             }
-            System.out.println("Hi9");
+
             if (!StringUtils.hasText(details.getLastname())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lastname is missing");
             }
         }
 
-        System.out.println("Hi11");
         if (details.getBirthday() != null && details.getBirthday().after(new Date())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is invalid");
         }
-        System.out.println("Hi12");
-        System.out.println("Hi13");
     }
 }
