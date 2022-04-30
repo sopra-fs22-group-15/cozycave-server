@@ -92,6 +92,10 @@ import org.springframework.web.server.ResponseStatusException;
         return userRepository.findById(uuid);
     }
 
+    public @NotNull Optional<User> findUserByEmail(String email) {
+        return userRepository.findByAuthenticationData_Email(email);
+    }
+
     public @NotNull User updateUser(User userInput, User updatedBy) {
         User updatedUser = userRepository.findById(userInput.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
