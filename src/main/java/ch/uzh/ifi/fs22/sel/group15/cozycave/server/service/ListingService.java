@@ -1,8 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
 import java.util.Date;
@@ -18,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.persistence.EntityNotFoundException;
 
 @Service @Transactional public class ListingService {
 
@@ -127,8 +123,6 @@ import javax.persistence.EntityNotFoundException;
 
 
     private void checkIfDataIsValid(Listing listingToBeCreated, boolean mandatoryFieldsAreFilled) {
-        if (!mandatoryFieldsAreFilled) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
+        //TODO: implement
     }
 }
