@@ -43,9 +43,10 @@ public class Location {
     public Location() {
     }
 
-    public Location(String name, String street, String streetNumber, String zipCode, String village, String country) {
+    public Location(String name, String description, String street, String streetNumber, String zipCode, String village, String country) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.description = description;
         this.street = street;
         this.streetNumber = streetNumber;
         this.zipCode = zipCode;

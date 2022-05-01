@@ -1,6 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
 import java.util.Date;
@@ -33,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
     public @NotNull Listing createListing(Listing newListing) {
         checkIfDataIsValid(newListing, true);
+        newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
@@ -41,8 +43,8 @@ import org.springframework.web.server.ResponseStatusException;
         return newListing;
     }
 
-    public @NotNull Optional<Listing> findListingID(UUID id) {
-        return listingRepository.findById(id);
+    public @NotNull Optional<Listing> findListingID(UUID uuid) {
+        return listingRepository.findById(uuid);
     }
 
 
@@ -109,10 +111,10 @@ import org.springframework.web.server.ResponseStatusException;
         if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
         }
-
+        /*
         if (listingInput.getPublisher() != null) {
             updatedListing.setPublisher(listingInput.getPublisher());
-        }
+        }*/
 
         return listingRepository.saveAndFlush(updatedListing);
     }
