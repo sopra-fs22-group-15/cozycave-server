@@ -2,6 +2,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,18 +30,53 @@ import javax.persistence.EntityNotFoundException;
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UniversityDomains universityDomains;
 
-    @Autowired public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    @Autowired
+    public UserService(@Qualifier("userRepository") UserRepository userRepository,
+        PasswordEncoder passwordEncoder, UniversityDomains universityDomains) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.universityDomains = universityDomains;
     }
 
     public List<User> getUsers() {
         return this.userRepository.findAll();
     }
 
-    public @NotNull User createUser(User newUser) {
+    public @NotNull User createUser(User newUser, User createdBy) {
+        log.debug("creating user {}", newUser);
+
+        newUser.setId(null);
         newUser.setCreationDate(new Date());
-        newUser.getAuthenticationData().setSalt(Utils.generateSalt(16));
+
+        AuthenticationData ad = newUser.getAuthenticationData();
+        ad.setId(null);
+        ad.setSalt(Utils.generateSalt());
+
+        if (StringUtils.hasText(ad.getPassword())
+            && ad.getPassword().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
+        }
+
+        ad.setPassword(passwordEncoder.encode(ad.getPassword() + ad.getSalt()));
+
+        if (createdBy == null || newUser.getRole() == null) {
+            newUser.setRole(universityDomains
+                .matchesEmail(newUser.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+        } else if (createdBy.getRole().lessEquals(Role.TEAM)
+            || createdBy.getRole().equals(Role.TEAM)
+            && newUser.getRole().greaterEquals(Role.TEAM)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
+        }
+
+        if (newUser.getRole().equals(Role.INTERNAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
+        }
+
+        UserDetails ud = newUser.getDetails();
+        ud.setId(null);
 
         // global checks
         checkIfUserAlreadyExists(newUser);
@@ -47,7 +84,7 @@ import javax.persistence.EntityNotFoundException;
 
         newUser = userRepository.saveAndFlush(newUser);
 
-        log.debug("Created Information for User: {}", newUser);
+        log.debug("created user {}", newUser);
         return newUser;
     }
 
@@ -56,19 +93,14 @@ import javax.persistence.EntityNotFoundException;
     }
 
     public @NotNull Optional<User> findUserByEmail(String email) {
-        Optional<User> foundUser;
-        try {
-            foundUser = userRepository.findByAuthenticationData_Email(email);
-            return foundUser;
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
-        }
+        return userRepository.findByAuthenticationData_Email(email);
     }
 
     public @NotNull User updateUser(User userInput, User updatedBy) {
         User updatedUser = userRepository.findById(userInput.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        log.debug("updating user {}", updatedUser);
 
         // update authentication data
         if (updatedUser.getAuthenticationData() != null) {
@@ -82,15 +114,20 @@ import javax.persistence.EntityNotFoundException;
                 updatedUser.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
             }
 
-            if (userInput.getAuthenticationData().getPassword() != null) {
-                // TODO: encrypt password
-                updatedUser.getAuthenticationData().setPassword(userInput.getAuthenticationData().getPassword());
+            if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
+                && userInput.getAuthenticationData().getPassword().length() > 8) {
+                updatedUser.getAuthenticationData().setPassword(
+                    passwordEncoder.encode(
+                        userInput.getAuthenticationData().getPassword()
+                            + updatedUser.getAuthenticationData().getSalt()
+                    )
+                );
+            } else if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
+                && userInput.getAuthenticationData().getPassword().length() < 8) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
             }
 
-            if (userInput.getAuthenticationData().getToken() != null
-                && updatedBy.getRole().greaterEquals(Role.TEAM)) {
-                updatedUser.getAuthenticationData().setToken(null);
-            }
+            log.debug("updated user {}", updatedUser);
         }
 
         // update role
@@ -119,7 +156,7 @@ import javax.persistence.EntityNotFoundException;
             }
 
             if (userInput.getDetails().getAddress() != null) {
-                // TODO: verify address
+                // TODO: verify address, change role
                 updatedUser.getDetails().setAddress(userInput.getDetails().getAddress());
             }
 
@@ -163,32 +200,29 @@ import javax.persistence.EntityNotFoundException;
         if (userToBeCreated.getDetails() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "details are missing");
         }
+
         UserDetails details = userToBeCreated.getDetails();
 
         if (mandatoryFieldsAreFilled) {
             if (!Utils.checkValidEmail(ad.getEmail())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
             }
+
             if (!StringUtils.hasText(ad.getPassword())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is missing");
             }
+
             if (!StringUtils.hasText(details.getFirstname())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstname is missing");
             }
+
             if (!StringUtils.hasText(details.getLastname())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lastname is missing");
             }
-            if (details.getGender() != null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "gender is missing");
-            }
-            if (details.getBirthday() != null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is missing");
-            }
         }
 
-        if (StringUtils.hasText(ad.getPassword())
-            && ad.getPassword().length() < 8) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
+        if (details.getBirthday() != null && details.getBirthday().after(new Date())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is invalid");
         }
     }
 }

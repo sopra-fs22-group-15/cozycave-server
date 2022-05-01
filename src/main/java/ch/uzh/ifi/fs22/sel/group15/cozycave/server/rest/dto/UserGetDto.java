@@ -2,6 +2,8 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
@@ -51,8 +53,7 @@ public class UserGetDto implements Serializable {
         return authenticationData;
     }
 
-    public void setAuthenticationData(
-        AuthenticationDataDto authenticationData) {
+    public void setAuthenticationData(AuthenticationDataDto authenticationData) {
         this.authenticationData = authenticationData;
     }
 
@@ -106,12 +107,20 @@ public class UserGetDto implements Serializable {
     public static class AuthenticationDataDto implements Serializable {
 
         private String email;
+        @JsonInclude(Include.NON_EMPTY)
+        private String token;
 
         public AuthenticationDataDto() {
         }
 
         public AuthenticationDataDto(String email) {
             this.email = email;
+            this.token = null;
+        }
+
+        public AuthenticationDataDto(String email, String token) {
+            this.email = email;
+            this.token = token;
         }
 
         public String getEmail() {
@@ -122,25 +131,12 @@ public class UserGetDto implements Serializable {
             this.email = email;
         }
 
-        @Override public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof AuthenticationDataDto)) {
-                return false;
-            }
-            AuthenticationDataDto that = (AuthenticationDataDto) o;
-            return getEmail().equals(that.getEmail());
+        public String getToken() {
+            return token;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(getEmail());
-        }
-
-        @Override public String toString() {
-            return "AuthenticationDataDto{" +
-                "email='" + email + '\'' +
-                '}';
+        public void setToken(String token) {
+            this.token = token;
         }
     }
 
@@ -148,10 +144,15 @@ public class UserGetDto implements Serializable {
 
         private String firstname;
         private String lastname;
+        @JsonInclude(Include.NON_EMPTY)
         private Gender gender;
+        @JsonInclude(Include.NON_EMPTY)
         private Date birthday;
+        @JsonInclude(Include.NON_EMPTY)
         private LocationDto address;
+        @JsonInclude(Include.NON_EMPTY)
         private String biography;
+        @JsonInclude(Include.NON_EMPTY)
         private PictureDto picture;
 
         public UserDetailsDto() {
