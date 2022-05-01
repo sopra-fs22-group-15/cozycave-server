@@ -1,7 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
 import java.util.Date;
@@ -43,7 +42,7 @@ import org.springframework.web.server.ResponseStatusException;
         return newListing;
     }
 
-    public @NotNull Optional<Listing> findListingID(UUID uuid) {
+    public @NotNull Optional<Listing> findListingById(UUID uuid) {
         return listingRepository.findById(uuid);
     }
 
@@ -54,6 +53,7 @@ import org.springframework.web.server.ResponseStatusException;
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
 
         // update details
+        //TODO: throw correct errors
         if (listingInput.getName() != null) {
             updatedListing.setName(listingInput.getName());
         }
