@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
+
 @Service @Transactional public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -51,6 +53,17 @@ import org.springframework.web.server.ResponseStatusException;
 
     public @NotNull Optional<User> findUserID(UUID uuid) {
         return userRepository.findById(uuid);
+    }
+
+    public @NotNull Optional<User> findUserByEmail(String email) {
+        Optional<User> foundUser;
+        try {
+            foundUser = userRepository.findByAuthenticationData_Email(email);
+            return foundUser;
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
     }
 
     public @NotNull User updateUser(User userInput, User updatedBy) {
