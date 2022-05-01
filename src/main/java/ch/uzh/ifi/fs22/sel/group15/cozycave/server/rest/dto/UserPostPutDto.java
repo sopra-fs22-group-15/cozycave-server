@@ -8,17 +8,17 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-public class UserPutDto implements Serializable {
+public class UserPostPutDto implements Serializable {
 
     @JsonProperty("authentication")
     private AuthenticationDataDto authenticationData;
     private Role role;
     private UserDetailsDto details;
 
-    public UserPutDto() {
+    public UserPostPutDto() {
     }
 
-    public UserPutDto(
+    public UserPostPutDto(
         AuthenticationDataDto authenticationData, Role role,
         UserDetailsDto details) {
         this.authenticationData = authenticationData;
@@ -59,7 +59,7 @@ public class UserPutDto implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        UserPutDto entity = (UserPutDto) o;
+        UserPostPutDto entity = (UserPostPutDto) o;
         return Objects.equals(this.authenticationData, entity.authenticationData) &&
             Objects.equals(this.role, entity.role) &&
             Objects.equals(this.details, entity.details);
