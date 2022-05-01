@@ -3,28 +3,19 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.*;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import java.util.Date;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
 
 class UserServiceTest {
 
@@ -48,9 +39,11 @@ class UserServiceTest {
         Date dNow = new Date();
         UUID userId = UUID.randomUUID();
         UUID locationId = UUID.randomUUID();
-        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", "8000", "Zurich", "Switzerland");
-        testAuthenticationData = new AuthenticationData(userId, "testUser@uzh.ch", "Test1234!?", "Test1234!?", "Test1234!?");
-        testUserDetails = new UserDetails(userId, "Test", "User", Gender.OTHER, dNow, testLocation, "Simple Bioagraphy of the TestUser");
+        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", "8000", "Zurich",
+            "Switzerland");
+        testAuthenticationData = new AuthenticationData(userId, "testUser@uzh.ch", "Test1234!?", "Test1234!?");
+        testUserDetails = new UserDetails(userId, "Test", "User", Gender.OTHER, dNow, testLocation,
+            "Simple Bioagraphy of the TestUser");
         testUser = new User(userId, dNow, testAuthenticationData, Role.STUDENT, testUserDetails);
 
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
