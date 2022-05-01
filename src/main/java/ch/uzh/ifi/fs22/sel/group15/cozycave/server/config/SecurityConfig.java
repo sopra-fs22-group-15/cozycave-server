@@ -40,6 +40,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+//        http
+//            .cors()
+//            .and()
+//            .csrf().disable()
+//            .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+//            .and()
+//            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//            .and()
+//            .authorizeRequests()
+//            .antMatchers(
+//                "/v1/auth/login",
+//                "/v1/auth/register",
+//                "/v1/listings",
+//                "/v1/listings/{id}",
+//                "/v1/pictures/{id}"
+//            )
+//            .permitAll()
+//            .anyRequest().authenticated()
+//            .and()
+//            .formLogin().disable();
+//
+//        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
         http
             .cors()
             .and()
@@ -48,16 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            .authorizeRequests()
-            .antMatchers(
-                "/v1/auth/login",
-                "/v1/auth/register",
-                "/v1/listings",
-                "/v1/listings/{id}",
-                "/v1/pictures/{id}"
-            )
-            .permitAll()
-            .anyRequest().authenticated()
+            .authorizeRequests().anyRequest().permitAll()
             .and()
             .formLogin().disable();
 
