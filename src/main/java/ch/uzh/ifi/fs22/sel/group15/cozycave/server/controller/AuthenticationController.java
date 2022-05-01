@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,13 +56,20 @@ public class AuthenticationController {
         Location address = null;
         if (userPostPutDto.getDetails().getAddress() != null) {
             address = new Location(
-                "home",
                 userPostPutDto.getDetails().getAddress().getStreet(),
                 userPostPutDto.getDetails().getAddress().getStreetNumber(),
                 userPostPutDto.getDetails().getAddress().getZipCode(),
                 userPostPutDto.getDetails().getAddress().getVillage(),
                 userPostPutDto.getDetails().getAddress().getCountry()
             );
+
+            if (StringUtils.hasText(userPostPutDto.getDetails().getAddress().getName())) {
+                address.setName(userPostPutDto.getDetails().getAddress().getDescription());
+            }
+
+            if (StringUtils.hasText(userPostPutDto.getDetails().getAddress().getDescription())) {
+                address.setDescription(userPostPutDto.getDetails().getAddress().getDescription());
+            }
         }
 
         User user = userService.createUser(new User(

@@ -84,10 +84,12 @@ public class UserController {
     // delete a specific user
     @DeleteMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable UUID id, @RequestBody UserPostPutDto userPostPutDto) {
-        User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
+    public void deleteUser(@PathVariable UUID id) {
+        User user = userService.findUserID(id)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
 
-        userService.deleteUser(userInput);
+        userService.deleteUser(user);
     }
 
 }
