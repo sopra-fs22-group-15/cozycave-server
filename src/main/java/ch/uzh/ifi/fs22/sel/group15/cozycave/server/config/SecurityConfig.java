@@ -1,6 +1,5 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.config;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.CorsFilter;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationEntryPoint;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
-    }
-
-    @Bean CorsFilter corsFilter() {
-        return new CorsFilter();
     }
 
     @Bean
@@ -67,6 +62,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .formLogin().disable();
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilter(corsFilter());
     }
 }
