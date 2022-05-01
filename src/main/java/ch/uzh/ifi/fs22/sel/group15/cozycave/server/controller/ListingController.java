@@ -59,7 +59,7 @@ public class ListingController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ListingGetDto findListing(@PathVariable UUID id) {
-        return listingService.findListingID(id)
+        return listingService.findListingById(id)
                 .map(ListingMapper.INSTANCE::listingToListingGetDto)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
@@ -70,7 +70,7 @@ public class ListingController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ListingGetDto updateListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
-        Listing listing = listingService.findListingID(id)
+        Listing listing = listingService.findListingById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 

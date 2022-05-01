@@ -18,7 +18,7 @@ public class ListingPutDto implements Serializable {
 
     private String description;
 
-    private Location address;
+    private LocationDto address;
 
     private boolean published;
 
@@ -40,7 +40,7 @@ public class ListingPutDto implements Serializable {
 
     private double rooms;
 
-    private UUID publisherID;
+    //private UserGetDto publisher;
 
 
     public ListingPutDto() {
@@ -49,9 +49,9 @@ public class ListingPutDto implements Serializable {
 
     // Constructor for single picture
     public ListingPutDto(UUID id, String name, String description,
-                         Location address, boolean published, Picture picture,
+                         LocationDto address, boolean published, Picture picture,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                         boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -72,14 +72,14 @@ public class ListingPutDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public ListingPutDto(UUID id, String name, String description,
-                         Location address, boolean published, List<Picture> pictures,
+                         LocationDto address, boolean published, List<Picture> pictures,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                         boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -100,7 +100,7 @@ public class ListingPutDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     public String getName() {
@@ -119,11 +119,11 @@ public class ListingPutDto implements Serializable {
         this.description = description;
     }
 
-    public Location getAddress() {
+    public LocationDto getAddress() {
         return address;
     }
 
-    public void setAddress(Location address) {
+    public void setAddress(LocationDto address) {
         this.address = address;
     }
 
@@ -214,11 +214,11 @@ public class ListingPutDto implements Serializable {
         this.rooms = rooms;
     }
 
-    public UUID getPublisher() {
-        return publisherID;
+    /*public UserGetDto getPublisher() {
+        return publisher;
     }
 
-    public void setPublisher(UUID publisherID) {
-        this.publisherID = publisherID;
-    }
+    public void setPublisher(UserGetDto publisher) {
+        this.publisher = publisher;
+    }*/
 }
