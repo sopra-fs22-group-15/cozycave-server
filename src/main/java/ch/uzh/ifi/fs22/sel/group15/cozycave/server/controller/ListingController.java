@@ -36,7 +36,7 @@ public class ListingController {
     }
 
     // Get all listings in a list
-    @GetMapping("/listing")
+    @GetMapping("/listings")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<ListingGetDto> getAllListings() {
@@ -46,7 +46,7 @@ public class ListingController {
     }
 
     // Creates new listing
-    @PostMapping("/listing")
+    @PostMapping("/listings")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ListingGetDto createListing(@RequestBody ListingPostDto listingPostDto) {
@@ -59,7 +59,7 @@ public class ListingController {
     }
 
     // get specific listing
-    @GetMapping("/listing/{id}")
+    @GetMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ListingGetDto findListing(@PathVariable UUID id) {
@@ -70,7 +70,7 @@ public class ListingController {
     }
 
     // update specific listing
-    @PutMapping("/listing/{id}")
+    @PutMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ListingGetDto updateListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
@@ -84,7 +84,7 @@ public class ListingController {
     }
 
     // delete a specific listing
-    @DeleteMapping("/listing/{id}")
+    @DeleteMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
         Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
