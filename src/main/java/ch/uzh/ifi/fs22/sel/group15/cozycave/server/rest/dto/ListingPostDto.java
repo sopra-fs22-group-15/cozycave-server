@@ -20,7 +20,7 @@ public class ListingPostDto implements Serializable {
 
     private String description;
 
-    private Location address;
+    private LocationDto address;
 
     private boolean published;
 
@@ -42,7 +42,7 @@ public class ListingPostDto implements Serializable {
 
     private double rooms;
 
-    private UUID publisherID;
+    //private UserGetDto publisher;
 
 
     public ListingPostDto() {
@@ -50,12 +50,10 @@ public class ListingPostDto implements Serializable {
     }
 
     // Constructor for single picture
-    public ListingPostDto(UUID id, Date creationDate, String name, String description,
-                          Location address, boolean published, Picture picture,
+    public ListingPostDto(String name, String description,
+                          LocationDto address, boolean published, Picture picture,
                           double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                          boolean available, double rent, double deposit, double rooms, UUID publisherID) {
-        this.id = id;
-        this.creationDate = creationDate;
+                          boolean available, double rent, double deposit, double rooms) {
         this.name = name;
         this.description = description;
         this.address = address;
@@ -75,16 +73,14 @@ public class ListingPostDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
-    public ListingPostDto(UUID id, Date creationDate, String name, String description,
-                          Location address, boolean published, List<Picture> pictures,
+    public ListingPostDto(String name, String description,
+                          LocationDto address, boolean published, List<Picture> pictures,
                           double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                          boolean available, double rent, double deposit, double rooms, UUID publisherID) {
-        this.id = id;
-        this.creationDate = creationDate;
+                          boolean available, double rent, double deposit, double rooms) {
         this.name = name;
         this.description = description;
         this.address = address;
@@ -104,7 +100,7 @@ public class ListingPostDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     public UUID getId() {
@@ -139,11 +135,11 @@ public class ListingPostDto implements Serializable {
         this.description = description;
     }
 
-    public Location getAddress() {
+    public LocationDto getAddress() {
         return address;
     }
 
-    public void setAddress(Location address) {
+    public void setAddress(LocationDto address) {
         this.address = address;
     }
 
@@ -234,11 +230,11 @@ public class ListingPostDto implements Serializable {
         this.rooms = rooms;
     }
 
-    public UUID getPublisher() {
-        return publisherID;
+    /*public UserGetDto getPublisher() {
+        return publisher;
     }
 
-    public void setPublisher(UUID publisherID) {
-        this.publisherID = publisherID;
-    }
+    public void setPublisher(UserGetDto publisher) {
+        this.publisher = publisher;
+    }*/
 }

@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,13 +16,14 @@ public class ListingGetDto implements Serializable {
 
     private UUID id;
 
+    @JsonProperty("creation_date")
     private Date creationDate;
 
     private String name;
 
     private String description;
 
-    private Location address;
+    private LocationDto address;
 
     private boolean published;
 
@@ -43,7 +45,7 @@ public class ListingGetDto implements Serializable {
 
     private double rooms;
 
-    private UUID publisherID;
+    //private UserGetDto publisher;
 
 
     public ListingGetDto() {
@@ -52,9 +54,9 @@ public class ListingGetDto implements Serializable {
 
     // Constructor for single picture
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
-                         Location address, boolean published, Picture picture,
+                         LocationDto address, boolean published, Picture picture,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                         boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -76,14 +78,14 @@ public class ListingGetDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
-                         Location address, boolean published, List<Picture> pictures,
+                         LocationDto address, boolean published, List<Picture> pictures,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                         boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -105,61 +107,132 @@ public class ListingGetDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     public UUID getId() {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public Date getCreationDate() {
         return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    public Location getAddress() {
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocationDto getAddress() {
         return address;
+    }
+
+    public void setAddress(LocationDto address) {
+        this.address = address;
     }
 
     public boolean getPublished() {
         return published;
     }
 
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
     public List<Picture> getPictures() {
         return pictures != null ? Collections.unmodifiableList(pictures) : new ArrayList<Picture>();
+    }
+
+    // overloading methods to be able to add single pictures or collections of pictures
+    public void addPicture(Picture picture) {
+        this.pictures.add(picture);
+    }
+
+    public void addPicture(List<Picture> pictures) {
+        this.pictures.addAll(pictures);
+    }
+
+    public void removePicture(Picture picture) {
+        this.pictures.remove(picture);
+    }
+
+    public void removePicture(List<Picture> pictures) {
+        this.pictures.removeAll(pictures);
     }
 
     public double getSqm() {
         return sqm;
     }
 
+    public void setSqm(double sqm) {
+        this.sqm = sqm;
+    }
+
     public ListingType getListingtype() {
         return listingtype;
+    }
+
+    public void setListingtype(ListingType listingtype) {
+        this.listingtype = listingtype;
     }
 
     public boolean getFurnished() {
         return furnished;
     }
 
+    public void setFurnished(boolean furnished) {
+        this.furnished = furnished;
+    }
+
     public List<Gender> getAvailableTo() {
         return availableTo != null ? Collections.unmodifiableList(availableTo) : new ArrayList<Gender>();
     }
 
-    public boolean getAvailable() { return available; }
+    public void setAvailableTo(List<Gender> availableTo) {
+        this.availableTo = availableTo;
+    }
+
+    public boolean getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     public double getRent() {
         return rent;
     }
 
+    public void setRent(double rent) {
+        this.rent = rent;
+    }
+
     public double getDeposit() {
         return deposit;
+    }
+
+    public void setDeposit(double deposit) {
+        this.deposit = deposit;
     }
 
     public double getRooms() {
@@ -170,10 +243,11 @@ public class ListingGetDto implements Serializable {
         this.rooms = rooms;
     }
 
-    public UUID getPublisher() {
-        return publisherID;
+    /*public UserGetDto getPublisher() {
+        return publisher;
     }
-    public void setPublisher(UUID publisherID) {
-        this.publisherID = publisherID;
-    }
+
+    public void setPublisher(UserGetDto publisher) {
+        this.publisher = publisher;
+    }*/
 }

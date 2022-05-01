@@ -33,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
     public @NotNull Listing createListing(Listing newListing) {
         checkIfDataIsValid(newListing, true);
+        newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
@@ -41,8 +42,8 @@ import org.springframework.web.server.ResponseStatusException;
         return newListing;
     }
 
-    public @NotNull Optional<Listing> findListingID(UUID id) {
-        return listingRepository.findById(id);
+    public @NotNull Optional<Listing> findListingById(UUID uuid) {
+        return listingRepository.findById(uuid);
     }
 
 
@@ -52,6 +53,7 @@ import org.springframework.web.server.ResponseStatusException;
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
 
         // update details
+        //TODO: throw correct errors
         if (listingInput.getName() != null) {
             updatedListing.setName(listingInput.getName());
         }
@@ -109,10 +111,10 @@ import org.springframework.web.server.ResponseStatusException;
         if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
         }
-
+        /*
         if (listingInput.getPublisher() != null) {
             updatedListing.setPublisher(listingInput.getPublisher());
-        }
+        }*/
 
         return listingRepository.saveAndFlush(updatedListing);
     }

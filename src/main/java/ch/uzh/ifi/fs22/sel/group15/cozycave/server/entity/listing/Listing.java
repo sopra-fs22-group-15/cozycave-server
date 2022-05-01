@@ -6,6 +6,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import com.google.common.collect.ImmutableList;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
 public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(type = "uuid-char")
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -70,8 +72,9 @@ public class Listing {
     @Column(name = "rooms")
     private double rooms;
 
-    @Column(name = "publisher_id")
-    private UUID publisherID;
+    /*@OneToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "publisher_id", nullable = false, unique = true)
+    private User publisher;*/
 
     public Listing() {
 
@@ -81,7 +84,7 @@ public class Listing {
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, Picture picture,
                    double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                   boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                   boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -103,14 +106,14 @@ public class Listing {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, List<Picture> pictures,
                    double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                   boolean available, double rent, double deposit, double rooms, UUID publisherID) {
+                   boolean available, double rent, double deposit, double rooms) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -132,7 +135,7 @@ public class Listing {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        this.publisherID = publisherID;
+        //this.publisher = publisher;
     }
 
     public UUID getId() {
@@ -262,10 +265,10 @@ public class Listing {
         this.rooms = rooms;
     }
 
-    public UUID getPublisher() {
-        return publisherID;
+    /*public User getPublisher() {
+        return publisher;
     }
-    public void setPublisher(UUID publisherID) {
-        this.publisherID = publisherID;
-    }
+    public void setPublisher(User publisher) {
+        this.publisher = publisher;
+    }*/
 }
