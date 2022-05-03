@@ -49,7 +49,7 @@ import javax.persistence.EntityNotFoundException;
         return this.userRepository.findAll();
     }
 
-    public @NotNull User createUser(User newUser, Location address, User createdBy) {
+    public @NotNull User createUser(User newUser, User createdBy) {
         log.debug("creating user {}", newUser);
 
         newUser.setId(null);
@@ -86,7 +86,7 @@ import javax.persistence.EntityNotFoundException;
         checkIfUserAlreadyExists(newUser);
         checkIfDataIsValid(newUser, true);
 
-        address = locationRepository.saveAndFlush(address);
+        Location address = locationRepository.saveAndFlush(newUser.getDetails().getAddress());
         newUser.getDetails().setAddress(address);
 
         newUser = userRepository.saveAndFlush(newUser);

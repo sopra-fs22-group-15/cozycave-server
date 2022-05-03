@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.LocationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingPutDto;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +40,12 @@ import org.springframework.web.server.ResponseStatusException;
         return this.listingRepository.findAll();
     }
 
-    public @NotNull Listing createListing(Listing newListing, Location address, UUID publisherID) {
+    public @NotNull Listing createListing(Listing newListing, UUID publisherID) {
         checkIfDataIsValid(newListing, true);
         newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
-        address = locationRepository.save(address);
+        Location address = locationRepository.save(newListing.getAddress());
+        locationRepository.flush();
         newListing.setAddress(address);
 
         if (userRepository.getOne(publisherID) != null && publisherID != null) {
@@ -63,8 +65,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 
-    public @NotNull Listing updateListing(Listing listingInput) {
-        Listing updatedListing = listingRepository.findById(listingInput.getId())
+    public @NotNull Listing updateListing(Listing listing, ListingPutDto listingInput) {
+        Listing updatedListing = listingRepository.findById(listing.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
 
         // update details
@@ -78,7 +80,18 @@ import org.springframework.web.server.ResponseStatusException;
         }
 
         if (listingInput.getAddress() != null) {
-            updatedListing.setAddress(listingInput.getAddress());
+            Location address = new Location(
+                    listingInput.getName(),
+                    listingInput.getName(),
+                    listingInput.getAddress().getStreet(),
+                    listingInput.getAddress().getHouseNumber(),
+                    listingInput.getAddress().getApartmentNumber(),
+                    listingInput.getAddress().getZipCode(),
+                    listingInput.getAddress().getCity(),
+                    listingInput.getAddress().getCountry()
+            );
+            address = locationRepository.save(address);
+            updatedListing.setAddress(address);
         }
 
         if (listingInput.getPictures() != null) {
@@ -126,10 +139,10 @@ import org.springframework.web.server.ResponseStatusException;
         if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
         }
-        /*
-        if (listingInput.getPublisher() != null) {
-            updatedListing.setPublisher(listingInput.getPublisher());
-        }*/
+
+        if (listingInput.getPublisher() != null && userRepository.getOne(listingInput.getPublisher()) != null) {
+            updatedListing.setPublisher(userRepository.getOne(listingInput.getPublisher()));
+        }
 
         return listingRepository.saveAndFlush(updatedListing);
     }

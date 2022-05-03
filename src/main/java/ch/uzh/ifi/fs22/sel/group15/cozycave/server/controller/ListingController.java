@@ -55,7 +55,6 @@ public class ListingController {
 
         Location address = null;
 
-        // TODO: set descripotion and name of location to name of listing
         if (listingPostDto.getAddress() != null) {
             address = new Location(
                     listingPostDto.getName(),
@@ -76,7 +75,7 @@ public class ListingController {
                 null,
                 listingPostDto.getName(),
                 listingPostDto.getDescription(),
-                null,
+                address,
                 listingPostDto.getPublished(),
                 listingPostDto.getPictures(),
                 listingPostDto.getSqm(),
@@ -88,7 +87,6 @@ public class ListingController {
                 listingPostDto.getDeposit(),
                 listingPostDto.getRooms(),
                 null),
-                address,
                 listingPostDto.getPublisher()
         );
 
@@ -115,16 +113,24 @@ public class ListingController {
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
-        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+        //Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
 
-        return ListingMapper.INSTANCE.listingToListingGetDto(listingService.updateListing(listingInput));
+        //return ListingMapper.INSTANCE.listingToListingGetDto(listingService.updateListing(listingInput));
+
+        Listing listingInput = listingService.updateListing(listing, listingPutDto);
+
+        return ListingMapper.INSTANCE.listingToListingGetDto(listingInput);
     }
 
     // delete a specific listing
     @DeleteMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
-        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+        //Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+
+        Listing listingInput = listingService.findListingById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
         listingService.deleteListing(listingInput);
     }
