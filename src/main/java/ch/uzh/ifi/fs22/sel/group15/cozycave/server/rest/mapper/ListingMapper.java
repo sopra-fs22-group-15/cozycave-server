@@ -32,13 +32,13 @@ public interface ListingMapper {
     //ListingPostDto listingPostDto(Listing listing);
 
     // PUT DTO MAPPER
-    Listing listingPutDtoToListing(ListingPutDto listingPutDto);
+    //Listing listingPutDtoToListing(ListingPutDto listingPutDto);
 
-    ListingPutDto listingToListingPutDto(Listing listing);
+    //ListingPutDto listingToListingPutDto(Listing listing);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    /*@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateListingFromListingPutDto(
-            ListingPutDto listingPutDto, @MappingTarget Listing listing);
+            ListingPutDto listingPutDto, @MappingTarget Listing listing);*/
 
 
 }

@@ -91,10 +91,10 @@ public class AuthenticationController {
                 userPostPutDto.getDetails().getLastname(),
                 userPostPutDto.getDetails().getGender(),
                 userPostPutDto.getDetails().getBirthday(),
-                null,
+                address,
                 userPostPutDto.getDetails().getBiography()
             )
-        ), address, null);
+        ), null);
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 
