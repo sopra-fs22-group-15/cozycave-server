@@ -5,8 +5,10 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import com.google.common.collect.ImmutableList;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.util.*;
@@ -31,6 +33,8 @@ public class Listing {
     private String description;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
+    @NotFound(
+            action = NotFoundAction.IGNORE)
     @JoinColumn(name = "location_id")
     private Location address;
 
@@ -72,9 +76,11 @@ public class Listing {
     @Column(name = "rooms")
     private double rooms;
 
-    /*@OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "publisher_id", nullable = false, unique = true)
-    private User publisher;*/
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @NotFound(
+            action = NotFoundAction.IGNORE)
+    @JoinColumn(name = "publisher_id")
+    private @NotNull User publisher;
 
     public Listing() {
 
@@ -84,7 +90,7 @@ public class Listing {
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, Picture picture,
                    double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                   boolean available, double rent, double deposit, double rooms) {
+                   boolean available, double rent, double deposit, double rooms, User publisher) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -106,14 +112,14 @@ public class Listing {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public Listing(UUID id, Date creationDate, String name, String description,
                    Location address, boolean published, List<Picture> pictures,
                    double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                   boolean available, double rent, double deposit, double rooms) {
+                   boolean available, double rent, double deposit, double rooms, User publisher) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -135,7 +141,7 @@ public class Listing {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     public UUID getId() {
@@ -265,10 +271,10 @@ public class Listing {
         this.rooms = rooms;
     }
 
-    /*public User getPublisher() {
+    public User getPublisher() {
         return publisher;
     }
     public void setPublisher(User publisher) {
         this.publisher = publisher;
-    }*/
+    }
 }

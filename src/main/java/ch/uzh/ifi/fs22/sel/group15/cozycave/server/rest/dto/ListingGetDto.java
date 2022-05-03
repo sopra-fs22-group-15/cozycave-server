@@ -45,7 +45,7 @@ public class ListingGetDto implements Serializable {
 
     private double rooms;
 
-    //private UserGetDto publisher;
+    private UserGetDto publisher;
 
 
     public ListingGetDto() {
@@ -56,7 +56,7 @@ public class ListingGetDto implements Serializable {
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
                          LocationDto address, boolean published, Picture picture,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms) {
+                         boolean available, double rent, double deposit, double rooms, UserGetDto publisher) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -78,14 +78,14 @@ public class ListingGetDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public ListingGetDto(UUID id, Date creationDate, String name, String description,
                          LocationDto address, boolean published, List<Picture> pictures,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms) {
+                         boolean available, double rent, double deposit, double rooms, UserGetDto publisher) {
         this.id = id;
         this.creationDate = creationDate;
         this.name = name;
@@ -107,7 +107,7 @@ public class ListingGetDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     public UUID getId() {
@@ -243,11 +243,11 @@ public class ListingGetDto implements Serializable {
         this.rooms = rooms;
     }
 
-    /*public UserGetDto getPublisher() {
+    public UserGetDto getPublisher() {
         return publisher;
     }
 
     public void setPublisher(UserGetDto publisher) {
         this.publisher = publisher;
-    }*/
+    }
 }

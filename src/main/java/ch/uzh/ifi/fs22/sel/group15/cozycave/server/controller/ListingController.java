@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingPostDto;
@@ -50,10 +51,46 @@ public class ListingController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ListingGetDto createListing(@RequestBody ListingPostDto listingPostDto) {
-        Listing listingInput = ListingMapper.INSTANCE.listingPostDtoToListing(listingPostDto);
+        //Listing listingInput = ListingMapper.INSTANCE.listingPostDtoToListing(listingPostDto);
+
+        Location address = null;
+
+        // TODO: set descripotion and name of location to name of listing
+        if (listingPostDto.getAddress() != null) {
+            address = new Location(
+                    listingPostDto.getName(),
+                    listingPostDto.getName(),
+                    listingPostDto.getAddress().getStreet(),
+                    listingPostDto.getAddress().getHouseNumber(),
+                    listingPostDto.getAddress().getApartmentNumber(),
+                    listingPostDto.getAddress().getZipCode(),
+                    listingPostDto.getAddress().getCity(),
+                    listingPostDto.getAddress().getCountry()
+            );
+        }
 
         // TODO: User Authentication required to create listings?
-        Listing createdListing = listingService.createListing(listingInput);
+        //Listing createdListing = listingService.createListing(listingInput, address);
+        Listing createdListing = listingService.createListing(new Listing(
+                null,
+                null,
+                listingPostDto.getName(),
+                listingPostDto.getDescription(),
+                null,
+                listingPostDto.getPublished(),
+                listingPostDto.getPictures(),
+                listingPostDto.getSqm(),
+                listingPostDto.getListingtype(),
+                listingPostDto.getFurnished(),
+                listingPostDto.getAvailableTo(),
+                listingPostDto.getAvailable(),
+                listingPostDto.getRent(),
+                listingPostDto.getDeposit(),
+                listingPostDto.getRooms(),
+                null),
+                address,
+                listingPostDto.getPublisher()
+        );
 
         return ListingMapper.INSTANCE.listingToListingGetDto(createdListing);
     }

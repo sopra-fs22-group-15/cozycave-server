@@ -60,9 +60,9 @@ public class AuthenticationController {
         if (userPostPutDto.getDetails().getAddress() != null) {
             address = new Location(
                 userPostPutDto.getDetails().getAddress().getStreet(),
-                userPostPutDto.getDetails().getAddress().getStreetNumber(),
+                userPostPutDto.getDetails().getAddress().getHouseNumber(),
                 userPostPutDto.getDetails().getAddress().getZipCode(),
-                userPostPutDto.getDetails().getAddress().getVillage(),
+                userPostPutDto.getDetails().getAddress().getCity(),
                 userPostPutDto.getDetails().getAddress().getCountry()
             );
 
@@ -91,10 +91,10 @@ public class AuthenticationController {
                 userPostPutDto.getDetails().getLastname(),
                 userPostPutDto.getDetails().getGender(),
                 userPostPutDto.getDetails().getBirthday(),
-                address,
+                null,
                 userPostPutDto.getDetails().getBiography()
             )
-        ), null);
+        ), address, null);
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
@@ -7,6 +8,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.LocationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,19 +26,30 @@ import org.springframework.web.server.ResponseStatusException;
     private final Logger log = LoggerFactory.getLogger(ListingService.class);
 
     private final ListingRepository listingRepository;
+    private final LocationRepository locationRepository;
+    private final UserRepository userRepository;
 
-    @Autowired public ListingService(@Qualifier("listingRepository")ListingRepository listingRepository) {
+    @Autowired public ListingService(@Qualifier("listingRepository") ListingRepository listingRepository, LocationRepository locationRepository, UserRepository userRepository) {
         this.listingRepository = listingRepository;
+        this.locationRepository = locationRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Listing> getListings() {
         return this.listingRepository.findAll();
     }
 
-    public @NotNull Listing createListing(Listing newListing) {
+    public @NotNull Listing createListing(Listing newListing, Location address, UUID publisherID) {
         checkIfDataIsValid(newListing, true);
         newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
+        address = locationRepository.save(address);
+        newListing.setAddress(address);
+
+        if (userRepository.getOne(publisherID) != null && publisherID != null) {
+            newListing.setPublisher(userRepository.getOne(publisherID));
+        }
+
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
 
