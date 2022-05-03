@@ -27,9 +27,9 @@ public interface ListingMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateListingFromListingGetDto(ListingGetDto listingGetDto, @MappingTarget Listing listing);
 
-    Listing listingPostDtoToListing(ListingPostDto listingPostDto);
+    //Listing listingPostDtoToListing(ListingPostDto listingPostDto);
 
-    ListingPostDto listingPostDto(Listing listing);
+    //ListingPostDto listingPostDto(Listing listing);
 
     // PUT DTO MAPPER
     Listing listingPutDtoToListing(ListingPutDto listingPutDto);

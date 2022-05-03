@@ -53,7 +53,7 @@ public class UserController {
     public UserGetDto createUser(@RequestBody UserPostPutDto userPostPutDto) {
         User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
 
-        User createdUser = userService.createUser(userInput, null);
+        User createdUser = userService.createUser(userInput, userInput.getDetails().getAddress(),null);
 
         return UserMapper.INSTANCE.userToUserGetDto(createdUser);
     }

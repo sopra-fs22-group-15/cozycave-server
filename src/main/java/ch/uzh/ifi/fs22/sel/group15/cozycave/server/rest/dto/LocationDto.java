@@ -13,24 +13,27 @@ public class LocationDto implements Serializable {
     @JsonInclude(Include.NON_EMPTY)
     private String description;
     private String street;
-    @JsonProperty("street_number")
-    private String streetNumber;
+    @JsonProperty("house_number")
+    private String houseNumber;
+    @JsonProperty("apartment_number")
+    private String apartmentNumber;
     @JsonProperty("zip_code")
     private String zipCode;
-    private String village;
+    private String city;
     private String country;
 
     public LocationDto() {
     }
 
-    public LocationDto(String name, String description, String street, String streetNumber, String zipCode,
-        String village, String country) {
+    public LocationDto(String name, String description, String street, String houseNumber, String apartmentNumber, String zipCode,
+        String city, String country) {
         this.name = name;
         this.description = description;
         this.street = street;
-        this.streetNumber = streetNumber;
+        this.houseNumber = houseNumber;
+        this.apartmentNumber = apartmentNumber;
         this.zipCode = zipCode;
-        this.village = village;
+        this.city = city;
         this.country = country;
     }
 
@@ -58,12 +61,20 @@ public class LocationDto implements Serializable {
         this.street = street;
     }
 
-    public String getStreetNumber() {
-        return streetNumber;
+    public String getHouseNumber() {
+        return houseNumber;
     }
 
-    public void setStreetNumber(String streetNumber) {
-        this.streetNumber = streetNumber;
+    public void setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
+    }
+
+    public String getApartmentNumber() {
+        return apartmentNumber;
+    }
+
+    public void setApartmentNumber(String apartmentNumber) {
+        this.apartmentNumber = apartmentNumber;
     }
 
     public String getZipCode() {
@@ -74,12 +85,12 @@ public class LocationDto implements Serializable {
         this.zipCode = zipCode;
     }
 
-    public String getVillage() {
-        return village;
+    public String getCity() {
+        return city;
     }
 
-    public void setVillage(String village) {
-        this.village = village;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getCountry() {
@@ -102,15 +113,16 @@ public class LocationDto implements Serializable {
         return Objects.equals(this.name, entity.name) &&
             Objects.equals(this.description, entity.description) &&
             Objects.equals(this.street, entity.street) &&
-            Objects.equals(this.streetNumber, entity.streetNumber) &&
+            Objects.equals(this.houseNumber, entity.houseNumber) &&
+            Objects.equals(this.apartmentNumber, entity.apartmentNumber) &&
             Objects.equals(this.zipCode, entity.zipCode) &&
-            Objects.equals(this.village, entity.village) &&
+            Objects.equals(this.city, entity.city) &&
             Objects.equals(this.country, entity.country);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, street, streetNumber, zipCode, village, country);
+        return Objects.hash(name, description, street, houseNumber, apartmentNumber, zipCode, city, country);
     }
 
     @Override
@@ -119,9 +131,10 @@ public class LocationDto implements Serializable {
             "name = " + name + ", " +
             "description = " + description + ", " +
             "street = " + street + ", " +
-            "streetNumber = " + streetNumber + ", " +
+            "houseNumber = " + houseNumber + ", " +
+            "apartmentNumber = " + apartmentNumber + ", " +
             "zipCode = " + zipCode + ", " +
-            "village = " + village + ", " +
+            "village = " + city + ", " +
             "country = " + country + ")";
     }
 }

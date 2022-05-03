@@ -3,9 +3,11 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.LocationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.util.Date;
 import java.util.List;
@@ -30,13 +32,15 @@ import javax.persistence.EntityNotFoundException;
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
     private final PasswordEncoder passwordEncoder;
     private final UniversityDomains universityDomains;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository,
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, LocationRepository locationRepository,
         PasswordEncoder passwordEncoder, UniversityDomains universityDomains) {
         this.userRepository = userRepository;
+        this.locationRepository = locationRepository;
         this.passwordEncoder = passwordEncoder;
         this.universityDomains = universityDomains;
     }
@@ -45,7 +49,7 @@ import javax.persistence.EntityNotFoundException;
         return this.userRepository.findAll();
     }
 
-    public @NotNull User createUser(User newUser, User createdBy) {
+    public @NotNull User createUser(User newUser, Location address, User createdBy) {
         log.debug("creating user {}", newUser);
 
         newUser.setId(null);
@@ -81,6 +85,9 @@ import javax.persistence.EntityNotFoundException;
         // global checks
         checkIfUserAlreadyExists(newUser);
         checkIfDataIsValid(newUser, true);
+
+        address = locationRepository.saveAndFlush(address);
+        newUser.getDetails().setAddress(address);
 
         newUser = userRepository.saveAndFlush(newUser);
 

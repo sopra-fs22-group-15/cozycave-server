@@ -34,7 +34,7 @@ class UserServiceTest {
     // create test user before each setup
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
+        /*MockitoAnnotations.openMocks(this);
 
         Date dNow = new Date();
         UUID userId = UUID.randomUUID();
@@ -46,7 +46,7 @@ class UserServiceTest {
             "Simple Bioagraphy of the TestUser");
         testUser = new User(userId, dNow, testAuthenticationData, Role.STUDENT, testUserDetails);
 
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
+        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);*/
     }
 
     @Test
