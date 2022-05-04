@@ -40,17 +40,17 @@ import org.springframework.web.server.ResponseStatusException;
         return this.listingRepository.findAll();
     }
 
-    public @NotNull Listing createListing(Listing newListing, UUID publisherID) {
+    public @NotNull Listing createListing(Listing newListing) {
         checkIfDataIsValid(newListing, true);
         newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
         Location address = locationRepository.save(newListing.getAddress());
         locationRepository.flush();
         newListing.setAddress(address);
-
+        /*
         if (userRepository.getOne(publisherID) != null && publisherID != null) {
             newListing.setPublisher(userRepository.getOne(publisherID));
-        }
+        }*/
 
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
@@ -65,10 +65,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 
-    public @NotNull Listing updateListing(Listing listing, ListingPutDto listingInput) {
-        Listing updatedListing = listingRepository.findById(listing.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
-
+    public @NotNull Listing updateListing(Listing listingInput) {
+        Listing updatedListing = listingRepository.getOne(listingInput.getId());
         // update details
         //TODO: throw correct errors
         if (listingInput.getName() != null) {
@@ -90,12 +88,9 @@ import org.springframework.web.server.ResponseStatusException;
                     listingInput.getAddress().getCity(),
                     listingInput.getAddress().getCountry()
             );
-            address = locationRepository.save(address);
+            address = locationRepository.saveAndFlush(address);
+            locationRepository.delete(updatedListing.getAddress());
             updatedListing.setAddress(address);
-        }
-
-        if (listingInput.getPictures() != null) {
-            updatedListing.addPicture(listingInput.getPictures());
         }
 
         // prmitive type do not have null values and get initialized with 0
@@ -138,10 +133,6 @@ import org.springframework.web.server.ResponseStatusException;
         // prmitive type do not have null values and get initialized with 0
         if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
-        }
-
-        if (listingInput.getPublisher() != null && userRepository.getOne(listingInput.getPublisher()) != null) {
-            updatedListing.setPublisher(userRepository.getOne(listingInput.getPublisher()));
         }
 
         return listingRepository.saveAndFlush(updatedListing);
