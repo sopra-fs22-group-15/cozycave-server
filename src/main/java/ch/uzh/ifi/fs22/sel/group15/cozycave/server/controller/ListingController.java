@@ -115,12 +115,12 @@ public class ListingController {
     // delete a specific listing
     @DeleteMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
-        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+    public void deleteListing(@PathVariable UUID id) {
+        Listing listing = listingService.findListingById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
-        listingInput.setId(id);
-
-        listingService.deleteListing(listingInput);
+        listingService.deleteListing(listing);
     }
 
 }
