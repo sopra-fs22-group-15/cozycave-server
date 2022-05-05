@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -18,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UserController.class)
@@ -28,6 +30,11 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private AuthenticationManager authenticationManager;
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private User permittedTestUser;
     private User unpermittedTestUser;
