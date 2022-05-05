@@ -40,7 +40,7 @@ public class ListingPutDto implements Serializable {
 
     private double rooms;
 
-    //private UserGetDto publisher;
+    private UUID publisher;
 
 
     public ListingPutDto() {
@@ -51,7 +51,7 @@ public class ListingPutDto implements Serializable {
     public ListingPutDto(UUID id, String name, String description,
                          LocationDto address, boolean published, Picture picture,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms) {
+                         boolean available, double rent, double deposit, double rooms, UUID publisher) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -72,14 +72,14 @@ public class ListingPutDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     // Constructor for multiple Picture add
     public ListingPutDto(UUID id, String name, String description,
                          LocationDto address, boolean published, List<Picture> pictures,
                          double sqm, ListingType listingtype, boolean furnished, List<Gender> availableTo,
-                         boolean available, double rent, double deposit, double rooms) {
+                         boolean available, double rent, double deposit, double rooms, UUID publisher) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -100,7 +100,7 @@ public class ListingPutDto implements Serializable {
         this.rent = rent;
         this.deposit = deposit;
         this.rooms = rooms;
-        //this.publisher = publisher;
+        this.publisher = publisher;
     }
 
     public String getName() {
@@ -214,11 +214,11 @@ public class ListingPutDto implements Serializable {
         this.rooms = rooms;
     }
 
-    /*public UserGetDto getPublisher() {
+    public UUID getPublisher() {
         return publisher;
     }
 
-    public void setPublisher(UserGetDto publisher) {
+    public void setPublisher(UUID publisher) {
         this.publisher = publisher;
-    }*/
+    }
 }

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 
@@ -7,6 +8,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.LocationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingPutDto;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +27,13 @@ import org.springframework.web.server.ResponseStatusException;
     private final Logger log = LoggerFactory.getLogger(ListingService.class);
 
     private final ListingRepository listingRepository;
+    private final LocationRepository locationRepository;
+    private final UserRepository userRepository;
 
-    @Autowired public ListingService(@Qualifier("listingRepository")ListingRepository listingRepository) {
+    @Autowired public ListingService(@Qualifier("listingRepository") ListingRepository listingRepository, LocationRepository locationRepository, UserRepository userRepository) {
         this.listingRepository = listingRepository;
+        this.locationRepository = locationRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Listing> getListings() {
@@ -35,6 +44,14 @@ import org.springframework.web.server.ResponseStatusException;
         checkIfDataIsValid(newListing, true);
         newListing.setId(UUID.randomUUID());
         newListing.setCreationDate(new Date());
+        Location address = locationRepository.save(newListing.getAddress());
+        locationRepository.flush();
+        newListing.setAddress(address);
+        /*
+        if (userRepository.getOne(publisherID) != null && publisherID != null) {
+            newListing.setPublisher(userRepository.getOne(publisherID));
+        }*/
+
         newListing = listingRepository.save(newListing);
         listingRepository.flush();
 
@@ -49,9 +66,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 
     public @NotNull Listing updateListing(Listing listingInput) {
-        Listing updatedListing = listingRepository.findById(listingInput.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
-
+        Listing updatedListing = listingRepository.getOne(listingInput.getId());
         // update details
         //TODO: throw correct errors
         if (listingInput.getName() != null) {
@@ -63,11 +78,19 @@ import org.springframework.web.server.ResponseStatusException;
         }
 
         if (listingInput.getAddress() != null) {
-            updatedListing.setAddress(listingInput.getAddress());
-        }
-
-        if (listingInput.getPictures() != null) {
-            updatedListing.addPicture(listingInput.getPictures());
+            Location address = new Location(
+                    listingInput.getName(),
+                    listingInput.getName(),
+                    listingInput.getAddress().getStreet(),
+                    listingInput.getAddress().getHouseNumber(),
+                    listingInput.getAddress().getApartmentNumber(),
+                    listingInput.getAddress().getZipCode(),
+                    listingInput.getAddress().getCity(),
+                    listingInput.getAddress().getCountry()
+            );
+            address = locationRepository.saveAndFlush(address);
+            locationRepository.delete(updatedListing.getAddress());
+            updatedListing.setAddress(address);
         }
 
         // prmitive type do not have null values and get initialized with 0
@@ -111,10 +134,6 @@ import org.springframework.web.server.ResponseStatusException;
         if (listingInput.getRooms() >= 0) {
             updatedListing.setRooms(listingInput.getRooms());
         }
-        /*
-        if (listingInput.getPublisher() != null) {
-            updatedListing.setPublisher(listingInput.getPublisher());
-        }*/
 
         return listingRepository.saveAndFlush(updatedListing);
     }

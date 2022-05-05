@@ -28,14 +28,17 @@ public class Location {
     @Column(name = "street")
     private String street;
 
-    @Column(name = "street_number", nullable = false, length = 10)
-    private String streetNumber;
+    @Column(name = "house_number", nullable = false, length = 10)
+    private String houseNumber;
+
+    @Column(name = "apartment_number")
+    private String apartmentNumber;
 
     @Column(name = "zip_code", nullable = false)
     private String zipCode;
 
-    @Column(name = "village", nullable = false)
-    private String village;
+    @Column(name = "city", nullable = false)
+    private String city;
 
     @Column(name = "country", nullable = false)
     private String country;
@@ -43,35 +46,50 @@ public class Location {
     public Location() {
     }
 
-    public Location(String name, String description, String street, String streetNumber, String zipCode, String village, String country) {
+    public Location(String name, String description, String street, String houseNumber, String apartmentNumber, String zipCode, String city, String country) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.description = description;
         this.street = street;
-        this.streetNumber = streetNumber;
+        this.houseNumber = houseNumber;
+        this.apartmentNumber = apartmentNumber;
         this.zipCode = zipCode;
-        this.village = village;
+        this.city = city;
         this.country = country;
     }
 
-    public Location(String street, String streetNumber, String zipCode, String village, String country) {
+    // constructor without necessary fields
+    public Location(String street, String houseNumber, String zipCode, String city, String country) {
         this.id = UUID.randomUUID();
         this.street = street;
-        this.streetNumber = streetNumber;
+        this.houseNumber = houseNumber;
         this.zipCode = zipCode;
-        this.village = village;
+        this.city = city;
         this.country = country;
     }
 
-    public Location(UUID id, String name, String description, String street, String streetNumber, String zipCode,
-        String village, String country) {
+    // constructor without necessary fields
+    public Location(String street, String houseNumber, String apartmentNumber, String zipCode, String city, String country) {
+        this.id = UUID.randomUUID();
+        this.street = street;
+        this.houseNumber = houseNumber;
+        this.apartmentNumber = apartmentNumber;
+        this.zipCode = zipCode;
+        this.city = city;
+        this.country = country;
+    }
+
+    // constructor for all instance variables
+    public Location(UUID id, String name, String description, String street, String houseNumber, String apartmentNumber, String zipCode,
+        String city, String country) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.street = street;
-        this.streetNumber = streetNumber;
+        this.houseNumber = houseNumber;
+        this.apartmentNumber = apartmentNumber;
         this.zipCode = zipCode;
-        this.village = village;
+        this.city = city;
         this.country = country;
     }
 
@@ -107,12 +125,20 @@ public class Location {
         this.street = street;
     }
 
-    public String getStreetNumber() {
-        return streetNumber;
+    public String getHouseNumber() {
+        return houseNumber;
     }
 
-    public void setStreetNumber(String streetNumber) {
-        this.streetNumber = streetNumber;
+    public void setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
+    }
+
+    public String getApartmentNumber() {
+        return apartmentNumber;
+    }
+
+    public void setApartmentNumber(String apartmentNumber) {
+        this.apartmentNumber = apartmentNumber;
     }
 
     public String getZipCode() {
@@ -123,12 +149,12 @@ public class Location {
         this.zipCode = zipCode;
     }
 
-    public String getVillage() {
-        return village;
+    public String getCity() {
+        return city;
     }
 
-    public void setVillage(String village) {
-        this.village = village;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getCountry() {
@@ -145,9 +171,10 @@ public class Location {
             ", name='" + name + '\'' +
             ", description='" + description + '\'' +
             ", street='" + street + '\'' +
-            ", streetNumber='" + streetNumber + '\'' +
+            ", houseNumber='" + houseNumber + '\'' +
+            ", houseNumber='" + apartmentNumber + '\'' +
             ", zipCode=" + zipCode +
-            ", village='" + village + '\'' +
+            ", city='" + city + '\'' +
             ", country='" + country + '\'' +
             '}';
     }

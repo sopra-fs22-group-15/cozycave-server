@@ -1,14 +1,20 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listing.Listing;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingPostDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.ListingPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ListingMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,9 +36,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class ListingController {
 
     private final ListingService listingService;
+    private final UserService userService;
 
-    ListingController(ListingService listingService) {
+    ListingController(ListingService listingService, UserService userService) {
         this.listingService = listingService;
+        this.userService = userService;
     }
 
     // Get all listings in a list
@@ -52,7 +60,27 @@ public class ListingController {
     public ListingGetDto createListing(@RequestBody ListingPostDto listingPostDto) {
         Listing listingInput = ListingMapper.INSTANCE.listingPostDtoToListing(listingPostDto);
 
-        // TODO: User Authentication required to create listings?
+        Location address = null;
+
+        if (listingPostDto.getAddress() != null) {
+            address = new Location(
+                    listingPostDto.getName(),
+                    listingPostDto.getName(),
+                    listingPostDto.getAddress().getStreet(),
+                    listingPostDto.getAddress().getHouseNumber(),
+                    listingPostDto.getAddress().getApartmentNumber(),
+                    listingPostDto.getAddress().getZipCode(),
+                    listingPostDto.getAddress().getCity(),
+                    listingPostDto.getAddress().getCountry()
+            );
+        }
+
+        User userInput = userService.findUserID(listingPostDto.getPublisher())
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher couldn't be found with that Publisher ID."));
+
+        listingInput.setAddress(address);
+
         Listing createdListing = listingService.createListing(listingInput);
 
         return ListingMapper.INSTANCE.listingToListingGetDto(createdListing);
@@ -79,6 +107,7 @@ public class ListingController {
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
         Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+        listingInput.setId(id);
 
         return ListingMapper.INSTANCE.listingToListingGetDto(listingService.updateListing(listingInput));
     }
@@ -86,10 +115,12 @@ public class ListingController {
     // delete a specific listing
     @DeleteMapping("/listings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteListing(@PathVariable UUID id, @RequestBody ListingPutDto listingPutDto) {
-        Listing listingInput = ListingMapper.INSTANCE.listingPutDtoToListing(listingPutDto);
+    public void deleteListing(@PathVariable UUID id) {
+        Listing listing = listingService.findListingById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing couldn't be found with that listing ID."));
 
-        listingService.deleteListing(listingInput);
+        listingService.deleteListing(listing);
     }
 
 }
