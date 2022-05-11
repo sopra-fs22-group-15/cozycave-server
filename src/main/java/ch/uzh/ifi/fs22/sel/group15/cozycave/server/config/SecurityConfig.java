@@ -17,7 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+//TODO: fix global error handling -> not showing custom error message
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    public static final int PASSWORD_MIN_LENGTH = 8;
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -52,27 +55,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(
                 "/",
                 "/v1/auth/login",
+                "/v1/auth/login/",
                 "/v1/auth/register",
+                "/v1/auth/register/",
                 "/v1/listings",
+                "/v1/listings/",
                 "/v1/listings/{id}",
-                "/v1/pictures/{id}"
+                "/v1/listings/{id}/",
+                "/v1/pictures/{id}",
+                "/v1/pictures/{id}/"
             ).permitAll()
             .anyRequest().authenticated()
             .and()
             .formLogin().disable();
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-//        http
-//            .cors()
-//            .and()
-//            .csrf().disable()
-//            .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
-//            .and()
-//            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//            .and()
-//            .authorizeRequests().anyRequest().permitAll()
-//            .and()
-//            .formLogin().disable();
     }
 }

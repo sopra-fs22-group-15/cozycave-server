@@ -55,4 +55,12 @@ public enum Role {
             .map(SimpleGrantedAuthority::new)
             .collect(java.util.stream.Collectors.toList());
     }
+
+    public boolean isTeam() {
+        return greaterEquals(TEAM);
+    }
+
+    public boolean isUser() {
+        return lessEquals(STUDENT);
+    }
 }

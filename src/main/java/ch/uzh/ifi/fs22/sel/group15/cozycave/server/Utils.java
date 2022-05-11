@@ -20,14 +20,29 @@ public class Utils {
 
     public static String generateSalt(@Positive int length) {
         SecureRandom random = null;
+
         try {
             random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return (Math.random() * (SALT_LENGTH + 2) + "").substring(1, SALT_LENGTH + 1);
         }
+
         byte[] bytes = new byte[length];
         random.nextBytes(bytes);
 
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, SALT_LENGTH);
+    }
+
+    /**
+     * removes all special characters and white spaces, if they are at the front or back of the string. it also replaces
+     * all white spaces with a single space and checks if the string has no letters.
+     *
+     * @param str name
+     * @return the stripped version of the name
+     */
+    // TODO: change to also allow other languages characters
+    public static String stripNames(String str) {
+        return str.replaceAll("\\s+", " ").trim();
     }
 }

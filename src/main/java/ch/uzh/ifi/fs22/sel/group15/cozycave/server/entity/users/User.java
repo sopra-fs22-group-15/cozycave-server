@@ -1,12 +1,14 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,11 +27,9 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "picture")
+@Table(name = "users")
 @AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
-public class Picture {
-
-    public static final String ROOT_PATH = "https://sopra-fs22-group-15-server.herokuapp.com/pictures/";
+public class User implements Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,9 +41,17 @@ public class Picture {
     @Column(name = "creation_date", updatable = false)
     private Date creationDate;
 
-    @OneToOne(cascade = CascadeType.PERSIST, optional = false, orphanRemoval = true)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private User uploader;
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "authentication_data_id")
+    private AuthenticationData authenticationData;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "details_id", nullable = false, unique = true)
+    private UserDetails details;
 
     @Override
     public boolean equals(Object o) {
@@ -53,13 +61,23 @@ public class Picture {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Picture picture = (Picture) o;
-        return id != null && Objects.equals(id, picture.id);
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public User clone() {
+        return new User(
+            this.id,
+            this.creationDate,
+            this.authenticationData.clone(),
+            this.role,
+            this.details.clone()
+        );
     }
 
     @PrePersist

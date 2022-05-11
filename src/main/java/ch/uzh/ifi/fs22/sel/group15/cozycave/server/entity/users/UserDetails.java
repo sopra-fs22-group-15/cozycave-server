@@ -1,12 +1,15 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,11 +28,9 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "picture")
+@Table(name = "user_details")
 @AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
-public class Picture {
-
-    public static final String ROOT_PATH = "https://sopra-fs22-group-15-server.herokuapp.com/pictures/";
+public class UserDetails implements Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,13 +38,26 @@ public class Picture {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date", updatable = false)
-    private Date creationDate;
+    @Column(name = "firstname", nullable = false)
+    private String firstName;
 
-    @OneToOne(cascade = CascadeType.PERSIST, optional = false, orphanRemoval = true)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private User uploader;
+    @Column(name = "lastname", nullable = false)
+    private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = false)
+    private Gender gender;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "birthday")
+    private Date birthday;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id")
+    private Location address;
+
+    @Column(name = "about", columnDefinition = "TEXT")
+    private String about;
 
     @Override
     public boolean equals(Object o) {
@@ -53,8 +67,8 @@ public class Picture {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Picture picture = (Picture) o;
-        return id != null && Objects.equals(id, picture.id);
+        UserDetails that = (UserDetails) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
@@ -62,9 +76,20 @@ public class Picture {
         return getClass().hashCode();
     }
 
+    public UserDetails clone() {
+        return new UserDetails(
+            this.id,
+            this.firstName,
+            this.lastName,
+            this.gender,
+            (Date) this.birthday.clone(),
+            this.address.clone(),
+            about
+        );
+    }
+
     @PrePersist
     private void prePersist() {
         this.id = UUID.randomUUID();
-        this.creationDate = new Date();
     }
 }

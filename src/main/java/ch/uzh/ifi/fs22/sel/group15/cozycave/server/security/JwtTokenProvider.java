@@ -9,17 +9,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
-
-    private final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${cozycave.security.jwt.secret}")
     private String jwtSecret;

@@ -1,19 +1,22 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.config.SecurityConfig;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.LocationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +28,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityNotFoundException;
-
-@Service @Transactional public class UserService {
+@Service @Transactional
+@ToString @EqualsAndHashCode
+public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
-    private final LocationRepository locationRepository;
     private final PasswordEncoder passwordEncoder;
     private final UniversityDomains universityDomains;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, LocationRepository locationRepository,
-        PasswordEncoder passwordEncoder, UniversityDomains universityDomains) {
+    public UserService(
+        @Qualifier("userRepository") UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        UniversityDomains universityDomains) {
         this.userRepository = userRepository;
-        this.locationRepository = locationRepository;
         this.passwordEncoder = passwordEncoder;
         this.universityDomains = universityDomains;
     }
@@ -49,7 +52,7 @@ import javax.persistence.EntityNotFoundException;
         return this.userRepository.findAll();
     }
 
-    public @NotNull User createUser(User newUser, User createdBy) {
+    public @NotNull User createUser(@NotNull User newUser, @Nullable User createdBy) {
         log.debug("creating user {}", newUser);
 
         newUser.setId(null);
@@ -59,39 +62,14 @@ import javax.persistence.EntityNotFoundException;
         ad.setId(null);
         ad.setSalt(Utils.generateSalt());
 
-        if (StringUtils.hasText(ad.getPassword())
-            && ad.getPassword().length() < 8) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
-        }
+        newUser.getDetails().setId(null);
 
+        checkIfDataIsValid(newUser, createdBy);
         ad.setPassword(passwordEncoder.encode(ad.getPassword() + ad.getSalt()));
-
-        if (createdBy == null || newUser.getRole() == null) {
-            newUser.setRole(universityDomains
-                .matchesEmail(newUser.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
-        } else if (createdBy.getRole().lessEquals(Role.TEAM)
-            || createdBy.getRole().equals(Role.TEAM)
-            && newUser.getRole().greaterEquals(Role.TEAM)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
-        }
-
-        if (newUser.getRole().equals(Role.INTERNAL)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not permitted to set this role");
-        }
-
-        UserDetails ud = newUser.getDetails();
-        ud.setId(null);
-
-        // global checks
-        checkIfUserAlreadyExists(newUser);
-        checkIfDataIsValid(newUser, true);
-
-        Location address = locationRepository.saveAndFlush(newUser.getDetails().getAddress());
-        newUser.getDetails().setAddress(address);
 
         newUser = userRepository.saveAndFlush(newUser);
 
-        log.debug("created user {}", newUser);
+        log.info("created user {}", newUser);
         return newUser;
     }
 
@@ -103,133 +81,252 @@ import javax.persistence.EntityNotFoundException;
         return userRepository.findByAuthenticationData_Email(email);
     }
 
-    public @NotNull User updateUser(User userInput, User updatedBy) {
-        User updatedUser = userRepository.findById(userInput.getId())
+    public @NotNull User updateUser(@NotNull User userInput, @Nullable User updatedBy) {
+        log.debug("updating user with id: {}", userInput.getId());
+
+        User user = userRepository.findById(userInput.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        log.debug("updating user {}", updatedUser);
+        checkIfDataIsValid(userInput, updatedBy);
 
-        // update authentication data
-        if (updatedUser.getAuthenticationData() != null) {
-            // TODO: confirm email change by sending email with link to confirm
-            if (userInput.getAuthenticationData().getEmail() != null) {
+        User updatedUser = userRepository.saveAndFlush(user);
 
-                if (!Utils.checkValidEmail(userInput.getAuthenticationData().getEmail())) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
-                }
+        log.info("updated user with id: {}", updatedUser.getId());
 
-                updatedUser.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
-            }
-
-            if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
-                && userInput.getAuthenticationData().getPassword().length() > 8) {
-                updatedUser.getAuthenticationData().setPassword(
-                    passwordEncoder.encode(
-                        userInput.getAuthenticationData().getPassword()
-                            + updatedUser.getAuthenticationData().getSalt()
-                    )
-                );
-            } else if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())
-                && userInput.getAuthenticationData().getPassword().length() < 8) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
-            }
-
-            log.debug("updated user {}", updatedUser);
-        }
-
-        // update role
-        if ((updatedBy.getRole().equals(Role.TEAM)
-            && userInput.getRole().lessThan(Role.TEAM))
-            || updatedBy.getRole().equals(Role.ADMIN)) {
-            updatedUser.setRole(userInput.getRole());
-        }
-
-        // update details
-        if (userInput.getDetails() != null) {
-            if (userInput.getDetails().getFirstname() != null) {
-                updatedUser.getDetails().setFirstname(userInput.getDetails().getFirstname());
-            }
-
-            if (userInput.getDetails().getLastname() != null) {
-                updatedUser.getDetails().setLastname(userInput.getDetails().getLastname());
-            }
-
-            if (userInput.getDetails().getGender() != null) {
-                updatedUser.getDetails().setGender(userInput.getDetails().getGender());
-            }
-
-            if (userInput.getDetails().getBirthday() != null) {
-                updatedUser.getDetails().setBirthday(userInput.getDetails().getBirthday());
-            }
-
-            if (userInput.getDetails().getAddress() != null) {
-                // TODO: verify address, change role
-                updatedUser.getDetails().setAddress(userInput.getDetails().getAddress());
-            }
-
-            if (userInput.getDetails().getBiography() != null) {
-                updatedUser.getDetails().setBiography(userInput.getDetails().getBiography());
-            }
-
-            if (userInput.getDetails().getPicture() != null) {
-                updatedUser.getDetails().setPicture(userInput.getDetails().getPicture());
-            }
-        }
-
-        return userRepository.saveAndFlush(updatedUser);
+        return updatedUser;
     }
 
     public void deleteUser(User user) {
+        log.debug("deleting user with id: {}", user.getId());
+
         userRepository.delete(user);
+
+        log.info("deleted user with id: {}", user.getId());
     }
 
     public void deleteUser(UUID uuid) {
-        userRepository.delete(userRepository.findById(uuid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")));
+        log.debug("deleting user with id: {}", uuid);
+
+        userRepository.deleteById(uuid);
+
+        log.info("deleted user with id: {}", uuid);
     }
 
-    private void checkIfUserAlreadyExists(User userToBeCreated) {
-        Optional<User> userByEmail = userRepository.findByAuthenticationData_Email(
-            userToBeCreated.getAuthenticationData().getEmail());
-
-        if (userByEmail.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "a user with this email already exists");
-        }
+    public boolean existsUser(UUID uuid) {
+        return userRepository.existsById(uuid);
     }
 
-    //TODO: add more checks if required
-    private void checkIfDataIsValid(User userToBeCreated, boolean mandatoryFieldsAreFilled) {
-        if (userToBeCreated.getAuthenticationData() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "authentication data is missing");
+    public boolean existsUser(String email) {
+        return userRepository.existsByAuthenticationData_Email(email);
+    }
+
+    private @NotNull User mergeUser(@NotNull User user, @NotNull User userInput) {
+        user = user.clone();
+
+        if (user.getId() != userInput.getId()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error when merging users");
         }
-        AuthenticationData ad = userToBeCreated.getAuthenticationData();
 
-        if (userToBeCreated.getDetails() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "details are missing");
+        if (userInput.getAuthenticationData() != null) {
+            if (StringUtils.hasText(userInput.getAuthenticationData().getEmail())) {
+                user.getAuthenticationData().setEmail(userInput.getAuthenticationData().getEmail());
+            }
+
+            if (StringUtils.hasText(userInput.getAuthenticationData().getPassword())) {
+                user.getAuthenticationData().setPassword(userInput.getAuthenticationData().getPassword());
+            }
         }
 
-        UserDetails details = userToBeCreated.getDetails();
+        if (userInput.getRole() != null) {
+            user.setRole(userInput.getRole());
+        }
 
-        if (mandatoryFieldsAreFilled) {
-            if (!Utils.checkValidEmail(ad.getEmail())) {
+        if (userInput.getDetails() != null) {
+            if (StringUtils.hasText(userInput.getDetails().getFirstName())) {
+                user.getDetails().setFirstName(userInput.getDetails().getFirstName());
+            }
+
+            if (StringUtils.hasText(userInput.getDetails().getLastName())) {
+                user.getDetails().setLastName(userInput.getDetails().getLastName());
+            }
+
+            if (userInput.getDetails().getGender() != null) {
+                user.getDetails().setGender(userInput.getDetails().getGender());
+            }
+
+            if (userInput.getDetails().getBirthday() != null) {
+                user.getDetails().setBirthday(userInput.getDetails().getBirthday());
+            }
+
+            if (userInput.getDetails().getAddress() != null) {
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getName())) {
+                    user.getDetails().getAddress().setName(userInput.getDetails().getAddress().getName());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getDescription())) {
+                    user.getDetails().getAddress().setDescription(userInput.getDetails().getAddress().getDescription());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getStreet())) {
+                    user.getDetails().getAddress().setStreet(userInput.getDetails().getAddress().getStreet());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getHouseNumber())) {
+                    user.getDetails().getAddress().setHouseNumber(userInput.getDetails().getAddress().getHouseNumber());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getApartmentNumber())) {
+                    user.getDetails().getAddress()
+                        .setApartmentNumber(userInput.getDetails().getAddress().getApartmentNumber());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getZipCode())) {
+                    user.getDetails().getAddress().setZipCode(userInput.getDetails().getAddress().getZipCode());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getCity())) {
+                    user.getDetails().getAddress().setCity(userInput.getDetails().getAddress().getCity());
+                }
+
+                if (StringUtils.hasText(userInput.getDetails().getAddress().getCountry())) {
+                    user.getDetails().getAddress().setCountry(userInput.getDetails().getAddress().getCountry());
+                }
+            }
+
+            if (StringUtils.hasText(userInput.getDetails().getAbout())) {
+                user.getDetails().setAbout(userInput.getDetails().getAbout());
+            }
+        }
+
+        return user;
+    }
+
+    private void checkIfDataIsValid(@NotNull User user, @Nullable User executedBy) {
+        if (user.getAuthenticationData() == null
+            || user.getDetails() == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "user wrongly built");
+        }
+
+        Optional<User> userWithSameEmail = userRepository.findByAuthenticationData_Email(
+            user.getAuthenticationData().getEmail());
+        Optional<User> userWithSameId = user.getId() != null ? userRepository.findById(user.getId()) : Optional.empty();
+        boolean userAlreadyExists = userWithSameId.isPresent();
+
+        if (executedBy != null) {
+            if (executedBy.getId() != user.getId()
+                && !executedBy.getRole().isTeam()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user");
+            }
+        }
+
+        if (!userAlreadyExists) {
+            if (user.getAuthenticationData().getEmail() == null
+                || user.getAuthenticationData().getPassword() == null
+                || user.getDetails().getFirstName() == null
+                || user.getDetails().getLastName() == null
+                || user.getDetails().getGender() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "mandatory fields must be filled");
+            }
+        }
+
+        // AUTHENTICATION DATA MANAGEMENT
+        if (StringUtils.hasText(user.getAuthenticationData().getEmail())) {
+            if (!Utils.checkValidEmail(user.getAuthenticationData().getEmail())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
             }
 
-            if (!StringUtils.hasText(ad.getPassword())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is missing");
+            if (userWithSameEmail.isPresent() && userWithSameEmail.get().getId() != user.getId()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "email already in use");
             }
 
-            if (!StringUtils.hasText(details.getFirstname())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstname is missing");
-            }
-
-            if (!StringUtils.hasText(details.getLastname())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lastname is missing");
+            if (userAlreadyExists) {
+                if (!user.getRole().isTeam()) {
+                    user.setRole(universityDomains.matchesEmail(
+                        user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+                }
             }
         }
 
-        if (details.getBirthday() != null && details.getBirthday().after(new Date())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday is invalid");
+        if (StringUtils.hasText(user.getAuthenticationData().getPassword())) {
+            if (user.getAuthenticationData().getPassword().length() < SecurityConfig.PASSWORD_MIN_LENGTH) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is too short");
+            }
+        }
+
+        // ROLE MANAGEMENT
+        // internal execution or same user
+        if (executedBy == null
+            || executedBy != null && executedBy.getId() == user.getId()) {
+            // user already exists
+            if (userAlreadyExists) {
+                // user has new role
+                if (userWithSameId.get().getRole() != user.getRole()) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you cannot set your own role");
+                }
+            } else {
+                // user does not exist
+                user.setRole(universityDomains.matchesEmail(
+                    user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+            }
+        } else if (executedBy != null && executedBy.getId() != user.getId()) {
+            // other user executing
+            // executor is a user
+            if (!executedBy.getRole().isTeam()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user");
+            } else if (executedBy.getRole().isTeam()) {
+                // executor is a team
+                // executor is not an admin
+                if (executedBy.getRole().lessThan(Role.ADMIN)) {
+                    // new role is a team role
+                    if (user.getRole().isTeam()) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you can not set this role");
+                    }
+                }
+            }
+        }
+
+        // DETAILS MANAGEMENT
+        if (user.getDetails().getFirstName() != null) {
+            if (Utils.stripNames(user.getDetails().getFirstName()).length() == 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid first name");
+            }
+
+            if (Utils.stripNames(user.getDetails().getFirstName()).length() > 255) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "first name is too long");
+            }
+
+            user.getDetails().setFirstName(user.getDetails().getFirstName().trim());
+        }
+
+        if (user.getDetails().getLastName() != null) {
+            if (Utils.stripNames(user.getDetails().getLastName()).length() == 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid last name");
+            }
+
+            if (Utils.stripNames(user.getDetails().getLastName()).length() > 255) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "last name is too long");
+            }
+
+            user.getDetails().setLastName(user.getDetails().getLastName().trim());
+        }
+
+        //TODO: should user has to be 16?
+        if (user.getDetails().getBirthday().after(
+            Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
+        )) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "you are too young");
+        }
+
+        if (user.getDetails().getAddress() != null) {
+            if (!user.getDetails().getAddress().isValid()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "address is not valid");
+            }
+        }
+
+        if (StringUtils.hasText(user.getDetails().getAbout())) {
+            if (user.getDetails().getAbout().length() > 65535) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "about is too long");
+            }
         }
     }
 }

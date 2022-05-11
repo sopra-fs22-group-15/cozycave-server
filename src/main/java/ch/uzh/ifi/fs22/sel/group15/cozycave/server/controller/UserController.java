@@ -1,14 +1,16 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/v1")
+@Slf4j
 //TODO: add role filtering
 public class UserController {
 
@@ -32,7 +35,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Get all users in a list
+    // get all users in a list
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -46,11 +49,20 @@ public class UserController {
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    //TODO: update
-    public UserGetDto createUser(@RequestBody UserPostPutDto userPostPutDto) {
+    public UserGetDto createUser(
+        @AuthenticationPrincipal String authUserId,
+        @RequestBody UserPostPutDto userPostPutDto
+    ) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+            .orElseThrow(() -> {
+                log.error("user (authenticated user) with id {} not found while creating user", authUserId);
+                return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "error finding authenticated user");
+            });
+
         User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
 
-        User createdUser = userService.createUser(userInput, null);
+        User createdUser = userService.createUser(userInput, authUser);
 
         return UserMapper.INSTANCE.userToUserGetDto(createdUser);
     }
@@ -62,34 +74,51 @@ public class UserController {
     public UserGetDto findUser(@PathVariable UUID id) {
         return userService.findUserID(id)
             .map(UserMapper.INSTANCE::userToUserGetDto)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
+            .orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "user with id " + id + " not found"));
     }
 
     // update specific user
     @PutMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetDto updateUser(@PathVariable UUID id, @RequestBody UserPostPutDto userPostPutDto) {
-        User user = userService.findUserID(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
+    public UserGetDto updateUser(
+        @AuthenticationPrincipal String authUserId,
+        @PathVariable UUID id,
+        @RequestBody UserPostPutDto userPostPutDto
+    ) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+            .orElseThrow(() -> {
+                log.error("user (authenticated user) with id {} not found while updating user", authUserId);
+                return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "error finding authenticated user");
+            });
+
+        if (!userService.existsUser(id)) {
+            log.debug("user with id {} not found while updating user", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user with id " + id + " not found");
+        }
 
         User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
+        userInput.setId(id);
 
-        // TODO: change to updating user by using token
-        return UserMapper.INSTANCE.userToUserGetDto(userService.updateUser(user, userInput));
+        User updatedUser = userService.updateUser(userInput, authUser);
+
+        return UserMapper.INSTANCE.userToUserGetDto(updatedUser);
     }
 
     // delete a specific user
     @DeleteMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable UUID id) {
-        User user = userService.findUserID(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User couldn't be found with that user ID."));
+        if (!userService.existsUser(id)) {
+            log.debug("user with id {} not found while deleting user", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user with id " + id + " not found");
+        }
 
-        userService.deleteUser(user);
+        userService.deleteUser(id);
+
+        log.info("listing with id {} deleted", id);
     }
 
 }

@@ -1,5 +1,18 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -37,39 +50,46 @@ public class Application {
         };
     }
 
-    /*
     @Bean
-    public CommandLineRunner createTestData(UserService userService) {
+    public CommandLineRunner createTestData(UserService userService,
+        UniversityDomains universityDomains,
+        @Value("${cozycave.debug.create_test_user}") boolean createTestUser) {
         return args -> {
+            if (!createTestUser) {
+                return;
+            }
+
             userService.createUser(new User(
-                UUID.randomUUID(),
-                new Date(),
+                null,
+                null,
                 new AuthenticationData(
-                    UUID.randomUUID(),
-                    "test2@uzh.ch",
-                    "hashedPassword",
-                    "SaLt2",
-                    "no token"
+                    null,
+                    "test@uzh.ch",
+                    "password",
+                    null
                 ),
-                Role.STUDENT,
+                null,
                 new UserDetails(
                     UUID.randomUUID(),
                     "Erika",
                     "Mustermann",
                     Gender.FEMALE,
-                    new Date(),
+                    Date.from(Instant.now().minus(9000, ChronoUnit.DAYS)),
                     new Location(
+                        null,
+                        null,
+                        null,
                         "Hauptstrasse",
                         "24",
-                        5312,
+                        null,
+                        "5312",
                         "Döttingen",
+                        "Aargau",
                         "Switzerland"
                     ),
-                    "bio",
-                    null
+                    "bio"
                 )
-            ));
+            ), null);
         };
     }
-    */
 }
