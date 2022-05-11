@@ -87,6 +87,7 @@ public class Application {
                         "Aargau",
                         "Switzerland"
                     ),
+                    "+41791234567",
                     "bio"
                 )
             ), null);

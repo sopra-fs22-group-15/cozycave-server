@@ -56,6 +56,10 @@ public class UserGetDto implements Serializable {
         private LocationDto address;
 
         @JsonInclude(Include.NON_EMPTY)
+        @JsonProperty("phone_number")
+        private String phoneNumber;
+
+        @JsonInclude(Include.NON_EMPTY)
         private String biography;
     }
 }

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import java.util.Date;
@@ -16,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -56,6 +58,9 @@ public class UserDetails implements Cloneable {
     @JoinColumn(name = "location_id")
     private Location address;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "about", columnDefinition = "TEXT")
     private String about;
 
@@ -84,6 +89,7 @@ public class UserDetails implements Cloneable {
             this.gender,
             (Date) this.birthday.clone(),
             this.address.clone(),
+            phoneNumber,
             about
         );
     }
@@ -91,5 +97,16 @@ public class UserDetails implements Cloneable {
     @PrePersist
     private void prePersist() {
         this.id = UUID.randomUUID();
+
+        if (this.phoneNumber != null) {
+            this.phoneNumber = Utils.stripPhoneNumber(this.phoneNumber);
+        }
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        if (this.phoneNumber != null) {
+            this.phoneNumber = Utils.stripPhoneNumber(this.phoneNumber);
+        }
     }
 }

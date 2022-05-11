@@ -323,6 +323,14 @@ public class UserService {
             }
         }
 
+        if (user.getDetails().getPhoneNumber() != null) {
+            if (!Utils.isPhoneNumberValid(user.getDetails().getPhoneNumber())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid phone number");
+            }
+
+            user.getDetails().setPhoneNumber(Utils.stripPhoneNumber(user.getDetails().getPhoneNumber()));
+        }
+
         if (StringUtils.hasText(user.getDetails().getAbout())) {
             if (user.getDetails().getAbout().length() > 65535) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "about is too long");

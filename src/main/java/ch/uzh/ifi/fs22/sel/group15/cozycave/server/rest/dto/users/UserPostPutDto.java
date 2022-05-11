@@ -43,6 +43,9 @@ public class UserPostPutDto implements Serializable {
 
         private LocationDto address;
 
+        @JsonProperty("phone_number")
+        private String phoneNumber;
+
         private String biography;
     }
 }

@@ -45,4 +45,19 @@ public class Utils {
     public static String stripNames(String str) {
         return str.replaceAll("\\s+", " ").trim();
     }
+
+    /**
+     * only allows numbers and a + at the front
+     *
+     * @param str of the phone number
+     * @return the stripped phone number
+     */
+    public static String stripPhoneNumber(String str) {
+        return str.replaceAll("[^+\\d]", "");
+    }
+
+    // TODO: validate the phone number
+    public static boolean isPhoneNumberValid(String str) {
+        return true;
+    }
 }
