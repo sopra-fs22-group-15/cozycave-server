@@ -87,9 +87,11 @@ public class UserService {
         User user = userRepository.findById(userInput.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        checkIfDataIsValid(userInput, updatedBy);
+        User mergedUser = mergeUser(user, userInput);
 
-        User updatedUser = userRepository.saveAndFlush(user);
+        checkIfDataIsValid(mergedUser, updatedBy);
+
+        User updatedUser = userRepository.saveAndFlush(mergedUser);
 
         log.info("updated user with id: {}", updatedUser.getId());
 
@@ -123,7 +125,7 @@ public class UserService {
     private @NotNull User mergeUser(@NotNull User user, @NotNull User userInput) {
         user = user.clone();
 
-        if (user.getId() != userInput.getId()) {
+        if (!user.getId().equals(userInput.getId())) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error when merging users");
         }
 
@@ -202,15 +204,17 @@ public class UserService {
     }
 
     private void checkIfDataIsValid(@NotNull User user, @Nullable User executedBy) {
+        log.error("User {} is trying to update user {}", executedBy, user);
+
         Optional<User> userWithSameEmail = userRepository.findByAuthenticationData_Email(
             user.getAuthenticationData().getEmail());
         Optional<User> userWithSameId = user.getId() != null ? userRepository.findById(user.getId()) : Optional.empty();
         boolean userAlreadyExists = userWithSameId.isPresent();
 
         if (executedBy != null) {
-            if (executedBy.getId() != user.getId()
+            if (!executedBy.getId().equals(user.getId())
                 && !executedBy.getRole().isTeam()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user1");
             }
         }
 
@@ -230,7 +234,7 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is not valid");
             }
 
-            if (userWithSameEmail.isPresent() && userWithSameEmail.get().getId() != user.getId()) {
+            if (userWithSameEmail.isPresent() && !userWithSameEmail.get().getId().equals(user.getId())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "email already in use");
             }
 
@@ -263,7 +267,7 @@ public class UserService {
                 user.setRole(universityDomains.matchesEmail(
                     user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
             }
-        } else if (executedBy != null && executedBy.getId() != user.getId()) {
+        } else if (executedBy != null && !executedBy.getId().equals(user.getId())) {
             // other user executing
             // executor is a user
             if (!executedBy.getRole().isTeam()) {
@@ -305,10 +309,12 @@ public class UserService {
             user.getDetails().setLastName(user.getDetails().getLastName().trim());
         }
 
-        if (user.getDetails().getBirthday().after(
-            Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
-        )) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "you are too young");
+        if (user.getDetails().getBirthday() != null) {
+            if (user.getDetails().getBirthday().after(
+                Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
+            )) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "you are too young");
+            }
         }
 
         if (user.getDetails().getAddress() != null) {

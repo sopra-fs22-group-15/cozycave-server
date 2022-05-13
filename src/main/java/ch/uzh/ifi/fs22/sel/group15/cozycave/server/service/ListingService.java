@@ -100,7 +100,7 @@ public class ListingService {
     private @NotNull Listing mergeListing(@NotNull Listing listing, @NotNull Listing listingInput) {
         listing = listing.clone();
 
-        if (listing.getId() != listingInput.getId()) {
+        if (listing.getId().equals(listingInput.getId())) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error when merging listings");
         }
 
