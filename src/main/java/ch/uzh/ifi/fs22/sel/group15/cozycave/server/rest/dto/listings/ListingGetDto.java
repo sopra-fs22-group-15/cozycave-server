@@ -4,6 +4,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetPublicDto;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
@@ -29,11 +31,13 @@ public class ListingGetDto implements Serializable {
 
     private Boolean published;
 
+    @JsonInclude(Include.NON_NULL)
     private Double sqm;
 
     @JsonProperty("listing_type")
     private ListingType listingType;
 
+    @JsonInclude(Include.NON_NULL)
     private Boolean furnished;
 
     @JsonProperty("available_to")
@@ -41,10 +45,13 @@ public class ListingGetDto implements Serializable {
 
     private Boolean available;
 
+    @JsonInclude(Include.NON_NULL)
     private Double rent;
 
+    @JsonInclude(Include.NON_NULL)
     private Double deposit;
 
+    @JsonInclude(Include.NON_NULL)
     private Double rooms;
 
     private UserGetPublicDto publisher;

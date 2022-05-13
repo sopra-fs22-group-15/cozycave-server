@@ -166,11 +166,8 @@ public class ListingService {
                 || listing.getDescription() == null
                 || listing.getAddress() == null
                 || listing.getListingType() == null
-                || listing.getFurnished() == null
                 || listing.getAvailableTo() == null
                 || listing.getAvailable() == null
-                || listing.getRent() == null
-                || listing.getDeposit() == null
                 || listing.getPublisher() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled before publishing");

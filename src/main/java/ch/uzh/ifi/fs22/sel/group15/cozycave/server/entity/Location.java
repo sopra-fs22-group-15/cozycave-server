@@ -42,7 +42,7 @@ public class Location implements Cloneable {
     @Column(name = "house_number", nullable = false, length = 10)
     private String houseNumber;
 
-    @Column(name = "apartment_number", length = 32)
+    @Column(name = "apartment_number", length = 10)
     private String apartmentNumber;
 
     @Column(name = "zip_code", nullable = false)

@@ -23,12 +23,16 @@ public class LocationDto implements Serializable {
     private String houseNumber;
 
     @JsonProperty("apartment_number")
+    @JsonInclude(Include.NON_EMPTY)
     private String apartmentNumber;
 
     @JsonProperty("zip_code")
     private String zipCode;
 
     private String city;
+
+    @JsonInclude(Include.NON_EMPTY)
+    private String state;
 
     private String country;
 }

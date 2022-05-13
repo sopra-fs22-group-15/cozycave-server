@@ -46,7 +46,7 @@ public class Listing implements Cloneable {
     private UUID id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date", updatable = false)
+    @Column(name = "creation_date", updatable = false, nullable = false)
     private Date creationDate;
 
     @Column(name = "title", nullable = false)
@@ -56,7 +56,7 @@ public class Listing implements Cloneable {
     private String description;
 
     @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "location_id")
+    @JoinColumn(name = "location_id", nullable = false)
     private Location address;
 
     @Column(name = "published", nullable = false)
@@ -65,7 +65,7 @@ public class Listing implements Cloneable {
     @Column(name = "sqm")
     private Double sqm;
 
-    @Column(name = "listing_type")
+    @Column(name = "listing_type", nullable = false)
     private ListingType listingType;
 
     @Column(name = "furnished")
@@ -74,10 +74,10 @@ public class Listing implements Cloneable {
     @ElementCollection(targetClass = Gender.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "listings_gender")
-    @Column(name = "available_to")
+    @Column(name = "available_to", nullable = false)
     private List<Gender> availableTo;
 
-    @Column(name = "available")
+    @Column(name = "available", nullable = false)
     private Boolean available;
 
     @Column(name = "rent")
@@ -89,8 +89,8 @@ public class Listing implements Cloneable {
     @Column(name = "rooms")
     private Double rooms;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "publisher_id")
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
+    @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
 
     public boolean isReadyToPublish() {

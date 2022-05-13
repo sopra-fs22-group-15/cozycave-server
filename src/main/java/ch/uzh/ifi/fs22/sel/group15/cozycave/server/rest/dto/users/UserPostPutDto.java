@@ -9,8 +9,9 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor @NoArgsConstructor @Data
+@Data
 public class UserPostPutDto implements Serializable {
 
     @JsonProperty("authentication")
@@ -19,6 +20,25 @@ public class UserPostPutDto implements Serializable {
     private Role role;
 
     private UserDetailsDto details;
+
+    public UserPostPutDto(@NotNull AuthenticationDataDto authenticationData, Role role,
+        @NotNull UserDetailsDto details) {
+        this.authenticationData = authenticationData == null ? new AuthenticationDataDto() : authenticationData;
+        this.details = details == null ? new UserDetailsDto() : details;
+    }
+
+    public UserPostPutDto() {
+        this.authenticationData = new AuthenticationDataDto();
+        this.details = new UserDetailsDto();
+    }
+
+    public void setAuthenticationData(@NotNull AuthenticationDataDto authenticationData) {
+        this.authenticationData = authenticationData == null ? new AuthenticationDataDto() : authenticationData;
+    }
+
+    public void setDetails(@NotNull UserDetailsDto details) {
+        this.details = details == null ? new UserDetailsDto() : details;
+    }
 
     @AllArgsConstructor @NoArgsConstructor @Data
     public static class AuthenticationDataDto implements Serializable {

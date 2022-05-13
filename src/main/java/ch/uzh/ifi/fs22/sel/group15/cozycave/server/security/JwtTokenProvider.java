@@ -22,9 +22,12 @@ public class JwtTokenProvider {
     @Value("${cozycave.security.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${cozycave.security.jwt.expiration_days}")
+    private int expiration;
+
     public String generateToken(UUID uuid, Collection<Role> roles) {
         Instant now = Instant.now();
-        Instant expiryTime = now.plus(7, ChronoUnit.DAYS);
+        Instant expiryTime = now.plus(expiration, ChronoUnit.DAYS);
 
         return Jwts.builder()
             .setSubject(uuid.toString())
@@ -41,8 +44,8 @@ public class JwtTokenProvider {
 
         return generateToken(
             UUID.fromString(user.getUsername()),
-            user.getAuthorities().stream().map(authority -> Role.valueOf(authority.getAuthority()))
-                .collect(Collectors.toList())
+            user.getAuthorities().stream().map(authority -> Role.valueOf(
+                authority.getAuthority().substring(5))).collect(Collectors.toList())
         );
     }
 

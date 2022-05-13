@@ -17,8 +17,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException authException) throws IOException, ServletException {
 
-        log.debug("Unauthorized request blocked and HEADER send.");
-
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }

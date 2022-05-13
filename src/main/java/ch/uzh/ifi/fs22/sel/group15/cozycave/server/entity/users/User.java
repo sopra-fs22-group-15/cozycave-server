@@ -37,11 +37,11 @@ public class User implements Cloneable {
     private UUID id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date", updatable = false)
+    @Column(name = "creation_date", updatable = false, nullable = false)
     private Date creationDate;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "authentication_data_id")
+    @JoinColumn(name = "authentication_data_id", nullable = false, unique = true, updatable = false)
     private @NotNull AuthenticationData authenticationData;
 
     @Enumerated(EnumType.STRING)
@@ -49,7 +49,7 @@ public class User implements Cloneable {
     private Role role;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "details_id", nullable = false, unique = true)
+    @JoinColumn(name = "details_id", nullable = false, unique = true, updatable = false)
     private @NotNull UserDetails details;
 
     public User(UUID id, Date creationDate, @NotNull AuthenticationData authenticationData, Role role,

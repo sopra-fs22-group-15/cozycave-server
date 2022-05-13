@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-//TODO: add on all dtos: JsonInclude when neccessary
 @AllArgsConstructor @NoArgsConstructor @Data
 public class UserGetPublicDto implements Serializable {
 
