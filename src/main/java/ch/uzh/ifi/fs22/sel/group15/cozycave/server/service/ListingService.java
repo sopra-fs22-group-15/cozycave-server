@@ -100,7 +100,7 @@ public class ListingService {
     private @NotNull Listing mergeListing(@NotNull Listing listing, @NotNull Listing listingInput) {
         listing = listing.clone();
 
-        if (listing.getId().equals(listingInput.getId())) {
+        if (!listing.getId().equals(listingInput.getId())) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error when merging listings");
         }
 
@@ -160,6 +160,18 @@ public class ListingService {
     }
 
     private void checkIfDataIsValid(Listing listing) {
+        if (!StringUtils.hasText(listing.getTitle())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title is required");
+        }
+
+        if (listing.getPublished() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "published is required");
+        }
+
+        if (listing.getPublisher() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "publisher is required");
+        }
+
         // check if listing will be published -> mandatory fields must be filled
         if (listing.getPublished()) {
             if (listing.getTitle() == null
@@ -170,13 +182,13 @@ public class ListingService {
                 || listing.getAvailable() == null
                 || listing.getPublisher() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "mandatory fields must be filled before publishing");
+                    "mandatory fields must be filled when listing is / will be published");
             }
         }
 
         // check if data is valid
         if (listing.getTitle() != null) {
-            if (StringUtils.hasText(listing.getTitle())) {
+            if (!StringUtils.hasText(listing.getTitle())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid title");
             }
 
@@ -188,7 +200,7 @@ public class ListingService {
         }
 
         if (listing.getDescription() != null) {
-            if (StringUtils.hasText(listing.getDescription())) {
+            if (!StringUtils.hasText(listing.getDescription())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid description");
             }
 

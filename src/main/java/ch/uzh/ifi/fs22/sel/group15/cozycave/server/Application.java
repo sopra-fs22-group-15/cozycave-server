@@ -6,6 +6,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -53,7 +54,7 @@ public class Application {
     @Bean
     public CommandLineRunner createTestData(UserService userService,
         UniversityDomains universityDomains,
-        @Value("${cozycave.debug.create_test_user}") boolean createTestUser) {
+        @Value("${cozycave.debug.create_test_user}") boolean createTestUser, ListingService listingService) {
         return args -> {
             if (!createTestUser) {
                 return;
