@@ -27,7 +27,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "listings")
-@AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
+@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
 public class Listing implements Cloneable {
 
     @Id

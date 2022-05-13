@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-//TODO: fix global error handling -> not showing custom error message
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final int PASSWORD_MIN_LENGTH = 8;

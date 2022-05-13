@@ -43,7 +43,7 @@ public class Utils {
      */
     // TODO: change to also allow other languages characters
     public static String stripNames(String str) {
-        return str.replaceAll("\\s+", " ").trim();
+        return str.trim();
     }
 
     /**

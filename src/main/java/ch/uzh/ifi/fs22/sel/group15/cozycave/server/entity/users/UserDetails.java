@@ -23,7 +23,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
@@ -31,7 +31,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "user_details")
-@AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
+@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
 public class UserDetails implements Cloneable {
 
     @Id

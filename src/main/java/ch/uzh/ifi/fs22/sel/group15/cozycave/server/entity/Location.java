@@ -11,7 +11,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "location")
-@AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
+@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
 public class Location implements Cloneable {
 
     @Id
@@ -74,7 +74,7 @@ public class Location implements Cloneable {
         return getClass().hashCode();
     }
 
-    // TODO: which if address exist
+    // TODO: check if address exists in real world
     @Transient
     public boolean isValid() {
         return StringUtils.hasText(street)

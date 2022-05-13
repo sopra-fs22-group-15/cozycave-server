@@ -18,17 +18,16 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "users")
-@AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
+@Getter @Setter @ToString
 public class User implements Cloneable {
 
     @Id
@@ -43,7 +42,7 @@ public class User implements Cloneable {
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "authentication_data_id")
-    private AuthenticationData authenticationData;
+    private @NotNull AuthenticationData authenticationData;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -51,7 +50,29 @@ public class User implements Cloneable {
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "details_id", nullable = false, unique = true)
-    private UserDetails details;
+    private @NotNull UserDetails details;
+
+    public User(UUID id, Date creationDate, @NotNull AuthenticationData authenticationData, Role role,
+        @NotNull UserDetails details) {
+        this.id = id;
+        this.creationDate = creationDate;
+        this.authenticationData = authenticationData;
+        this.role = role;
+        this.details = details;
+    }
+
+    public User() {
+        this.authenticationData = new AuthenticationData();
+        this.details = new UserDetails();
+    }
+
+    public void setAuthenticationData(@NotNull AuthenticationData authenticationData) {
+        this.authenticationData = authenticationData == null ? new AuthenticationData() : authenticationData;
+    }
+
+    public void setDetails(@NotNull UserDetails details) {
+        this.details = details == null ? new UserDetails() : details;
+    }
 
     @Override
     public boolean equals(Object o) {

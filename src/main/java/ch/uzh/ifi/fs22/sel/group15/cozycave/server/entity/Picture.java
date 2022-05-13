@@ -18,7 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
@@ -26,7 +26,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "picture")
-@AllArgsConstructor @Getter @Setter @ToString @RequiredArgsConstructor
+@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
 public class Picture {
 
     public static final String ROOT_PATH = "https://sopra-fs22-group-15-server.herokuapp.com/pictures/";

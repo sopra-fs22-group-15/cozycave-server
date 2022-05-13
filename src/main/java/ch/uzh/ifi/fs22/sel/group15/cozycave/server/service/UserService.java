@@ -202,11 +202,6 @@ public class UserService {
     }
 
     private void checkIfDataIsValid(@NotNull User user, @Nullable User executedBy) {
-        if (user.getAuthenticationData() == null
-            || user.getDetails() == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "user wrongly built");
-        }
-
         Optional<User> userWithSameEmail = userRepository.findByAuthenticationData_Email(
             user.getAuthenticationData().getEmail());
         Optional<User> userWithSameId = user.getId() != null ? userRepository.findById(user.getId()) : Optional.empty();
@@ -310,7 +305,6 @@ public class UserService {
             user.getDetails().setLastName(user.getDetails().getLastName().trim());
         }
 
-        //TODO: should user has to be 16?
         if (user.getDetails().getBirthday().after(
             Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
         )) {

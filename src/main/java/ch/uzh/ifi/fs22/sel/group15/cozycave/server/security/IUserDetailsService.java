@@ -23,8 +23,7 @@ public class IUserDetailsService implements UserDetailsService {
     @Override public UserDetails loadUserByUsername(String uuid) throws UsernameNotFoundException {
         log.error("loadUserByUsername: " + uuid);
         User user = userRepository.findById(UUID.fromString(uuid))
-            //TODO: change exception
-            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("invalid token: user not found"));
 
         return new org.springframework.security.core.userdetails.User(
             user.getId().toString(),
