@@ -60,6 +60,10 @@ public class Application {
                 return;
             }
 
+            if (userService.existsUser("test@uzh.ch")) {
+                return;
+            }
+
             userService.createUser(new User(
                 null,
                 null,
