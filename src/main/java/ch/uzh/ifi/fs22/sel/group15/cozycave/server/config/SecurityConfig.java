@@ -2,7 +2,6 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.config;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationEntryPoint;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,8 +18,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    public static final int PASSWORD_MIN_LENGTH = 8;
+
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -52,27 +56,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(
                 "/",
                 "/v1/auth/login",
+                "/v1/auth/login/",
                 "/v1/auth/register",
+                "/v1/auth/register/",
                 "/v1/listings",
+                "/v1/listings/",
                 "/v1/listings/{id}",
-                "/v1/pictures/{id}"
+                "/v1/listings/{id}/",
+                "/v1/pictures/{id}",
+                "/v1/pictures/{id}/"
             ).permitAll()
             .anyRequest().authenticated()
             .and()
             .formLogin().disable();
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-//        http
-//            .cors()
-//            .and()
-//            .csrf().disable()
-//            .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
-//            .and()
-//            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//            .and()
-//            .authorizeRequests().anyRequest().permitAll()
-//            .and()
-//            .formLogin().disable();
     }
 }

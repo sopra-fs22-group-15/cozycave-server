@@ -1,24 +1,18 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtTokenProvider;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/v1/auth")
@@ -53,50 +48,14 @@ public class AuthenticationController {
     public UserGetDto register(@RequestBody UserPostPutDto userPostPutDto) {
         log.debug("new user registration try: {}", userPostPutDto.toString());
 
-        Location address = null;
-        if (userPostPutDto.getDetails().getAddress() != null) {
-            address = new Location(
-                userPostPutDto.getDetails().getAddress().getStreet(),
-                userPostPutDto.getDetails().getAddress().getHouseNumber(),
-                userPostPutDto.getDetails().getAddress().getZipCode(),
-                userPostPutDto.getDetails().getAddress().getCity(),
-                userPostPutDto.getDetails().getAddress().getCountry()
-            );
+        User toBeCreatedUser = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
 
-            if (StringUtils.hasText(userPostPutDto.getDetails().getAddress().getName())) {
-                address.setName(userPostPutDto.getDetails().getAddress().getDescription());
-            }
-
-            if (StringUtils.hasText(userPostPutDto.getDetails().getAddress().getDescription())) {
-                address.setDescription(userPostPutDto.getDetails().getAddress().getDescription());
-            }
-        }
-
-        User user = userService.createUser(new User(
-            null,
-            null,
-            new AuthenticationData(
-                null,
-                userPostPutDto.getAuthenticationData().getEmail(),
-                userPostPutDto.getAuthenticationData().getPassword(),
-                null
-            ),
-            userPostPutDto.getRole(),
-            new UserDetails(
-                null,
-                userPostPutDto.getDetails().getFirstname(),
-                userPostPutDto.getDetails().getLastname(),
-                userPostPutDto.getDetails().getGender(),
-                userPostPutDto.getDetails().getBirthday(),
-                address,
-                userPostPutDto.getDetails().getBiography()
-            )
-        ), null);
+        User user = userService.createUser(toBeCreatedUser, null);
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 
         Authentication authentication = createAuthentication(
-            user.getId(),
+            user,
             userPostPutDto.getAuthenticationData().getPassword()
         );
 
@@ -104,7 +63,7 @@ public class AuthenticationController {
             jwtTokenProvider.generateToken(authentication)
         );
 
-        log.debug("new user registered: {}", result);
+        log.info("new user registered with id: {}", user.getId());
 
         return result;
     }
@@ -116,29 +75,32 @@ public class AuthenticationController {
         log.debug("new user login try: {}", userPostPutDto.getAuthenticationData().getEmail());
 
         User user = userService.findUserByEmail(userPostPutDto.getAuthenticationData().getEmail())
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        Authentication authentication = createAuthentication(user.getId(),
-            userPostPutDto.getAuthenticationData().getPassword());
+            .orElseThrow(() -> {
+                log.error("user with email {} not found while logging in",
+                    userPostPutDto.getAuthenticationData().getEmail());
+                return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid login data");
+            });
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
+
+        Authentication authentication = createAuthentication(
+            user,
+            userPostPutDto.getAuthenticationData().getPassword()
+        );
 
         result.getAuthenticationData().setToken(
             jwtTokenProvider.generateToken(authentication)
         );
 
-        log.debug("new user logged in: {}", result);
+        log.info("new user logged in with id: {}", user.getId());
 
         return result;
     }
 
-    private Authentication createAuthentication(UUID uuid, String passwordRaw) {
-        User user = userService.findUserID(uuid)
-            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-
+    private Authentication createAuthentication(User user, String passwordRaw) {
         return authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                uuid.toString(),
+                user.getId().toString(),
                 passwordRaw + user.getAuthenticationData().getSalt(),
                 user.getRole().generatePermittedAuthoritiesList()
             )

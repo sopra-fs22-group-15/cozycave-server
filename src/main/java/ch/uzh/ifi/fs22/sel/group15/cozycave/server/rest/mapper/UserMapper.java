@@ -1,8 +1,9 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.UserPostPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetPublicDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -10,22 +11,22 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
+@Mapper(
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL
+)
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     User userGetDtoToUser(UserGetDto userGetDto);
 
-    /*@Mapping(source = "id", target = "id")
-    @Mapping(source = "creationDate", target = "creationDate")
-    @Mapping(source = "authenticationData", target = "authenticationData")
-    @Mapping(source = "role", target = "role")
-    @Mapping(source = "details", target = "details")*/
     UserGetDto userToUserGetDto(User user);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserFromUserGetDto(UserGetDto userGetDto, @MappingTarget User user);
+    User userGetPublicDtoToUser(UserGetPublicDto userGetPublicDto);
+
+    UserGetPublicDto userToUserGetPublicDto(User user);
 
     User userPostPutDtoToUser(UserPostPutDto userPostPutDto);
 

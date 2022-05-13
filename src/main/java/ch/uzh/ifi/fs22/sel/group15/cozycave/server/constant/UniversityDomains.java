@@ -23,12 +23,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UniversityDomains {
 
-    private HashSet<University> universities;
+    private final HashSet<University> universities;
 
     public UniversityDomains() {
-        new Thread(() -> {
-            universities = generateUniversities();
-        }, "get university email addresses").start();
+        universities = generateUniversities();
     }
 
     public ImmutableSet<University> getUniversities() {

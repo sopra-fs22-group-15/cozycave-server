@@ -1,20 +1,14 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.AuthenticationData;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
-import java.util.Date;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
 class UserServiceTest {

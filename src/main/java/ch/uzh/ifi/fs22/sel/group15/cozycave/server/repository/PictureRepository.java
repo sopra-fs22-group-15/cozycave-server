@@ -1,7 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.user.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

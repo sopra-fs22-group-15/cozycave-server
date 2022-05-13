@@ -52,7 +52,16 @@ public enum Role {
         return Arrays.stream(Role.values())
             .filter(role -> role.getRoleId() <= this.getRoleId())
             .map(Enum::name)
+            .map(r -> "ROLE_" + r)
             .map(SimpleGrantedAuthority::new)
             .collect(java.util.stream.Collectors.toList());
+    }
+
+    public boolean isTeam() {
+        return greaterEquals(TEAM);
+    }
+
+    public boolean isUser() {
+        return lessEquals(STUDENT);
     }
 }
