@@ -141,7 +141,7 @@ public class UserController {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while getting application", authUserId);
-                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
         if (!userService.existsUser(id)) {
@@ -165,7 +165,7 @@ public class UserController {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while getting application", authUserId);
-                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
 
@@ -191,14 +191,14 @@ public class UserController {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while getting application", authUserId);
-                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
 
         Application applicationToBeDeleted = applicationService.findApplicationById(applicationID)
                 .orElseThrow(() -> {
                     log.error("application with id {} not found", applicationID);
-                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "error finding application");
                 });
 

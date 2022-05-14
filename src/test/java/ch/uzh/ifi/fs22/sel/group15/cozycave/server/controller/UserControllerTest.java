@@ -8,6 +8,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationEntryPoint;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.time.Instant;
@@ -35,6 +36,8 @@ class UserControllerTest {
     private UserService userService;
     @MockBean
     private ListingService listingService;
+    @MockBean
+    ApplicationService applicationService;
 
     private User permittedTestUser;
     private User unpermittedTestUser;
@@ -124,5 +127,20 @@ class UserControllerTest {
 
     @Test
     void deleteUser() {
+    }
+
+    @Test
+    void findApplications() {
+
+    }
+
+    @Test
+    void findApplication() {
+
+    }
+
+    @Test
+    void deleteApplication() {
+
     }
 }

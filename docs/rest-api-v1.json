@@ -396,12 +396,13 @@
     "/users/{userId}/applications/": {
       "get": {
         "summary": "list all applications of a user",
-        "operationId": "getApplicationsOfUser",
+        "operationId": "findApplications",
         "security": [
           {
             "bearerAuth": [
-              "team",
-              "admin"
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -413,9 +414,6 @@
         "responses": {
           "400": {
             "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
@@ -445,13 +443,14 @@
     },
     "/users/{userId}/applications/{applicationId}": {
       "get": {
-        "summary": "get an application of a user",
-        "operationId": "getApplicationOfUser",
+        "summary": "get a specific application of a user",
+        "operationId": "findApplication",
         "security": [
           {
             "bearerAuth": [
-              "team",
-              "admin"
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -466,51 +465,6 @@
         "responses": {
           "400": {
             "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "$ref": "#/components/responses/NoPermissionsError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "200": {
-            "$ref": "#/components/responses/Application"
-          }
-        },
-        "tags": [
-          "users",
-          "applications"
-        ]
-      },
-      "put": {
-        "summary": "change an application of a user",
-        "operationId": "changeApplicationOfUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "team",
-              "admin"
-            ]
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserID"
-          },
-          {
-            "$ref": "#/components/parameters/ApplicationID"
-          }
-        ],
-        "responses": {
-
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
@@ -529,12 +483,13 @@
       },
       "delete": {
         "summary": "delete an application of a user",
-        "operationId": "deleteApplicationOfUser",
+        "operationId": "deleteApplication",
         "security": [
           {
             "bearerAuth": [
-              "team",
-              "admin"
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -549,9 +504,6 @@
         "responses": {
           "400": {
             "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/NoPermissionsError"
@@ -793,13 +745,13 @@
     "/listings/{listingId}/applications/": {
       "get": {
         "summary": "returns all applications on a specific listing",
-        "operationId": "getListingApplications",
+        "operationId": "findApplications",
         "security": [
           {
             "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
+              "LANDLORD",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -841,14 +793,14 @@
       },
       "post": {
         "summary": "creates a new application to a listing",
-        "operationId": "createListingApplication",
+        "operationId": "createApplication",
         "security": [
           {
             "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
+              "STUDENT",
+              "TEAM",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -881,15 +833,16 @@
     "/listings/{listingId}/applications/{applicationId}": {
       "get": {
         "summary": "returns a listings application",
-        "operationId": "getListingApplication",
+        "operationId": "findApplication",
         "description": "students can only access their own application",
         "security": [
           {
             "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
+              "STUDENT",
+              "LANDLORD",
+              "TEAM",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -925,13 +878,14 @@
       },
       "put": {
         "summary": "changes a listings application",
-        "operationId": "changeListingApplication",
+        "operationId": "updateApplication",
+        "description": "only LANDLORD can update an application",
         "security": [
           {
             "bearerAuth": [
-              "landlord",
-              "team",
-              "admin"
+              "LANDLORD",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -966,10 +920,9 @@
         "security": [
           {
             "bearerAuth": [
-              "student",
-              "landlord",
-              "team",
-              "admin"
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
             ]
           }
         ],
@@ -1250,13 +1203,13 @@
           "creation_date": {
             "$ref": "#/components/schemas/Date"
           },
-          "user": {
+          "applicant": {
             "$ref": "#/components/schemas/User"
           },
           "listing": {
             "$ref": "#/components/schemas/Listing"
           },
-          "status": {
+          "application_status": {
             "$ref": "#/components/schemas/ApplicationStatus"
           },
           "linkedGroupApplication": {
@@ -1350,7 +1303,10 @@
         "type": "string",
         "enum": [
           "FLAT",
-          "ROOM"
+          "ROOM",
+          "HOUSE",
+          "DORM",
+          "SEE_LISTING"
         ]
       },
       "Address": {
@@ -1396,17 +1352,19 @@
       "Gender": {
         "type": "string",
         "enum": [
-          "female",
-          "male",
-          "other"
+          "MALE",
+          "FEMALE",
+          "OTHER",
+          "PREFER_NOT_TO_SAY"
         ]
       },
       "ApplicationStatus": {
         "type": "string",
         "enum": [
-          "pending",
-          "approved",
-          "denied"
+          "PENDING",
+          "CANCELED",
+          "DENIED",
+          "ACCEPTED"
         ]
       },
       "UUID": {

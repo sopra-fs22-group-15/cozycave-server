@@ -73,12 +73,20 @@ import java.util.UUID;
         newApplication.setCreationDate(new Date());
         // manually set application to pending regardless of how application was sent
         newApplication.setApplication_status(ApplicationStatus.PENDING);
+        newApplication.setId(UUID.randomUUID());
 
         Listing listing = listingRepository.getOne(newApplication.getListing().getId());
 
         if (listing.getAvailable() == false) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Listing not available for new applications");
+        }
+
+        User applicant = userRepository.getOne(newApplication.getApplicant().getId());
+
+        if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Applications only allowed for Students");
         }
 
         newApplication = applicationRepository.saveAndFlush(newApplication);
@@ -123,8 +131,7 @@ import java.util.UUID;
         // only the publisher of the
         User publisher = userRepository.getOne(applicationInput.getListing().getPublisher().getId());
         if (publisher != decider
-                && (decider.getRole() != Role.ADMIN
-                || decider.getRole() != Role.INTERNAL)) {
+                && (!decider.getRole().greaterEquals(Role.ADMIN))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                     "You're not the publisher of the listing to decide upon the application");
         }
