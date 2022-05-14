@@ -139,7 +139,7 @@ public class ListingController {
             @PathVariable UUID id) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                             "error finding authenticated user");
                 });
@@ -172,7 +172,7 @@ public class ListingController {
 
         User applicant = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (applicant) with id {} not found while creating application", authUserId);
+                    log.debug("user (applicant) with id {} not found while creating application", authUserId);
                     return new ResponseStatusException(HttpStatus.FORBIDDEN, "error finding publisher");
                 });
 
@@ -194,7 +194,7 @@ public class ListingController {
             @PathVariable UUID applicationID) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                             "error finding authenticated user");
                 });
@@ -208,18 +208,24 @@ public class ListingController {
 
         ApplicationGetDto application =  applicationService.findApplicationById(applicationID)
                 .map(ApplicationMapper.INSTANCE::applicationToApplicationGetDto)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "application with id " + applicationID + " not found"));
+                .orElseThrow(() -> {
+                        log.debug("application with id {} couldn't be found", applicationID);
+                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "application with id " + applicationID + " not found");
+                });
 
         if (application.getListing().getId() != listing.getId()) {
+            log.debug("application listing id {} is not the same as the id of the listing id {}", application.getListing().getId(), listing.getId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "application to listing couldn't be found");
         }
         // either publisher of listing to see application or applicant itself
         if ((authUser.getId() != application.getApplicant().getId()) &&
                 (authUser.getId() != listing.getPublisher().getId())) {
+            log.debug("not applicant of application with id {} nor an admin", application.getApplicant().getId());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "not allowed to get applications to listing");
         }
+
+        log.info("found application with id {}", application.getId());
 
         return application;
     }
@@ -235,7 +241,7 @@ public class ListingController {
             @RequestBody ApplicationPostPutDto applicationPostPutDto) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
@@ -249,15 +255,18 @@ public class ListingController {
 
         Application applicationToBeUpdated = applicationService.findApplicationById(applicationID)
                 .orElseThrow(() -> {
-                    log.error("application with id {} not found", applicationID);
+                    log.debug("application with id {} not found", applicationID);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "error finding application");
                 });
 
         Application applicationInput = ApplicationMapper.INSTANCE.applicationPostPutDtoToApplication(applicationPostPutDto);
 
-        return ApplicationMapper.INSTANCE.applicationToApplicationGetDto(
-                applicationService.decideOnApplication(applicationInput, authUser));
+        applicationInput = applicationService.decideOnApplication(applicationInput, authUser);
+
+        log.info("application with id {} updated", applicationInput.getId());
+
+        return ApplicationMapper.INSTANCE.applicationToApplicationGetDto(applicationInput);
     }
 
     // delete a specific user
@@ -269,20 +278,21 @@ public class ListingController {
             @PathVariable UUID applicationID) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                             "error finding authenticated user");
                 });
 
         Application applicationToBeDeleted = applicationService.findApplicationById(applicationID)
                 .orElseThrow(() -> {
-                    log.error("application with id {} not found", applicationID);
+                    log.debug("application with id {} not found", applicationID);
                     return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                             "error finding application");
                 });
 
         if ((applicationToBeDeleted.getApplicant().getId() != authUser.getId()) &&
                 (!authUser.getRole().greaterEquals(Role.ADMIN))) {
+            log.debug("not applicant of application with id {} nor an admin", applicationToBeDeleted.getApplicant().getId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You're not allowed to delete the application");
         }
         applicationService.deleteApplication(id);

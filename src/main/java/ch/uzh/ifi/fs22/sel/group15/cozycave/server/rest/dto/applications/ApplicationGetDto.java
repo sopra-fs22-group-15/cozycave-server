@@ -20,11 +20,11 @@ public class ApplicationGetDto implements Serializable {
     @JsonProperty("creation_date")
     private Date creationDate;
 
-    // will be UserGetPublicDto
     private UserGetDto applicant;
 
     private ListingGetDto listing;
 
-    private ApplicationStatus application_status;
+    @JsonProperty("application_status")
+    private ApplicationStatus applicationStatus;
 
 }

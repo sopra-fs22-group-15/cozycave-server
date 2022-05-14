@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -72,21 +73,30 @@ import java.util.UUID;
         newApplication.setId(UUID.randomUUID());
         newApplication.setCreationDate(new Date());
         // manually set application to pending regardless of how application was sent
-        newApplication.setApplication_status(ApplicationStatus.PENDING);
+        newApplication.setApplicationStatus(ApplicationStatus.PENDING);
         newApplication.setId(UUID.randomUUID());
 
-        Listing listing = listingRepository.getOne(newApplication.getListing().getId());
+        try {
+            Listing listing = listingRepository.getOne(newApplication.getListing().getId());
 
-        if (listing.getAvailable() == false) {
+            if (listing.getAvailable() == false) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Listing not available for new applications");
+            }
+        } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Listing not available for new applications");
         }
 
-        User applicant = userRepository.getOne(newApplication.getApplicant().getId());
-
-        if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Applications only allowed for Students");
+        try {
+            User applicant = userRepository.getOne(newApplication.getApplicant().getId());
+            if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "only students can apply to a listing");
+            }
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Listing not available for new applications");
         }
 
         newApplication = applicationRepository.saveAndFlush(newApplication);
@@ -104,7 +114,7 @@ import java.util.UUID;
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
         updatedApplication.setApplicant(applicationInput.getApplicant());
         updatedApplication.setListing(applicationInput.getListing());
-        updatedApplication.setApplication_status(applicationInput.getApplication_status());
+        updatedApplication.setApplicationStatus(applicationInput.getApplicationStatus());
 
         return this.applicationRepository.saveAndFlush(updatedApplication);
     }
@@ -129,21 +139,27 @@ import java.util.UUID;
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
 
         // only the publisher of the
-        User publisher = userRepository.getOne(applicationInput.getListing().getPublisher().getId());
-        if (publisher != decider
-                && (!decider.getRole().greaterEquals(Role.ADMIN))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "You're not the publisher of the listing to decide upon the application");
+        try {
+            User publisher = userRepository.getOne(applicationInput.getListing().getPublisher().getId());
+            if (publisher != decider
+                    && (!decider.getRole().greaterEquals(Role.ADMIN))) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "You're not the publisher of the listing to decide upon the application");
+            }
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Listing not available for new applications");
         }
-        updatedApplication.setApplication_status(applicationInput.getApplication_status());
+
+        updatedApplication.setApplicationStatus(applicationInput.getApplicationStatus());
 
         // decline all other applications automatically
-        if (updatedApplication.getApplication_status() == ApplicationStatus.ACCEPTED) {
+        if (updatedApplication.getApplicationStatus() == ApplicationStatus.ACCEPTED) {
             for (Application deniedApplication : applicationRepository.findByListing_Id(updatedApplication.getListing().getId())) {
                 if (deniedApplication.getId() == updatedApplication.getId()) {
                     continue;
                 }
-                deniedApplication.setApplication_status(ApplicationStatus.DENIED);
+                deniedApplication.setApplicationStatus(ApplicationStatus.DENIED);
                 applicationRepository.saveAndFlush(deniedApplication);
             }
         }
@@ -169,13 +185,13 @@ import java.util.UUID;
         // check if application has empty fiels
         if (applicationToBeCreated.getApplicant() == null
                 || applicationToBeCreated.getListing() == null
-                || applicationToBeCreated.getApplication_status() == null) {
+                || applicationToBeCreated.getApplicationStatus() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled before publishing");
         }
         // check if application has even sensible values
         userRepository.findById(applicationToBeCreated.getApplicant().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
         listingRepository.findById(applicationToBeCreated.getListing().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
     }

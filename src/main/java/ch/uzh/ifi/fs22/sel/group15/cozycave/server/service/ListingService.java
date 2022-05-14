@@ -1,6 +1,9 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.util.Date;
@@ -29,13 +32,15 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final ApplicationRepository applicationRepository;
 
     @Autowired
     public ListingService(
         @Qualifier("listingRepository") ListingRepository listingRepository,
-        UserRepository userRepository) {
+        UserRepository userRepository, ApplicationRepository applicationRepository) {
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
+        this.applicationRepository = applicationRepository;
     }
 
     public List<Listing> getListings() {
@@ -80,6 +85,8 @@ public class ListingService {
     public void deleteListing(Listing listing) {
         log.debug("deleting listing {}", listing);
 
+        applicationRepository.deleteAll(applicationRepository.findByListing_Id(listing.getId()));
+
         listingRepository.delete(listing);
 
         log.info("deleted listing {}", listing);
@@ -87,6 +94,8 @@ public class ListingService {
 
     public void deleteListing(UUID uuid) {
         log.debug("deleting listing with id {}", uuid);
+
+        applicationRepository.deleteAll(applicationRepository.findByListing_Id(uuid));
 
         listingRepository.deleteById(uuid);
 

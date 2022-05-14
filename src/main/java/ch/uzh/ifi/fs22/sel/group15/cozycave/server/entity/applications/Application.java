@@ -33,18 +33,18 @@ public class Application {
     @OneToOne(cascade = CascadeType.PERSIST)
     @NotFound(
             action = NotFoundAction.IGNORE)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private @NotNull User applicant;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @NotFound(
             action = NotFoundAction.IGNORE)
-    @JoinColumn(name = "listing_id")
+    @JoinColumn(name = "listing_id", nullable = false, updatable = false)
     private @NotNull Listing listing;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "application_status", nullable = false)
-    private ApplicationStatus application_status;
+    private ApplicationStatus applicationStatus;
 
 
 }

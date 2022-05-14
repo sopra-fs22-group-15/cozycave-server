@@ -114,6 +114,8 @@ public class UserController {
 
         User updatedUser = userService.updateUser(userInput, authUser);
 
+        log.info("application with id {} updated", updatedUser.getId());
+
         return UserMapper.INSTANCE.userToUserGetDto(updatedUser);
     }
 
@@ -140,7 +142,7 @@ public class UserController {
             @PathVariable UUID id) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
@@ -164,7 +166,7 @@ public class UserController {
             @PathVariable UUID applicationID) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
@@ -176,8 +178,10 @@ public class UserController {
 
         return applicationService.findApplicationById(applicationID)
                 .map(ApplicationMapper.INSTANCE::applicationToApplicationGetDto)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "application with id " + applicationID + " not found"));
+                .orElseThrow(() -> {
+                    log.debug("application with id {} not found", applicationID);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "application with id " + applicationID + " not found");
+                });
 
     }
 
@@ -190,14 +194,14 @@ public class UserController {
             @PathVariable UUID applicationID) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
-                    log.error("user (authenticated user) with id {} not found while getting application", authUserId);
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
                     return new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "error finding authenticated user");
                 });
 
         Application applicationToBeDeleted = applicationService.findApplicationById(applicationID)
                 .orElseThrow(() -> {
-                    log.error("application with id {} not found", applicationID);
+                    log.debug("application with id {} not found", applicationID);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "error finding application");
                 });
@@ -209,6 +213,7 @@ public class UserController {
 
         if ((applicationToBeDeleted.getApplicant().getId() != authUser.getId()) &&
                 (!authUser.getRole().greaterEquals(Role.ADMIN))) {
+            log.debug("not applicant of application with id {} nor an admin", applicationToBeDeleted.getApplicant().getId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You're not allowed to delete the application");
         }
 

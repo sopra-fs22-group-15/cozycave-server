@@ -6,6 +6,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -35,15 +36,18 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final ApplicationRepository applicationRepository;
     private final PasswordEncoder passwordEncoder;
     private final UniversityDomains universityDomains;
 
     @Autowired
     public UserService(
         @Qualifier("userRepository") UserRepository userRepository,
+        ApplicationRepository applicationRepository,
         PasswordEncoder passwordEncoder,
         UniversityDomains universityDomains) {
         this.userRepository = userRepository;
+        this.applicationRepository = applicationRepository;
         this.passwordEncoder = passwordEncoder;
         this.universityDomains = universityDomains;
     }
@@ -101,6 +105,8 @@ public class UserService {
     public void deleteUser(User user) {
         log.debug("deleting user with id: {}", user.getId());
 
+        applicationRepository.deleteAll(applicationRepository.findByApplicant_Id(user.getId()));
+
         userRepository.delete(user);
 
         log.info("deleted user with id: {}", user.getId());
@@ -108,6 +114,8 @@ public class UserService {
 
     public void deleteUser(UUID uuid) {
         log.debug("deleting user with id: {}", uuid);
+
+        applicationRepository.deleteAll(applicationRepository.findByApplicant_Id(uuid));
 
         userRepository.deleteById(uuid);
 
