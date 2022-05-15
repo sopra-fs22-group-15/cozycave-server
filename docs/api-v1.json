@@ -371,6 +371,51 @@
           }
         }
       },
+      "ApplicationGet": {
+        "description": "Application object used to create or update an Application",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "applicant": {
+            "$ref": "#/components/schemas/UserGetPublic"
+          },
+          "listing": {
+            "$ref": "#/components/schemas/ListingGet"
+          },
+          "application_status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        }
+      },
+      "ApplicationPostPut": {
+        "description": "Application object used to create or update an Application",
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/AuthenticationData"
+          },
+          "id": {
+            "type": "string"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "applicant": {
+            "type": "object"
+          },
+          "listing": {
+            "type": "object"
+          },
+          "application_status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        }
+      },
       "ListingType": {
         "type": "string",
         "description": "value must be in all upper case",
@@ -462,8 +507,9 @@
         "description": "value must be in all upper case",
         "enum": [
           "PENDING",
-          "APPROVED",
-          "DENIED"
+          "CANCELED",
+          "DENIED",
+          "ACCEPTED"
         ],
         "example": "PENDING",
         "required": false
@@ -521,6 +567,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ListingPostPut"
+            }
+          }
+        }
+      },
+      "Application": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApplicationPostPut"
             }
           }
         }
@@ -639,6 +695,16 @@
             }
           }
         }
+      },
+      "ApplicationGet": {
+        "description": "Application object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApplicationGet"
+            }
+          }
+        }
       }
     },
     "parameters": {
@@ -661,6 +727,16 @@
           "$ref": "#/components/schemas/UUID"
         },
         "allowEmptyValue": false
+      },
+      "ApplicationId": {
+        "name": "applicationId",
+        "in": "path",
+        "description": "The unique identifier of an application.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
+        },
+        "allowEmptyValue": false
       }
     }
   },
@@ -676,6 +752,10 @@
     {
       "name": "listings",
       "description": "Listing operations used for managing listings."
+    },
+    {
+      "name": "applications",
+      "description": "Application operations used for managing applications for listings."
     },
     {
       "name": "default",
@@ -953,6 +1033,121 @@
         }
       }
     },
+    "/v1/users/{userId}/applications": {
+      "get": {
+        "summary": "list all applications of a user",
+        "description": "lists all applications of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "listUserApplications",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      }
+    },
+    "/v1/users/{userId}/applications/{applicationId}": {
+      "get": {
+        "summary": "get a specific application of a user",
+        "description": "gets a specific application of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "findApplicationUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      },
+      "delete": {
+        "summary": "delete an application of a user",
+        "description": "deletes an application of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "deleteApplicationUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      }
+    },
     "/v1/listings": {
       "get": {
         "summary": "retrieve all listings",
@@ -1130,6 +1325,208 @@
             "$ref": "#/components/responses/UndefinedError"
           }
         }
+      }
+    },
+    "/v1/listings/{listingId}/applications": {
+      "get": {
+        "summary": "returns all applications on a specific listing",
+        "operationId": "findApplicationsListing",
+        "description": "returns all applications on a specific listing <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listings)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "send when executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationGet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "post": {
+        "summary": "creates a new application to a listing",
+        "operationId": "createApplicationListing",
+        "description": "creates a new application on a specific listing <br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Application"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      }
+    },
+    "/v1/listings/{listingId}/applications/{applicationId}": {
+      "get": {
+        "summary": "returns a specific application on a listing",
+        "operationId": "findApplicationListing",
+        "description": "students can only access their own application <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listing)</li><li>STUDENT (only on own application)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "put": {
+        "summary": "changes a listings application",
+        "operationId": "updateApplicationListing",
+        "description": "updates the status of an application <br>once an application has been approved, all other applications for the listing will be denied. <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listing)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Application"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "delete": {
+        "summary": "deletes a listings application",
+        "operationId": "deleteApplicationListing",
+        "description": "deletes an application on a specific listing <br><h3>Permitted Roles</h3><ul><li>STUDENT (only on own application)<li>LANDLORD (only on own listing)</li></li><li>TEAM</li><li>ADMIN</li></ul>",
+        "responses": {
+          "204": {
+            "description": "send when executed successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
       }
     }
   }

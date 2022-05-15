@@ -5,10 +5,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
