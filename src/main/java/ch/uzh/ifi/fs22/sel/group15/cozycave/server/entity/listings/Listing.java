@@ -94,20 +94,13 @@ public class Listing implements Cloneable {
     private User publisher;
 
     public boolean isReadyToPublish() {
-        return StringUtils.hasText(this.getTitle())
-            && StringUtils.hasText(this.getDescription())
-            && this.getAddress() != null
-            && this.sqm != null
-            && this.sqm >= 0
-            && this.getListingType() != null
-            && !AssertionsUtils.isEmpty(this.getAvailableTo())
-            && this.available != null
-            && this.rent != null
-            && this.rent >= 0
-            && this.deposit != null
-            && this.deposit >= 0
-            && this.rooms != null
-            && this.rooms >= 0;
+        return StringUtils.hasText(title)
+            && StringUtils.hasText(getDescription())
+            && getAddress() != null && getAddress().isValid()
+            && getListingType() != null
+            && !AssertionsUtils.isEmpty(getAvailableTo())
+            && getAvailable() != null && getAvailable()
+            && getPublisher() != null;
     }
 
     @Override

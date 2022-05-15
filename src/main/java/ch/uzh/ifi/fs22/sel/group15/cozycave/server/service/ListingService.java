@@ -47,6 +47,7 @@ public class ListingService {
 
         newListing.setId(null);
         newListing.setCreationDate(new Date());
+        newListing.setAvailable(true);
 
         checkIfDataIsValid(newListing);
 
@@ -174,13 +175,7 @@ public class ListingService {
 
         // check if listing will be published -> mandatory fields must be filled
         if (listing.getPublished()) {
-            if (listing.getTitle() == null
-                || listing.getDescription() == null
-                || listing.getAddress() == null
-                || listing.getListingType() == null
-                || listing.getAvailableTo() == null
-                || listing.getAvailable() == null
-                || listing.getPublisher() == null) {
+            if (!listing.isReadyToPublish()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled when listing is / will be published");
             }
