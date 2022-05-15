@@ -118,7 +118,7 @@ class UserControllerTest {
                 Gender.PREFER_NOT_TO_SAY,
                 Gender.OTHER));
 
-        listing =  new Listing(
+        /*listing =  new Listing(
                 UUID.randomUUID(),
                 Date.from(Instant.now().minus(45 * 365, ChronoUnit.DAYS)),
                 "Test Flat",
@@ -130,6 +130,7 @@ class UserControllerTest {
                 true,
                 availableTo,
                 true,
+                700.0,
                 1500.0,
                 1.5,
                 permittedTestUser);
@@ -140,7 +141,7 @@ class UserControllerTest {
                 permittedTestUser,
                 listing,
                 ApplicationStatus.PENDING
-                );
+                );*/
 
         Mockito.when(userService.getUsers()).thenReturn(List.of(permittedTestUser, unpermittedTestUser));
     }

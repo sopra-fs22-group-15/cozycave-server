@@ -91,27 +91,6 @@ public class Listing implements Cloneable {
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
 
-    public Listing(UUID id, Date creationDate, String title,
-                   String description, Location address,
-                   Boolean published, Double sqm, ListingType listingType,
-                   Boolean furnished, ArrayList<Gender> availableTo,
-                   Boolean available, Double deposit, Double rooms, User publisher) {
-        this.id = id;
-        this.creationDate = creationDate;
-        this.title = title;
-        this.description = description;
-        this.address = address;
-        this.published = published;
-        this.sqm = sqm;
-        this.listingType = listingType;
-        this.furnished = furnished;
-        this.availableTo = availableTo;
-        this.available = available;
-        this.deposit = deposit;
-        this.rooms = rooms;
-        this.publisher = publisher;
-    }
-
     public boolean isReadyToPublish() {
         return StringUtils.hasText(this.getTitle())
             && StringUtils.hasText(this.getDescription())
