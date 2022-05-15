@@ -729,7 +729,7 @@
         "allowEmptyValue": false
       },
       "ApplicationId": {
-        "name": "ApplicationId",
+        "name": "applicationId",
         "in": "path",
         "description": "The unique identifier of an application.",
         "required": true,
@@ -755,7 +755,7 @@
     },
     {
       "name": "applications",
-      "description": "Application operations used for managing applications to listings."
+      "description": "Application operations used for managing applications for listings."
     },
     {
       "name": "default",
@@ -1033,27 +1033,22 @@
         }
       }
     },
-    "/v1/users/{userId}/applications/": {
+    "/v1/users/{userId}/applications": {
       "get": {
         "summary": "list all applications of a user",
-        "operationId": "findApplicationsUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "STUDENT",
-              "ADMIN",
-              "INTERNAL"
-            ]
-          }
-        ],
+        "description": "lists all applications of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "listUserApplications",
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
           }
         ],
         "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -1061,8 +1056,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "$ref": "#/components/responses/ApplicationGet"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1074,16 +1072,8 @@
     "/v1/users/{userId}/applications/{applicationId}": {
       "get": {
         "summary": "get a specific application of a user",
+        "description": "gets a specific application of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "operationId": "findApplicationUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "STUDENT",
-              "ADMIN",
-              "INTERNAL"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1093,8 +1083,11 @@
           }
         ],
         "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -1102,8 +1095,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "$ref": "#/components/responses/ApplicationGet"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1113,16 +1109,8 @@
       },
       "delete": {
         "summary": "delete an application of a user",
+        "description": "deletes an application of a user <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "operationId": "deleteApplicationUser",
-        "security": [
-          {
-            "bearerAuth": [
-              "STUDENT",
-              "ADMIN",
-              "INTERNAL"
-            ]
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1132,8 +1120,14 @@
           }
         ],
         "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -1141,8 +1135,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "204": {
-            "description": "send when the request was executed successfully"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1329,6 +1326,7 @@
           }
         }
       }
+    },
     "/v1/listings/{listingId}/applications": {
       "get": {
         "summary": "returns all applications on a specific listing",
@@ -1340,6 +1338,18 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "send when executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationGet"
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
@@ -1352,17 +1362,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "description": "send when executed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ApplicationGet"
-                  }
-                }
-              }
-            }
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1383,6 +1387,9 @@
           "$ref": "#/components/requestBodies/Application"
         },
         "responses": {
+          "201": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
@@ -1395,8 +1402,14 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "201": {
-            "$ref": "#/components/responses/ApplicationGet"
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1409,7 +1422,7 @@
       "get": {
         "summary": "returns a specific application on a listing",
         "operationId": "findApplicationListing",
-        "description": "students can only access their own application <br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>LANDLORD (only on own listing)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "description": "students can only access their own application <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listing)</li><li>STUDENT (only on own application)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "parameters": [
           {
             "$ref": "#/components/parameters/ListingId"
@@ -1419,8 +1432,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
@@ -1431,8 +1444,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "$ref": "#/components/responses/ApplicationGet"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1443,7 +1459,7 @@
       "put": {
         "summary": "changes a listings application",
         "operationId": "updateApplicationListing",
-        "description": "Only a LANDLORD can update the applications <br> Once an application has been approved, all other applications on it's listing will be denied.",
+        "description": "updates the status of an application <br>once an application has been approved, all other applications for the listing will be denied. <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listing)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "parameters": [
           {
             "$ref": "#/components/parameters/ListingId"
@@ -1456,6 +1472,9 @@
           "$ref": "#/components/requestBodies/Application"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
@@ -1468,8 +1487,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "200": {
-            "$ref": "#/components/responses/ApplicationGet"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
@@ -1480,10 +1502,10 @@
       "delete": {
         "summary": "deletes a listings application",
         "operationId": "deleteApplicationListing",
-        "description": "deletes an application on a specific listing<br> Only allowed for logged in users<br><h3>Permitted Roles</h3><ul><li>STUDENT (applicant)<li>LANDLORD (only on it's own Listings)</li></li><li>TEAM</li><li>ADMIN</li></ul>",
+        "description": "deletes an application on a specific listing <br><h3>Permitted Roles</h3><ul><li>STUDENT (only on own application)<li>LANDLORD (only on own listing)</li></li><li>TEAM</li><li>ADMIN</li></ul>",
         "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
+          "204": {
+            "description": "send when executed successfully"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
@@ -1494,8 +1516,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "204": {
-            "description": "send when executed successfully"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
           }
         },
         "tags": [
