@@ -44,7 +44,7 @@
           "path": {
             "type": "string",
             "description": "path of the request that caused the error",
-            "example": "/v1/coffee/"
+            "example": "/v1/coffee"
           },
           "status": {
             "type": "integer",
@@ -766,7 +766,7 @@
         }
       }
     },
-    "/v1/users/": {
+    "/v1/users": {
       "get": {
         "summary": "retrieve all users",
         "description": "retrieves all registred users<br><h3>Permitted Roles</h3><ul><li>TEAM</li><li>ADMIN</li></ul>",
@@ -953,7 +953,7 @@
         }
       }
     },
-    "/v1/listings/": {
+    "/v1/listings": {
       "get": {
         "summary": "retrieve all listings",
         "description": "retrieves all listings<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
