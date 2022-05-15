@@ -1,0 +1,1509 @@
+{
+  "openapi": "3.0.3",
+  "permissions_preset": "<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+  "info": {
+    "title": "CozyCave.ch API Documentation",
+    "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
+    "version": "1.2.0",
+    "version-explanation": "APIVersion.MayorVersion.MinorVersion"
+  },
+  "servers": [
+    {
+      "url": "https://sopra-fs22-group-15-server.herokuapp.com/"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "status code as text",
+            "example": "I'm a teapot"
+          },
+          "message": {
+            "type": "string",
+            "description": "error message",
+            "example": "used a teapot instead of a coffeepot"
+          },
+          "path": {
+            "type": "string",
+            "description": "path of the request that caused the error",
+            "example": "/v1/coffee/"
+          },
+          "status": {
+            "type": "integer",
+            "description": "status code",
+            "example": 4418
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/Date"
+          }
+        }
+      },
+      "UserGet": {
+        "description": "User object with full information",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "authentication": {
+            "$ref": "#/components/schemas/AuthenticationData"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "details": {
+            "$ref": "#/components/schemas/UserDetails"
+          }
+        }
+      },
+      "UserGetPublic": {
+        "description": "User object with reduced information",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "authentication": {
+            "description": "Authentication data object",
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "email of the user",
+                "example": "erika.mustermann@uzh.ch"
+              }
+            }
+          },
+          "details": {
+            "description": "User details object",
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "first name of the user",
+                "example": "Erika"
+              },
+              "last_name": {
+                "type": "string",
+                "description": "last name of the user",
+                "example": "Mustermann"
+              },
+              "biography": {
+                "type": "string",
+                "description": "biography of the user",
+                "example": "I am a very nice person"
+              }
+            }
+          }
+        }
+      },
+      "UserPostPut": {
+        "description": "User object used to create or update a user",
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/AuthenticationData"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "details": {
+            "$ref": "#/components/schemas/UserDetails"
+          }
+        }
+      },
+      "AuthenticationData": {
+        "description": "Authentication data object",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "email of the user",
+            "example": "erika.mustermann@uzh.ch",
+            "required": true
+          },
+          "password": {
+            "type": "string",
+            "description": "password of the user",
+            "minLength": 8,
+            "example": "12345678",
+            "writeOnly": true,
+            "required": true
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT token when the user registering or logging in",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+            "readOnly": true
+          }
+        }
+      },
+      "UserDetails": {
+        "description": "User details object (note: birthday must be today 16 years ago)",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "first name of the user",
+            "example": "Erika",
+            "required": true,
+            "maxLength": 255
+          },
+          "last_name": {
+            "type": "string",
+            "description": "last name of the user",
+            "example": "Mustermann",
+            "required": true,
+            "maxLength": 255
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "birthday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "phone number of the user",
+            "example": "+41791234567",
+            "required": false
+          },
+          "biography": {
+            "type": "string",
+            "description": "biography of the user",
+            "example": "I am a very nice person",
+            "required": false,
+            "maxLength": 65535
+          }
+        }
+      },
+      "ListingGet": {
+        "description": "Listing object (if published is set, following fields must be set on the listing: title, description, address, listing_type, available_to, available(auto set), publisher(auto set))",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "title": {
+            "type": "string",
+            "description": "title of the listing",
+            "example": "beautiful apartment in Zurich"
+          },
+          "description": {
+            "type": "string",
+            "description": "description of the listing",
+            "example": "beautiful apartment in Zurich with one bedroom and a balcony"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "published": {
+            "type": "boolean",
+            "description": "if the listing is published",
+            "example": true
+          },
+          "sqm": {
+            "type": "number",
+            "description": "square meters of the listing",
+            "example": 45.5
+          },
+          "listing_type": {
+            "$ref": "#/components/schemas/ListingType"
+          },
+          "furnished": {
+            "type": "boolean",
+            "description": "if the listing is furnished",
+            "example": false
+          },
+          "available_to": {
+            "type": "array",
+            "description": "available to whom gender",
+            "items": {
+              "$ref": "#/components/schemas/Gender"
+            },
+            "example": [
+              "MALE",
+              "FEMALE",
+              "PREFER_NOT_TO_SAY",
+              "OTHER"
+            ]
+          },
+          "available": {
+            "type": "boolean",
+            "description": "if the listing is still available or not",
+            "example": true
+          },
+          "rent": {
+            "type": "number",
+            "description": "rent of the listing",
+            "example": 750
+          },
+          "deposit": {
+            "type": "number",
+            "description": "deposit of the listing",
+            "example": 2500
+          },
+          "rooms": {
+            "type": "number",
+            "description": "number of rooms of the listing",
+            "example": 2.5
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/UserGetPublic"
+          }
+        }
+      },
+      "ListingPostPut": {
+        "description": "Listing object used to create or update a listing (if published is set, following fields must be set on the listing: title, description, address, listing_type, available_to, available(auto set), publisher(auto set))",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "title": {
+            "type": "string",
+            "description": "title of the listing",
+            "example": "beautiful apartment in Zurich",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "description": "description of the listing",
+            "example": "beautiful apartment in Zurich with one bedroom and a balcony"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "published": {
+            "type": "boolean",
+            "description": "if the listing is published",
+            "example": true,
+            "default": false
+          },
+          "sqm": {
+            "type": "number",
+            "description": "square meters of the listing",
+            "example": 45.5,
+            "required": false
+          },
+          "listing_type": {
+            "$ref": "#/components/schemas/ListingType"
+          },
+          "furnished": {
+            "type": "boolean",
+            "description": "if the listing is furnished",
+            "example": false,
+            "required": false
+          },
+          "available_to": {
+            "type": "array",
+            "description": "available to whom gender",
+            "items": {
+              "$ref": "#/components/schemas/Gender"
+            },
+            "example": [
+              "MALE",
+              "FEMALE",
+              "PREFER_NOT_TO_SAY",
+              "OTHER"
+            ]
+          },
+          "available": {
+            "type": "boolean",
+            "description": "if the listing is still available or not",
+            "example": true,
+            "required": false,
+            "default": true
+          },
+          "rent": {
+            "type": "number",
+            "description": "rent of the listing",
+            "required": false,
+            "example": 750
+          },
+          "deposit": {
+            "type": "number",
+            "description": "deposit of the listing",
+            "required": false,
+            "example": 2500
+          },
+          "rooms": {
+            "type": "number",
+            "description": "number of rooms of the listing",
+            "required": false,
+            "example": 2.5
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/UserGetPublic"
+          }
+        }
+      },
+      "ApplicationGet": {
+        "description": "Application object used to create or update an Application",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "applicant": {
+            "$ref": "#/components/schemas/UserGetPublic"
+          },
+          "listing": {
+            "$ref": "#/components/schemas/ListingGet"
+          },
+          "application_status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        }
+      },
+      "ApplicationPostPut": {
+        "description": "Application object used to create or update an Application",
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/AuthenticationData"
+          },
+          "id": {
+            "type": "string"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "applicant": {
+            "type": "object"
+          },
+          "listing": {
+            "type": "object"
+          },
+          "application_status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        }
+      },
+      "ListingType": {
+        "type": "string",
+        "description": "value must be in all upper case",
+        "enum": [
+          "FLAT",
+          "ROOM",
+          "HOUSE",
+          "DORM",
+          "SEE_LISTING"
+        ],
+        "example": "FLAT"
+      },
+      "Location": {
+        "description": "Location object",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "name of the location",
+            "example": "uni campus",
+            "required": false
+          },
+          "description": {
+            "type": "string",
+            "description": "description of the location",
+            "example": "irchel campus @ uzh",
+            "required": false
+          },
+          "street": {
+            "type": "string",
+            "description": "street of the location",
+            "example": "Musterstrasse",
+            "required": false
+          },
+          "house_number": {
+            "type": "string",
+            "description": "house number of the location",
+            "example": "1A",
+            "required": true,
+            "maxLength": 10
+          },
+          "apartment_number": {
+            "type": "string",
+            "description": "apartment number of the location",
+            "example": "3C",
+            "maxLength": 10,
+            "required": false
+          },
+          "zip_code": {
+            "type": "string",
+            "description": "zip code of the location",
+            "example": "BR1 2DD",
+            "required": true
+          },
+          "city": {
+            "type": "string",
+            "description": "city of the location",
+            "example": "Zürich",
+            "required": true
+          },
+          "state": {
+            "type": "string",
+            "description": "state of the location",
+            "example": "Zürich",
+            "required": false
+          },
+          "country": {
+            "type": "string",
+            "description": "country of the location",
+            "example": "Switzerland",
+            "required": true
+          }
+        }
+      },
+      "Gender": {
+        "type": "string",
+        "description": "value must be in all upper case",
+        "enum": [
+          "FEMALE",
+          "MALE",
+          "PREFER_NOT_TO_SAY",
+          "OTHER"
+        ],
+        "example": "FEMALE",
+        "required": true
+      },
+      "ApplicationStatus": {
+        "type": "string",
+        "description": "value must be in all upper case",
+        "enum": [
+          "PENDING",
+          "CANCELED",
+          "DENIED",
+          "ACCEPTED"
+        ],
+        "example": "PENDING",
+        "required": false
+      },
+      "UUID": {
+        "type": "string",
+        "example": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+        "readOnly": true
+      },
+      "Date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "creation_date is always readOnly",
+        "example": "2020-05-14T02:41:20.182+00:00",
+        "required": false
+      },
+      "Role": {
+        "type": "string",
+        "description": "value must be in all upper case",
+        "enum": [
+          "LANDLORD",
+          "STUDENT",
+          "TEAM",
+          "ADMIN",
+          "INTERNAL"
+        ],
+        "required": false,
+        "example": "STUDENT"
+      }
+    },
+    "requestBodies": {
+      "Authentication": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthenticationData"
+            }
+          }
+        }
+      },
+      "User": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UserPostPut"
+            }
+          }
+        }
+      },
+      "Listing": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ListingPostPut"
+            }
+          }
+        }
+      },
+      "Application": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApplicationPostPut"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "The request does not have valid authentication credentials for the target resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "The authenticated user doesn't have the necessary permissions for the action.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequestError": {
+        "description": "The request is malformed, could not be parsed, misses information or includes invalid data.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "The requested resource doesn't exist.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "The server encountered an unexpected condition which prevented it from fulfilling the request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "MethodNotAllowedError": {
+        "description": "The method is not allowed for the requested URL.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "The request could not be completed due to a conflict with the current state of the target resource. This might be due to an already existing resource with the same unique fields.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "UndefinedError": {
+        "description": "An undefined / unknown error occurred.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NoContent": {
+        "description": "The request was successful but the response body is empty."
+      },
+      "UserGet": {
+        "description": "User object with full information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UserGet"
+            }
+          }
+        }
+      },
+      "UserGetPublic": {
+        "description": "User object with reduced information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UserGetPublic"
+            }
+          }
+        }
+      },
+      "ListingGet": {
+        "description": "Listing object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ListingGet"
+            }
+          }
+        }
+      },
+      "ApplicationGet": {
+        "description": "Application object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApplicationGet"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "UserId": {
+        "name": "userId",
+        "in": "path",
+        "description": "The unique identifier of the user.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
+        },
+        "allowEmptyValue": false
+      },
+      "ListingId": {
+        "name": "listingId",
+        "in": "path",
+        "description": "The unique identifier of the listing.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
+        },
+        "allowEmptyValue": false
+      },
+      "ApplicationId": {
+        "name": "ApplicationId",
+        "in": "path",
+        "description": "The unique identifier of an application.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
+        },
+        "allowEmptyValue": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "authentication",
+      "description": "Authentication operations used for user authentication like registering, logging in and logging out."
+    },
+    {
+      "name": "users",
+      "description": "User operations used for managing users."
+    },
+    {
+      "name": "listings",
+      "description": "Listing operations used for managing listings."
+    },
+    {
+      "name": "applications",
+      "description": "Application operations used for managing applications to listings."
+    },
+    {
+      "name": "default",
+      "description": "Default operations used for handling unknown requests."
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "ping the server",
+        "description": "Returns a simple message to verify that the server is up and running.<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "ping",
+        "security": [
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "default": "The API is running."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "summary": "register a new user",
+        "description": "registers and logs in a new user (token provided in the response)<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "register",
+        "tags": [
+          "authentication"
+        ],
+        "security": [
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/User"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/auth/login": {
+      "put": {
+        "summary": "log in a user",
+        "description": "used to log in as an already registered user (token is provided in response)<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "login",
+        "tags": [
+          "authentication"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Authentication"
+        },
+        "security": [
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/users/": {
+      "get": {
+        "summary": "retrieve all users",
+        "description": "retrieves all registred users<br><h3>Permitted Roles</h3><ul><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getUsers",
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "create a new user",
+        "description": "creates a new user by a team member (doesn't include token when created)<br><h3>Permitted Roles</h3><ul><li>TEAM (only users below team role)</li><li>ADMIN</li></ul>",
+        "operationId": "createUser",
+        "tags": [
+          "users"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/User"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/UserGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/users/{userId}": {
+      "get": {
+        "summary": "retrieve a user",
+        "description": "retrieves a user by id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getUser",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "put": {
+        "summary": "update a user",
+        "description": "updates a user by id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "updateUser",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/User"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a user",
+        "description": "deletes a user by id<br><h3>Permitted Roles</h3><ul><li>ADMIN</li></ul>",
+        "operationId": "deleteUser",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/users/{userId}/applications/": {
+      "get": {
+        "summary": "list all applications of a user",
+        "operationId": "findApplicationsUser",
+        "security": [
+          {
+            "bearerAuth": [
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      }
+    },
+    "/v1/users/{userId}/applications/{applicationId}": {
+      "get": {
+        "summary": "get a specific application of a user",
+        "operationId": "findApplicationUser",
+        "security": [
+          {
+            "bearerAuth": [
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      },
+      "delete": {
+        "summary": "delete an application of a user",
+        "operationId": "deleteApplicationUser",
+        "security": [
+          {
+            "bearerAuth": [
+              "STUDENT",
+              "ADMIN",
+              "INTERNAL"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "204": {
+            "description": "send when the request was executed successfully"
+          }
+        },
+        "tags": [
+          "users",
+          "applications"
+        ]
+      }
+    },
+    "/v1/listings/": {
+      "get": {
+        "summary": "retrieve all listings",
+        "description": "retrieves all listings<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getListings",
+        "tags": [
+          "listings"
+        ],
+        "security": [
+        ],
+        "responses": {
+          "200": {
+            "description": "list of listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingGet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "create a listing",
+        "description": "creates a listing<br><h3>Permitted Roles</h3><ul><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "createListing",
+        "tags": [
+          "listings"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Listing"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/ListingGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/listings/{listingId}": {
+      "get": {
+        "summary": "retrieve a listing",
+        "description": "retrieves a listing by id<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getListing",
+        "tags": [
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "security": [
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListingGet"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "put": {
+        "summary": "update a listing",
+        "description": "updates a listing<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listings)</li><li>STUDENT (only on own listings)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "updateListing",
+        "tags": [
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Listing"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListingGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a listing",
+        "description": "deletes a listing<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listings)</li><li>STUDENT (only on own listings)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "deleteListing",
+        "tags": [
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/listings/{listingId}/applications": {
+      "get": {
+        "summary": "returns all applications on a specific listing",
+        "operationId": "findApplicationsListing",
+        "description": "returns all applications on a specific listing <br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on own listings)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "description": "send when executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationGet"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "post": {
+        "summary": "creates a new application to a listing",
+        "operationId": "createApplicationListing",
+        "description": "creates a new application on a specific listing <br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Application"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "201": {
+            "$ref": "#/components/responses/ApplicationGet"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      }
+    },
+    "/v1/listings/{listingId}/applications/{applicationId}": {
+      "get": {
+        "summary": "returns a specific application on a listing",
+        "operationId": "findApplicationListing",
+        "description": "students can only access their own application <br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>LANDLORD (only on own listing)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "put": {
+        "summary": "changes a listings application",
+        "operationId": "updateApplicationListing",
+        "description": "Only a LANDLORD can update the applications <br> Once an application has been approved, all other applications on it's listing will be denied.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          },
+          {
+            "$ref": "#/components/parameters/ApplicationId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Application"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "200": {
+            "$ref": "#/components/responses/ApplicationGet"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      },
+      "delete": {
+        "summary": "deletes a listings application",
+        "operationId": "deleteApplicationListing",
+        "description": "deletes an application on a specific listing<br> Only allowed for logged in users<br><h3>Permitted Roles</h3><ul><li>STUDENT (applicant)<li>LANDLORD (only on it's own Listings)</li></li><li>TEAM</li><li>ADMIN</li></ul>",
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "204": {
+            "description": "send when executed successfully"
+          }
+        },
+        "tags": [
+          "listings",
+          "applications"
+        ]
+      }
+    }
+  }
+}

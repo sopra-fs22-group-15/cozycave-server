@@ -85,7 +85,7 @@ public class ListingService {
     public void deleteListing(Listing listing) {
         log.debug("deleting listing {}", listing);
 
-        applicationRepository.deleteAll(applicationRepository.findByListing_Id(listing.getId()));
+        applicationRepository.deleteAllByListing_Id(listing.getId());
 
         listingRepository.delete(listing);
 
@@ -95,7 +95,7 @@ public class ListingService {
     public void deleteListing(UUID uuid) {
         log.debug("deleting listing with id {}", uuid);
 
-        applicationRepository.deleteAll(applicationRepository.findByListing_Id(uuid));
+        applicationRepository.deleteAllByListing_Id(uuid);
 
         listingRepository.deleteById(uuid);
 

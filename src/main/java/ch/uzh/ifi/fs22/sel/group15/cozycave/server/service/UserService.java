@@ -105,7 +105,7 @@ public class UserService {
     public void deleteUser(User user) {
         log.debug("deleting user with id: {}", user.getId());
 
-        applicationRepository.deleteAll(applicationRepository.findByApplicant_Id(user.getId()));
+        applicationRepository.deleteAllByApplicant_Id(user.getId());
 
         userRepository.delete(user);
 
@@ -115,7 +115,7 @@ public class UserService {
     public void deleteUser(UUID uuid) {
         log.debug("deleting user with id: {}", uuid);
 
-        applicationRepository.deleteAll(applicationRepository.findByApplicant_Id(uuid));
+        applicationRepository.deleteAllByApplicant_Id(uuid);
 
         userRepository.deleteById(uuid);
 

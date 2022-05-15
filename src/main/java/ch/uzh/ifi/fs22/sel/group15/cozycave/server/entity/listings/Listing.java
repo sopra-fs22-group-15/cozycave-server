@@ -5,10 +5,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -92,6 +90,27 @@ public class Listing implements Cloneable {
     @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
+
+    public Listing(UUID id, Date creationDate, String title,
+                   String description, Location address,
+                   Boolean published, Double sqm, ListingType listingType,
+                   Boolean furnished, ArrayList<Gender> availableTo,
+                   Boolean available, Double deposit, Double rooms, User publisher) {
+        this.id = id;
+        this.creationDate = creationDate;
+        this.title = title;
+        this.description = description;
+        this.address = address;
+        this.published = published;
+        this.sqm = sqm;
+        this.listingType = listingType;
+        this.furnished = furnished;
+        this.availableTo = availableTo;
+        this.available = available;
+        this.deposit = deposit;
+        this.rooms = rooms;
+        this.publisher = publisher;
+    }
 
     public boolean isReadyToPublish() {
         return StringUtils.hasText(this.getTitle())

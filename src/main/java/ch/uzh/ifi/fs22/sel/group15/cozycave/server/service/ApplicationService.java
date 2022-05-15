@@ -1,6 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
@@ -8,9 +9,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service @Transactional public class ApplicationService {
-
-    private final Logger log = LoggerFactory.getLogger(ApplicationService.class);
+@Service @Transactional
+@Slf4j
+public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final ListingRepository listingRepository;
@@ -77,11 +77,10 @@ import java.util.UUID;
         newApplication.setId(UUID.randomUUID());
 
         try {
-            Listing listing = listingRepository.getOne(newApplication.getListing().getId());
-
-            if (listing.getAvailable() == false) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Listing not available for new applications");
+            User applicant = userRepository.getOne(newApplication.getApplicant().getId());
+            if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "only students can apply to a listing");
             }
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -89,12 +88,25 @@ import java.util.UUID;
         }
 
         try {
-            User applicant = userRepository.getOne(newApplication.getApplicant().getId());
-            if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "only students can apply to a listing");
+            Listing listing = listingRepository.getOne(newApplication.getListing().getId());
+
+            if (listing.getAvailable() == false) {
+                log.debug("listing with id: {} not available anymore", listing.getId());
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Listing not available for new applications");
+            }
+            if (listing.getPublished() == false) {
+                log.debug("listing with id: {} not published", listing.getId());
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Listing not available for new applications");
+            }
+            if (!listing.getAvailableTo().contains(getGenderOfApplicant(newApplication))) {
+                log.debug("listing with id: {} not available for gender: {}", listing.getId(), getGenderOfApplicant(newApplication));
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Listing not available for this gender");
             }
         } catch (EntityNotFoundException e) {
+            log.debug("listing with id: {} not found", newApplication);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Listing not available for new applications");
         }
@@ -143,10 +155,12 @@ import java.util.UUID;
             User publisher = userRepository.getOne(applicationInput.getListing().getPublisher().getId());
             if (publisher != decider
                     && (!decider.getRole().greaterEquals(Role.ADMIN))) {
+                log.debug("publisher of listing is not the one who can decide, nor is he admin publisher id: {} decider id: {}", publisher.getId(), decider.getId());
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "You're not the publisher of the listing to decide upon the application");
             }
         } catch (EntityNotFoundException e) {
+            log.debug("publisher not found");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Listing not available for new applications");
         }
@@ -172,6 +186,10 @@ import java.util.UUID;
         return applicationRepository.saveAndFlush(updatedApplication);
     }
 
+    private Gender getGenderOfApplicant(Application application) {
+        return application.getApplicant().getDetails().getGender();
+    }
+
     private String getEmailOfApplicant(Application application) {
         return application.getApplicant().getAuthenticationData().getEmail();
     }
@@ -186,6 +204,8 @@ import java.util.UUID;
         if (applicationToBeCreated.getApplicant() == null
                 || applicationToBeCreated.getListing() == null
                 || applicationToBeCreated.getApplicationStatus() == null) {
+            log.debug("values are not properly filled, applicant: {}, listing: {}, application_Status: {} ",
+                    applicationToBeCreated.getApplicant(), applicationToBeCreated.getListing(), applicationToBeCreated.getApplicationStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled before publishing");
         }

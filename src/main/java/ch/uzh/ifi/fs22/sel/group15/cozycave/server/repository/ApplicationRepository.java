@@ -15,13 +15,12 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     @NotNull Optional<Application> findById(UUID uuid);
 
-    /*@Query("SELECT a.id, a.creation_date, a.user_id, a.listing_id, a.application_status from applications a where user_id = ?1")
-    @NotNull List<Application> findByApplicant(UUID uuid);*/
-
     @NotNull List<Application> findByApplicant_Id(UUID uuid);
 
 
-    /*@Query("SELECT a.id, a.creation_date, a.user_id, a.listing_id, a.application_status from applications a where listing_id = ?1")
-    @NotNull List<Application> findByListing(UUID uuid);*/
     @NotNull List<Application> findByListing_Id(UUID uuid);
+
+    void deleteAllByApplicant_Id(@NotNull UUID id);
+
+    void deleteAllByListing_Id(@NotNull UUID id);
 }
