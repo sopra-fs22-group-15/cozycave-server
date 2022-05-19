@@ -1,7 +1,5 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
@@ -10,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +43,10 @@ public class ListingService {
     }
 
     public List<Listing> getListings() {
+        return this.listingRepository.findAll();
+    }
+
+    public List<Listing> getListingsFiltered() {
         return this.listingRepository.findAll();
     }
 

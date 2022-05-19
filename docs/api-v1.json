@@ -4,7 +4,7 @@
   "info": {
     "title": "CozyCave.ch API Documentation",
     "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "version-explanation": "APIVersion.MayorVersion.MinorVersion"
   },
   "servers": [
@@ -754,6 +754,10 @@
       "description": "Listing operations used for managing listings."
     },
     {
+      "name": "listings filter",
+      "description": "filter operations to retrieve listings."
+    },
+    {
       "name": "applications",
       "description": "Application operations used for managing applications for listings."
     },
@@ -1151,10 +1155,102 @@
     "/v1/listings": {
       "get": {
         "summary": "retrieve all listings",
-        "description": "retrieves all listings<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "description": "retrieves all listings<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul><br>Filters can be arbitrary put to gether",
         "operationId": "getListings",
+        "parameters": [
+          {
+            "name": "MIN_RENT",
+            "in": "query",
+            "description": "Minimum RENT e.g. 300",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MAX_RENT",
+            "in": "query",
+            "description": "Maximum RENT e.g. 800",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "AVAILABLE_TO",
+            "in": "query",
+            "description": "Gender selection e.g. MALE,FEMALE",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "LISTING_TYPE",
+            "in": "query",
+            "description": "Listing Type selection e.g. HOUSE,FLAT",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "CITY",
+            "in": "query",
+            "description": "CITY selection e.g. ZURICH",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ZIP_CODE",
+            "in": "query",
+            "description": "ZIP Code of flat e.g. 8000",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MIN_SQM",
+            "in": "query",
+            "description": "Minimum SQM of flat e.g. 100",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MAX_SQM",
+            "in": "query",
+            "description": "Maximum SQM of flat e.g. 150",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "AVAILABLE",
+            "in": "query",
+            "description": "Available if ad has been published",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "SORT",
+            "in": "query",
+            "description": "Only applicable for RENT and SQM",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ORDER",
+            "in": "query",
+            "description": "Only applicable for RENT and SQM via ASC, DESC. Default is ASC",
+            "schema": {
+              "type": "string"
+            }
+          }
+
+        ],
         "tags": [
-          "listings"
+          "listings",
+          "listings filter"
         ],
         "security": [
         ],
