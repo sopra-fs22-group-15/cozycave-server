@@ -4,25 +4,12 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.AssertionsUtils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 
 import java.util.*;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -91,6 +78,15 @@ public class Listing implements Cloneable {
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
 
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "listing_picture_id")
+    private List<Picture> pictures;
+
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "listing_floorplan_id")
+    private List<Picture> floorplan;
+
+
     public boolean isReadyToPublish() {
         return StringUtils.hasText(title)
             && StringUtils.hasText(getDescription())
@@ -135,7 +131,9 @@ public class Listing implements Cloneable {
             this.getRent(),
             this.getDeposit(),
             this.getRooms(),
-            this.getPublisher()
+            this.getPublisher(),
+            this.getPictures(),
+            this.getFloorplan()
         );
     }
 }

@@ -3,9 +3,13 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PictureGetDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PicturePostDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -67,5 +71,7 @@ public class UserPostPutDto implements Serializable {
         private String phoneNumber;
 
         private String biography;
+
+        private List<PicturePostDto> picture;
     }
 }

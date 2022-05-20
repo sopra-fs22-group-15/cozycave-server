@@ -86,7 +86,8 @@ class UserControllerTest {
                 Date.from(Instant.now().minus(50 * 365, ChronoUnit.DAYS)),
                 null,
                 "+41 79 123 45 67",
-                "bio"
+                "bio",
+                null
             )
         );
 
@@ -108,7 +109,8 @@ class UserControllerTest {
                 Date.from(Instant.now().minus(45 * 365, ChronoUnit.DAYS)),
                 null,
                 "+41 76 123 45 67",
-                "bio"
+                "bio",
+                null
             )
         );
 

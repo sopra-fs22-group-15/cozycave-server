@@ -93,7 +93,8 @@ public class Application {
                         "Switzerland"
                     ),
                     "+41791234567",
-                    "bio"
+                    "bio",
+                    null
                 )
             ), null);
         };

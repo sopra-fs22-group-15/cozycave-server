@@ -63,8 +63,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/v1/listings/",
                 "/v1/listings/{id}",
                 "/v1/listings/{id}/",
+                "/v1/pictures",
+                "/v1/pictures/",
                 "/v1/pictures/{id}",
-                "/v1/pictures/{id}/"
+                "/v1/pictures/{id}/",
+                "/v1/pictures/{id}/view",
+                "/v1/pictures/{id}/view/",
+                "/v1/listings/{listingId}",
+                "/v1/listings/{listingId}/",
+                "/v1//pictures/users/{userId}",
+                "/v1//pictures/users/{userId}/"
             ).permitAll()
             .anyRequest().authenticated()
             .and()

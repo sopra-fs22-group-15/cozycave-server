@@ -1,9 +1,11 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PictureGetDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,5 +29,7 @@ public class UserGetPublicDto implements Serializable {
 
         @JsonInclude(Include.NON_EMPTY)
         private String biography;
+
+        private List<PictureGetDto> picture;
     }
 }

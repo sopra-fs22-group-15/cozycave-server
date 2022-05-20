@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -61,5 +62,22 @@ public class UserGetDto implements Serializable {
 
         @JsonInclude(Include.NON_EMPTY)
         private String biography;
+
+        @JsonInclude(Include.NON_EMPTY)
+        private List<PictureDto> picture;
     }
+
+    @AllArgsConstructor @NoArgsConstructor @Data
+    public static class PictureDto implements Serializable {
+        private UUID id;
+
+        @JsonProperty("creation_date")
+        private Date creationDate;
+
+        private UserGetDto uploader;
+
+        @JsonProperty("picture_url")
+        private String pictureUrl;
+    }
+
 }

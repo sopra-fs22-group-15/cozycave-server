@@ -25,7 +25,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "picture")
+@Table(name = "pictures")
 @AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
 public class Picture {
 
@@ -44,6 +44,9 @@ public class Picture {
     @OneToOne(cascade = CascadeType.PERSIST, optional = false, orphanRemoval = true)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User uploader;
+
+    @Column(name = "picture_url", nullable = false)
+    private String pictureUrl;
 
     @Override
     public boolean equals(Object o) {

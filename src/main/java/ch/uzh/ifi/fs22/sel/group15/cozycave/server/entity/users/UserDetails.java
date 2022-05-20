@@ -4,23 +4,12 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -64,6 +53,10 @@ public class UserDetails implements Cloneable {
     @Column(name = "about", columnDefinition = "TEXT")
     private String about;
 
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "user_picture_id")
+    private List<Picture> picture;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -90,7 +83,8 @@ public class UserDetails implements Cloneable {
             (Date) this.birthday.clone(),
             this.address.clone(),
             phoneNumber,
-            about
+            about,
+            this.picture
         );
     }
 
