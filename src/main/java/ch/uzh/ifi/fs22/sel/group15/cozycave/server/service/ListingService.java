@@ -42,10 +42,6 @@ public class ListingService {
         this.applicationRepository = applicationRepository;
     }
 
-    public List<Listing> getListings() {
-        return this.listingRepository.findAll();
-    }
-
     public List<Listing> getListingsFiltered() {
         return this.listingRepository.findAll();
     }

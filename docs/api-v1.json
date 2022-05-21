@@ -1155,7 +1155,7 @@
     "/v1/listings": {
       "get": {
         "summary": "retrieve all listings",
-        "description": "retrieves all listings<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul><br>Filters can be arbitrary put to gether",
+        "description": "retrieves all listings. filters can be applied but are not mandatory. order of filters doesn't matter.<h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
         "operationId": "getListings",
         "parameters": [
           {
@@ -1163,7 +1163,7 @@
             "in": "query",
             "description": "Minimum RENT e.g. 300",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {
@@ -1171,7 +1171,7 @@
             "in": "query",
             "description": "Maximum RENT e.g. 800",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {
@@ -1179,7 +1179,7 @@
             "in": "query",
             "description": "Gender selection e.g. MALE,FEMALE",
             "schema": {
-              "type": "string"
+              "type": "array"
             }
           },
           {
@@ -1187,7 +1187,7 @@
             "in": "query",
             "description": "Listing Type selection e.g. HOUSE,FLAT",
             "schema": {
-              "type": "string"
+              "type": "array"
             }
           },
           {
@@ -1211,7 +1211,7 @@
             "in": "query",
             "description": "Minimum SQM of flat e.g. 100",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {
@@ -1219,7 +1219,7 @@
             "in": "query",
             "description": "Maximum SQM of flat e.g. 150",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {

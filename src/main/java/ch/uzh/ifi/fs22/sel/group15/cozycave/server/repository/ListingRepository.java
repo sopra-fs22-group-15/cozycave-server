@@ -13,7 +13,4 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
     @NotNull Optional<Listing> findById(@NotNull UUID id);
 
-    @NotNull Optional<Listing> findAllByAvailableToContains(Gender gender);
-
-    @NotNull Optional<Listing> findAllByRent(@NotNull Double rent);
 }

@@ -28,6 +28,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import static java.lang.System.*;
+import static java.util.stream.Collectors.toList;
+
 @RestController
 @RequestMapping(value = "/v1")
 @Slf4j
@@ -43,89 +46,52 @@ public class ListingController {
         this.applicationService = applicationService;
     }
 
-    // Get all listings in a list
-   /*@GetMapping("/listings")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<ListingGetDto> getAllListings() {
-        return listingService.getListings().stream()
-            .map(ListingMapper.INSTANCE::listingToListingGetDto)
-            .collect(Collectors.toList());
-    }*/
+    // Get all listings in a list and even e able to filter
     @GetMapping("/listings")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<ListingGetDto> getAllListingsFiltered(
-            @RequestParam(name = "MIN_RENT") Optional<String> minRent,
-            @RequestParam(name = "MAX_RENT") Optional<String> maxRent,
+            @RequestParam(name = "MIN_RENT") Optional<Integer> minRent,
+            @RequestParam(name = "MAX_RENT") Optional<Integer> maxRent,
             @RequestParam(name = "AVAILABLE_TO") Optional<List<String>> availableTo,
             @RequestParam(name = "LISTING_TYPE") Optional<List<String>> listingType,
             @RequestParam(name = "CITY") Optional<String> city,
             @RequestParam(name = "ZIP_CODE") Optional<String> zipCode,
-            @RequestParam(name = "MIN_SQM") Optional<String> minSqm,
-            @RequestParam(name = "MAX_SQM") Optional<String> maxSqm,
+            @RequestParam(name = "MIN_SQM") Optional<Integer> minSqm,
+            @RequestParam(name = "MAX_SQM") Optional<Integer> maxSqm,
             @RequestParam(name = "AVAILABLE") Optional<String> available,
             @RequestParam(name = "SORT") Optional<String> sort,
             @RequestParam(name = "ORDER") Optional<String> order
     ) {
         HashMap<String, Object> filtersMap = new HashMap<String, Object>();
-        List<Listing> allListings = listingService.getListings();
+        List<Listing> allListings = listingService.getListingsFiltered();
 
         // check if values are filled
         if (minRent.isPresent()) {
-            try {
-                filtersMap.put("MIN_RENT", Integer.parseInt(minRent.get()));
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expected a number");
-            }
+            filtersMap.put("MIN_RENT", minRent.get());
         }
         if (maxRent.isPresent()) {
-            try {
-                filtersMap.put("MAX_RENT", Integer.parseInt(maxRent.get()));
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expected a number");
-            }
+            filtersMap.put("MAX_RENT", maxRent.get());
         }
         if (availableTo.isPresent()) {
             // for conversion from String to ENUM
-            List<Gender> temp = new ArrayList<>();
-            for (String genderString : availableTo.get()) {
-                try {
-                    temp.add(Gender.valueOf(genderString.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gender for AVAILABLE_to does not exist");
-                }
-            }
-            filtersMap.put("AVAILABLE_TO", temp);
+            filtersMap.put("AVAILABLE_TO", availableTo.get().stream().
+                    map(gender -> Gender.valueOf(gender.toUpperCase()))
+                    .collect(toList())
+            );
+
         }
         if (listingType.isPresent()) {
             // for conversion from String to ENUM
-            List<ListingType> temp = new ArrayList<>();
-            for (String listingString : listingType.get()) {
-                try {
-                    temp.add(ListingType.valueOf(listingString.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "LISTING_TYPE does not exist");
-                }
-            }
-            filtersMap.put("LISTING_TYPE", temp);
+            filtersMap.put("LISTING_TYPE", listingType.get().stream().
+                    map(listing -> ListingType.valueOf(listing.toUpperCase()))
+                    .collect(toList())
+            );
         }
         if (city.isPresent()) filtersMap.put("CITY", city.get());
         if (zipCode.isPresent()) filtersMap.put("ZIP_CODE", zipCode.get());
-        if (minSqm.isPresent()) {
-            try {
-                filtersMap.put("MIN_SQM", Integer.parseInt(minSqm.get()));
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expected a number");
-            }
-        }
-        if (maxSqm.isPresent()) {
-            try {
-                filtersMap.put("MAX_SQM", Integer.parseInt(maxSqm.get()));
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expected a number");
-            }
-        }
+        if (minSqm.isPresent()) filtersMap.put("MIN_SQM", minSqm.get());
+        if (maxSqm.isPresent()) filtersMap.put("MAX_SQM", maxSqm.get());
 
         if (available.isPresent()) filtersMap.put("AVAILABLE", Boolean.parseBoolean(available.get()));
 
@@ -133,7 +99,7 @@ public class ListingController {
             List<FilterPair> filterPairs = filtersMap.entrySet().stream()
                     .map(e -> new FilterPair(ListingFilters.getFilter(e.getKey()), e.getValue())).toList();
 
-            allListings = ListingFilter.createFilter(allListings).filter(filterPairs).getListings();
+            allListings = ListingFilter.createFilter(allListings).filter(filterPairs).getListingsFiltered();
         }
 
         if (sort.isPresent()) {
@@ -189,7 +155,7 @@ public class ListingController {
 
         return allListings.stream()
                 .map(ListingMapper.INSTANCE::listingToListingGetDto)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     // Creates new listing
@@ -292,7 +258,7 @@ public class ListingController {
 
         return applicationService.findApplicationsToListing(id).stream()
                 .map(ApplicationMapper.INSTANCE::applicationToApplicationGetDto)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     // Creates an application to a listing
@@ -459,7 +425,7 @@ public class ListingController {
             return new ListingFilter(listings);
         }
 
-        public List<Listing> getListings() {
+        public List<Listing> getListingsFiltered() {
             return listings;
         }
 
@@ -484,63 +450,63 @@ public class ListingController {
         public ListingFilter filterByMinRent(int minRent) {
             this.listings = listings.stream()
                     .filter(listing -> listing.getRent() >= minRent)
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByMaxRent(int maxRent) {
             this.listings = listings.stream()
                     .filter(listing -> listing.getRent() <= maxRent)
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByGender(List<Gender> availableTo) {
             this.listings = listings.stream()
                     .filter(listing -> listing.getAvailableTo().containsAll(availableTo))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByListingType(List<ListingType> listingType) {
             this.listings = listings.stream()
                     .filter(listing -> listingType.contains(listing.getListingType()))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByCity(String city) {
             this.listings = listings.stream()
                     .filter(listing -> Objects.equals(listing.getAddress().getCity(), city))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByZipCode(String zipCode) {
             this.listings = listings.stream()
                     .filter(listing -> Objects.equals(listing.getAddress().getZipCode(), zipCode))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByMinSqm(int minSqm) {
             this.listings = listings.stream()
                     .filter(listing -> listing.getSqm() >= minSqm)
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByMaxSqm(int maxSqm) {
             this.listings = listings.stream()
                     .filter(listing -> listing.getSqm() <= maxSqm)
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
         public ListingFilter filterByAvailable(boolean available) {
             this.listings = listings.stream()
                     .filter(listing -> Objects.equals(listing.getPublished(), available))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             return this;
         }
 
