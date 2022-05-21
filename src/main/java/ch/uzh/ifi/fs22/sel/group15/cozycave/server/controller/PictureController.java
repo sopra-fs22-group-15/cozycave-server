@@ -4,10 +4,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PictureGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PicturePostDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.PictureMapper;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
@@ -41,8 +39,6 @@ public class PictureController {
         this.listingService = listingService;
     }
 
-    //TODO: Add authorization to all endpoints
-
     // get all pictures of a listing in a list
     @GetMapping("/pictures/listings/{listingId}")
     @ResponseStatus(HttpStatus.OK)
@@ -60,7 +56,7 @@ public class PictureController {
                 .collect(Collectors.toList());
     }
 
-    // get all pictures of a listing in a list
+    // get all floorplan pictures of a listing in a list
     @GetMapping("/pictures/listings/{listingId}/floorplan")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -75,6 +71,79 @@ public class PictureController {
         return pictureService.getListingFloorplan(inputListing).stream()
                 .map(PictureMapper.INSTANCE::pictureToPictureGetDto)
                 .collect(Collectors.toList());
+    }
+
+    // create pictures for listing
+    @PostMapping("/pictures/listings/{listingId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public PictureGetDto uploadListingPicture(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID listingId,
+            @RequestBody PicturePostDto picturePostDto
+    ) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.error("user (authenticated user) with id {} not found while creating user", authUserId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "error finding authenticated user");
+                });
+
+        Listing listing = listingService.findListingById(listingId)
+                .orElseThrow(() -> {
+                    log.error("Listing with id {} not found while uploading picture", listingId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "error finding listing");
+                });
+
+        if (authUser.getId() != listing.getPublisher().getId()) {
+            log.error("Listing with id {} has a different publisher {} than {}", listingId, listing.getPublisher().getId(), authUserId);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Publisher of listing and logged in user are not the same");
+        }
+
+        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+
+        pictureInput.setUploader(authUser);
+
+        Picture uploadedPicture = pictureService.uploadListingPicture(pictureInput, listing);
+
+        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
+    }
+
+    @PostMapping("/pictures/listings/{listingId}/floorplan")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public PictureGetDto uploadListingFloorplanPicture(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID listingId,
+            @RequestBody PicturePostDto picturePostDto
+    ) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.error("user (authenticated user) with id {} not found while creating user", authUserId);
+                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "error finding authenticated user");
+                });
+
+        Listing listing = listingService.findListingById(listingId)
+                .orElseThrow(() -> {
+                    log.error("Listing with id {} not found while uploading picture", listingId);
+                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "error finding listing");
+                });
+
+        if (authUser.getId() != listing.getPublisher().getId()) {
+            log.error("Listing with id {} has a different publisher {} than {}", listingId, listing.getPublisher().getId(), authUserId);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Publisher of listing and logged in user are not the same");
+        }
+
+        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+
+        pictureInput.setUploader(authUser);
+
+        Picture uploadedPicture = pictureService.uploadListingFloorplanPicture(pictureInput, listing);
+
+        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
     }
 
     // get profile picture of a user in a list
@@ -96,15 +165,13 @@ public class PictureController {
                 .collect(Collectors.toList());
     }
 
-    // TODO: Picture upload for listings and users
-    // create pictures
-    /*
-    @PostMapping("/pictures")
+    // create pictures for users
+    @PostMapping("/pictures/users")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public UserGetDto uploadPicture(
+    public PictureGetDto uploadUserPicture(
             @AuthenticationPrincipal String authUserId,
-            @RequestBody UserPostPutDto userPostPutDto
+            @RequestBody PicturePostDto picturePostDto
     ) {
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
@@ -113,12 +180,13 @@ public class PictureController {
                             "error finding authenticated user");
                 });
 
-        User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
+        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+        pictureInput.setUploader(authUser);
 
-        User createdUser = userService.createUser(userInput, authUser);
+        Picture uploadedPicture = pictureService.uploadUserPicture(pictureInput);
 
-        return UserMapper.INSTANCE.userToUserGetDto(createdUser);
-    }*/
+        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
+    }
 
     // get specific picture
     @GetMapping("/pictures/{id}")
@@ -134,10 +202,24 @@ public class PictureController {
     // delete a specific picture
     @DeleteMapping("/pictures/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePicture(@PathVariable UUID id) {
+    public void deletePicture(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id) {
         if (!pictureService.existsPicture(id)) {
             log.debug("picture with id {} not found while deleting picture", id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "picture with id " + id + " not found");
+        }
+
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.error("user (authenticated user) with id {} not found while creating user", authUserId);
+                    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "error finding authenticated user");
+                });
+
+        if (authUser.getId() != pictureService.findPictureById(id).get().getUploader().getId()) {
+            log.error("picture with id {} has a different uploader than {}", id, authUserId);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Uploader of picture and logged in user are not the same");
         }
 
         pictureService.deletePicture(id);
@@ -145,7 +227,7 @@ public class PictureController {
         log.info("listing with id {} deleted", id);
     }
 
-    // get specific userprofile
+    // get specific picture url
     @GetMapping("/pictures/{id}/view")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

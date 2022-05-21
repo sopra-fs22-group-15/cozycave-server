@@ -1,10 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
@@ -23,7 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
-@Service @Transactional
+@Service
+@Transactional
 @Slf4j
 public class PictureService {
 
@@ -32,7 +29,8 @@ public class PictureService {
     private final UserRepository userRepository;
     private final PictureRepository pictureRepository;
 
-    @Autowired public PictureService(@Qualifier("pictureRepository") PictureRepository pictureRepository, ApplicationRepository applicationRepository, ListingRepository listingRepository, UserRepository userRepository) {
+    @Autowired
+    public PictureService(@Qualifier("pictureRepository") PictureRepository pictureRepository, ApplicationRepository applicationRepository, ListingRepository listingRepository, UserRepository userRepository) {
         this.pictureRepository = pictureRepository;
         this.applicationRepository = applicationRepository;
         this.listingRepository = listingRepository;
@@ -63,16 +61,10 @@ public class PictureService {
         return listingFloorplan;
     }
 
-    // get all Pictures of a user
-    public List<Picture> getUserPictures(User inputUser) {
-        List<Picture> userPicture = new ArrayList<>();
 
-        for (Picture picture : inputUser.getDetails().getPicture()) {
-            if (picture.getId() != null) {
-                userPicture.add(this.pictureRepository.findById(picture.getId()).get());
-            }
-        }
-        return userPicture;
+    // get all Pictures of a user
+    public @NotNull Optional<Picture> getUserPictures(User inputUser) {
+        return this.pictureRepository.findById(inputUser.getDetails().getPicture().getId());
     }
 
     // get concrete Picture > id = picture id
@@ -86,51 +78,102 @@ public class PictureService {
     }
 
 
+    public @NotNull Picture uploadUserPicture(Picture picture) {
+        log.debug("upload Picture {}", picture);
+        checkIfDataIsValid(picture);
 
-    public @NotNull Application createApplication(Application newApplication) {
-        log.debug("create Application {}", newApplication);
-        checkIfDataIsValid(newApplication);
-
-        newApplication.setId(UUID.randomUUID());
-        newApplication.setCreationDate(new Date());
-        // manually set application to pending regardless of how application was sent
-        newApplication.setApplicationStatus(ApplicationStatus.PENDING);
-        newApplication.setId(UUID.randomUUID());
+        picture.setId(UUID.randomUUID());
+        picture.setCreationDate(new Date());
 
         try {
-            User applicant = userRepository.getOne(newApplication.getApplicant().getId());
-            if (!applicant.getRole().greaterEquals(Role.STUDENT)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "only students can apply to a listing");
+            User uploader = userRepository.getOne(picture.getUploader().getId());
+
+            picture = pictureRepository.saveAndFlush(picture);
+            log.debug("Uploaded new Picture: {}", picture);
+
+            if (uploader.getDetails().getPicture() != null) {
+                deletePicture(uploader.getDetails().getPicture());
             }
+
+            uploader.getDetails().setPicture(picture);
+
+            uploader = userRepository.saveAndFlush(uploader);
+
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Listing not available for new applications");
+                    "User deos not exist");
         }
+
+        return picture;
+    }
+
+
+    public @NotNull Picture uploadListingPicture(Picture picture, Listing listing) {
+        log.debug("upload Picture {}", picture);
+        checkIfDataIsValid(picture);
+
+        picture.setId(UUID.randomUUID());
+        picture.setCreationDate(new Date());
 
         try {
-            Listing listing = listingRepository.getOne(newApplication.getListing().getId());
-
-            if (listing.getAvailable() == false) {
-                log.debug("listing with id: {} not available anymore", listing.getId());
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Listing not available for new applications");
-            }
-            if (listing.getPublished() == false) {
-                log.debug("listing with id: {} not published", listing.getId());
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Listing not available for new applications");
-            }
+            User uploader = userRepository.getOne(picture.getUploader().getId());
         } catch (EntityNotFoundException e) {
-            log.debug("listing with id: {} not found", newApplication);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Listing not available for new applications");
+                    "User deos not exist");
+        }
+        try {
+            Listing uploadListing = listingRepository.getOne(listing.getId());
+
+            picture = pictureRepository.saveAndFlush(picture);
+            log.debug("Uploaded new Picture: {}", picture);
+
+            List<Picture> pictures = uploadListing.getPictures();
+            pictures.add(picture);
+
+            uploadListing.setPictures(pictures);
+
+            uploadListing = listingRepository.saveAndFlush(uploadListing);
+
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Listing deos not exist");
         }
 
-        newApplication = applicationRepository.saveAndFlush(newApplication);
-        log.debug("Created new Application: {}", newApplication);
+        return picture;
+    }
 
-        return newApplication;
+    public @NotNull Picture uploadListingFloorplanPicture(Picture picture, Listing listing) {
+        log.debug("upload Picture {}", picture);
+        checkIfDataIsValid(picture);
+
+        picture.setId(UUID.randomUUID());
+        picture.setCreationDate(new Date());
+
+        try {
+            User uploader = userRepository.getOne(picture.getUploader().getId());
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "User deos not exist");
+        }
+        try {
+            Listing uploadListing = listingRepository.getOne(listing.getId());
+
+            picture = pictureRepository.saveAndFlush(picture);
+            log.debug("Uploaded new Picture: {}", picture);
+
+            List<Picture> floorplanPictures = uploadListing.getFloorplan();
+            floorplanPictures.add(picture);
+
+            uploadListing.setFloorplan(floorplanPictures);
+
+            uploadListing = listingRepository.saveAndFlush(uploadListing);
+
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Listing deos not exist");
+        }
+
+        return picture;
     }
 
     public boolean existsPicture(UUID uuid) {
@@ -138,7 +181,6 @@ public class PictureService {
     }
 
     public void deletePicture(Picture picture) {
-        //TODO: delete all applications once a user is deleted
         log.debug("delete Picture {}", picture);
         this.pictureRepository.delete(picture);
     }
@@ -149,20 +191,17 @@ public class PictureService {
     }
 
 
-    private void checkIfDataIsValid(Application applicationToBeCreated) {
+    private void checkIfDataIsValid(Picture pictureToBeUploaded) {
         // check if application has empty fiels
-        if (applicationToBeCreated.getApplicant() == null
-                || applicationToBeCreated.getListing() == null
-                || applicationToBeCreated.getApplicationStatus() == null) {
-            log.debug("values are not properly filled, applicant: {}, listing: {}, application_Status: {} ",
-                    applicationToBeCreated.getApplicant(), applicationToBeCreated.getListing(), applicationToBeCreated.getApplicationStatus());
+        if (pictureToBeUploaded.getUploader() == null
+                || pictureToBeUploaded.getPictureUrl() == null) {
+            log.debug("values are not properly filled for picture, uploader: {}, url: {}",
+                    pictureToBeUploaded.getUploader(), pictureToBeUploaded.getPictureUrl());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled before publishing");
         }
         // check if application has even sensible values
-        userRepository.findById(applicationToBeCreated.getApplicant().getId())
+        userRepository.findById(pictureToBeUploaded.getUploader().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
-        listingRepository.findById(applicationToBeCreated.getListing().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
     }
 }

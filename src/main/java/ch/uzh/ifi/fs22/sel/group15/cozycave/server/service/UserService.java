@@ -4,9 +4,11 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.config.SecurityConfig;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -37,6 +39,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final PictureRepository pictureRepository;
     private final PasswordEncoder passwordEncoder;
     private final UniversityDomains universityDomains;
 
@@ -44,10 +47,12 @@ public class UserService {
     public UserService(
         @Qualifier("userRepository") UserRepository userRepository,
         ApplicationRepository applicationRepository,
+        PictureRepository pictureRepository,
         PasswordEncoder passwordEncoder,
         UniversityDomains universityDomains) {
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
+        this.pictureRepository = pictureRepository;
         this.passwordEncoder = passwordEncoder;
         this.universityDomains = universityDomains;
     }
@@ -107,6 +112,8 @@ public class UserService {
 
         applicationRepository.deleteAllByApplicant_Id(user.getId());
 
+        pictureRepository.delete(user.getDetails().getPicture());
+
         userRepository.delete(user);
 
         log.info("deleted user with id: {}", user.getId());
@@ -116,6 +123,8 @@ public class UserService {
         log.debug("deleting user with id: {}", uuid);
 
         applicationRepository.deleteAllByApplicant_Id(uuid);
+
+        pictureRepository.delete(findUserID(uuid).get().getDetails().getPicture());
 
         userRepository.deleteById(uuid);
 

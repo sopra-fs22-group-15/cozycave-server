@@ -1,6 +1,5 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetPublicDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,8 +16,6 @@ public class PictureGetDto implements Serializable {
 
     @JsonProperty("creation_date")
     private Date creationDate;
-
-    private UserGetPublicDto uploader;
 
     @JsonProperty("picture_url")
     private String pictureUrl;

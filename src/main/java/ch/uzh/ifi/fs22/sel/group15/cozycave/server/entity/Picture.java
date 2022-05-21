@@ -4,29 +4,18 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "pictures")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor @Getter @Setter @NoArgsConstructor
 public class Picture {
 
     public static final String ROOT_PATH = "https://sopra-fs22-group-15-server.herokuapp.com/pictures/";
@@ -41,7 +30,7 @@ public class Picture {
     @Column(name = "creation_date", updatable = false)
     private Date creationDate;
 
-    @OneToOne(cascade = CascadeType.PERSIST, optional = false, orphanRemoval = true)
+    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User uploader;
 
@@ -63,6 +52,15 @@ public class Picture {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public Picture clone() {
+        return new Picture(
+                this.id,
+                this.creationDate,
+                this.uploader,
+                this.pictureUrl
+        );
     }
 
     @PrePersist

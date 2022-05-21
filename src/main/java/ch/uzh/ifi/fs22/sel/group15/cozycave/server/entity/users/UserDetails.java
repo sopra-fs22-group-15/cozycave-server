@@ -3,10 +3,8 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 import javax.persistence.*;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
@@ -53,9 +51,9 @@ public class UserDetails implements Cloneable {
     @Column(name = "about", columnDefinition = "TEXT")
     private String about;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "user_picture_id")
-    private List<Picture> picture;
+    @OneToOne(cascade = CascadeType.DETACH)
+    @JoinColumn(name = "picture_id")
+    private Picture picture;
 
     @Override
     public boolean equals(Object o) {

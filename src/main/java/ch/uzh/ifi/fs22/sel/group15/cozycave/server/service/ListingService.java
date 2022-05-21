@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Applicati
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import java.util.Date;
 import java.util.List;
@@ -33,14 +34,16 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final PictureRepository pictureRepository;
 
     @Autowired
     public ListingService(
         @Qualifier("listingRepository") ListingRepository listingRepository,
-        UserRepository userRepository, ApplicationRepository applicationRepository) {
+        UserRepository userRepository, ApplicationRepository applicationRepository, PictureRepository pictureRepository) {
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
+        this.pictureRepository = pictureRepository;
     }
 
     public List<Listing> getListings() {
@@ -88,6 +91,10 @@ public class ListingService {
 
         applicationRepository.deleteAllByListing_Id(listing.getId());
 
+        pictureRepository.deleteAll(listing.getPictures());
+
+        pictureRepository.deleteAll(listing.getFloorplan());
+
         listingRepository.delete(listing);
 
         log.info("deleted listing {}", listing);
@@ -97,6 +104,10 @@ public class ListingService {
         log.debug("deleting listing with id {}", uuid);
 
         applicationRepository.deleteAllByListing_Id(uuid);
+
+        pictureRepository.deleteAll(findListingById(uuid).get().getPictures());
+
+        pictureRepository.deleteAll(findListingById(uuid).get().getFloorplan());
 
         listingRepository.deleteById(uuid);
 
