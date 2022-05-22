@@ -42,7 +42,7 @@ public class ListingService {
         this.applicationRepository = applicationRepository;
     }
 
-    public List<Listing> getListingsFiltered() {
+    public List<Listing> getListings() {
         return this.listingRepository.findAll();
     }
 

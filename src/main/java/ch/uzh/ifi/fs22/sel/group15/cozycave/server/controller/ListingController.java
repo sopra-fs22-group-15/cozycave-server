@@ -20,7 +20,6 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static java.lang.System.*;
 import static java.util.stream.Collectors.toList;
 
 @RestController
@@ -64,7 +62,7 @@ public class ListingController {
             @RequestParam(name = "ORDER") Optional<String> order
     ) {
         HashMap<String, Object> filtersMap = new HashMap<String, Object>();
-        List<Listing> allListings = listingService.getListingsFiltered();
+        List<Listing> allListings = listingService.getListings();
 
         // check if values are filled
         if (minRent.isPresent()) {
@@ -121,7 +119,7 @@ public class ListingController {
                 }
             }
 
-            // set default ordering to ASC or use userinput, only works for rent at the moment
+            // set default ordering to ASC (Ordering only applies to RENT and SQM)
             if (orderType.equals(OrderType.ASC)) {
                 if (sorting.equals(Sorting.RENT)) {
                     allListings.sort(Comparator.comparing(Listing::getRent));
