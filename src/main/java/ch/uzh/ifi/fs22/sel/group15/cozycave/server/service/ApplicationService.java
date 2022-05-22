@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service @Transactional
+@Service
+@Transactional
 @Slf4j
 public class ApplicationService {
 
@@ -32,7 +33,8 @@ public class ApplicationService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
 
-    @Autowired public ApplicationService(@Qualifier("applicationRepository") ApplicationRepository applicationRepository, ListingRepository listingRepository, UserRepository userRepository) {
+    @Autowired
+    public ApplicationService(@Qualifier("applicationRepository") ApplicationRepository applicationRepository, ListingRepository listingRepository, UserRepository userRepository) {
         this.applicationRepository = applicationRepository;
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
@@ -42,6 +44,7 @@ public class ApplicationService {
     public List<Application> findApplicationsOfUser(UUID id) {
         return this.applicationRepository.findByApplicant_Id(id);
     }
+
     // get all Applications of a user > id = user id
     public List<Application> findApplicationsOfUser(User user) {
         return this.applicationRepository.findByApplicant_Id(user.getId());
@@ -61,6 +64,7 @@ public class ApplicationService {
     public Optional<Application> findApplicationById(UUID id) {
         return this.applicationRepository.findById(id);
     }
+
     // get concrete application > id = application id
     public Optional<Application> findApplicationById(Application application) {
         return this.applicationRepository.findById(application.getId());
@@ -111,6 +115,14 @@ public class ApplicationService {
                     "Listing not available for new applications");
         }
 
+        // throw an error when there's already another application open to that listing
+        for (Application openApplication : findApplicationsOfUser(newApplication.getApplicant())) {
+            if (openApplication.getListing().getId() == newApplication.getListing().getId()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "There is already an application open");
+            }
+        }
+
         newApplication = applicationRepository.saveAndFlush(newApplication);
         log.debug("Created new Application: {}", newApplication);
 
@@ -132,7 +144,6 @@ public class ApplicationService {
     }
 
     public void deleteApplication(Application application) {
-        //TODO: delete all applications once a user is deleted
         log.debug("delete Application {}", application);
         this.applicationRepository.delete(application);
     }
