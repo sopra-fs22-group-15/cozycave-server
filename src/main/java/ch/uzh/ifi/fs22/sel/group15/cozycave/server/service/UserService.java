@@ -10,6 +10,10 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -123,8 +127,6 @@ public class UserService {
         log.debug("deleting user with id: {}", uuid);
 
         applicationRepository.deleteAllByApplicant_Id(uuid);
-
-        pictureRepository.delete(findUserID(uuid).get().getDetails().getPicture());
 
         userRepository.deleteById(uuid);
 

@@ -12,6 +12,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,8 +87,13 @@ public class PictureController {
     public PictureGetDto uploadListingPicture(
             @AuthenticationPrincipal String authUserId,
             @PathVariable UUID listingId,
-            @RequestBody PicturePostDto picturePostDto
-    ) {
+            @RequestParam MultipartFile file) {
+
+        if (file.isEmpty()) {
+            log.error("no Picture provided");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Picture provided");
+        }
+
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while creating user", authUserId);
@@ -107,11 +113,10 @@ public class PictureController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Publisher of listing and logged in user are not the same");
         }
 
-        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
-
+        Picture pictureInput = new Picture();
         pictureInput.setUploader(authUser);
 
-        Picture uploadedPicture = pictureService.uploadListingPicture(pictureInput, listing);
+        Picture uploadedPicture = pictureService.uploadListingPicture(pictureInput, file, listing);
 
         return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
     }
@@ -122,8 +127,13 @@ public class PictureController {
     public PictureGetDto uploadListingFloorplanPicture(
             @AuthenticationPrincipal String authUserId,
             @PathVariable UUID listingId,
-            @RequestBody PicturePostDto picturePostDto
-    ) {
+            @RequestParam MultipartFile file) {
+
+        if (file.isEmpty()) {
+            log.error("no Picture provided");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Picture provided");
+        }
+
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while creating user", authUserId);
@@ -143,11 +153,11 @@ public class PictureController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Publisher of listing and logged in user are not the same");
         }
 
-        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+        Picture pictureInput = new Picture();
 
         pictureInput.setUploader(authUser);
 
-        Picture uploadedPicture = pictureService.uploadListingFloorplanPicture(pictureInput, listing);
+        Picture uploadedPicture = pictureService.uploadListingFloorplanPicture(pictureInput, file, listing);
 
         return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
     }
@@ -164,7 +174,9 @@ public class PictureController {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found");
                 });
 
-        //TODO: Implement GRAVATAR API
+        //TODO: Implement GRAVATAR API -> simply hash the lowercase email to an md5 and get the pictureUrl like
+        // https://www.gravatar.com/avatar/hash.jpg -> Easiest way would be when a user is created, it automatically
+        // always uses the gravatar picture
 
         return pictureService.getUserPictures(inputUser).stream()
                 .map(PictureMapper.INSTANCE::pictureToPictureGetDto)
@@ -177,30 +189,11 @@ public class PictureController {
     @ResponseBody
     public PictureGetDto uploadUserPicture(
             @AuthenticationPrincipal String authUserId,
-            @RequestParam("pictures/users") MultipartFile file) throws IOException {
-        if (!file.isEmpty()) {
-            try {
-                byte[] bytes = file.getBytes();
+            @RequestParam MultipartFile file){
 
-                // Creating the directory to store file
-                String rootPath = System.getProperty("catalina.home");
-                File dir = new File(rootPath + File.separator + "tmpFiles");
-                if (!dir.exists())
-                    dir.mkdirs();
-
-                // Create the file on server
-                File serverFile = new File(dir.getAbsolutePath()
-                        + File.separator);
-                BufferedOutputStream stream = new BufferedOutputStream(
-                        new FileOutputStream(serverFile));
-                stream.write(bytes);
-                stream.close();
-
-                log.info("Server File Location="
-                        + serverFile.getAbsolutePath());
-
-            } catch (Exception e) {
-            }
+        if (file.isEmpty()) {
+            log.error("no Picture provided");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Picture provided");
         }
 
         User authUser = userService.findUserID(UUID.fromString(authUserId))
@@ -211,13 +204,13 @@ public class PictureController {
                 });
 
         //Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
-        /*Picture pictureInput = new Picture();
+        Picture pictureInput = new Picture();
         pictureInput.setUploader(authUser);
 
         Picture uploadedPicture = pictureService.uploadUserPicture(pictureInput, file);
 
-        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);*/
-        return null;
+        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
+
     }
 
     // get specific picture
@@ -254,9 +247,13 @@ public class PictureController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Uploader of picture and logged in user are not the same");
         }
 
+        // fallback profile picture should be gravatar
         pictureService.deletePicture(id);
+        if (authUser.getDetails().getPicture() == null) {
+            User user = pictureService.setGravatarPicture(authUser);
+        }
 
-        log.info("listing with id {} deleted", id);
+        log.info("picture with id {} deleted", id);
     }
 
     // get specific picture url

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
@@ -13,10 +14,13 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ListingMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,11 +44,13 @@ public class ListingController {
     private final ListingService listingService;
     private final UserService userService;
     private final ApplicationService applicationService;
+    private final PictureService pictureService;
 
-    ListingController(ListingService listingService, UserService userService, ApplicationService applicationService) {
+    ListingController(ListingService listingService, UserService userService, ApplicationService applicationService, PictureService pictureService) {
         this.listingService = listingService;
         this.userService = userService;
         this.applicationService = applicationService;
+        this.pictureService = pictureService;
     }
 
     // Get all listings in a list
@@ -124,6 +130,15 @@ public class ListingController {
             log.debug("listing with id {} not found while deleting listing", id);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "listing with id " + id + " not found");
         }
+
+        Listing listingToBeDeleted = listingService.findListingById(id).get();
+
+        // merge lists of pictures and list of floorplans into one and delete pictures first before listing GETS DELETED
+        pictureService.deleteAll(
+                Stream.of(listingToBeDeleted.getPictures(), listingToBeDeleted.getFloorplan())
+                        .flatMap(x -> x.stream())
+                        .collect(Collectors.toList())
+        );
 
         listingService.deleteListing(id);
 

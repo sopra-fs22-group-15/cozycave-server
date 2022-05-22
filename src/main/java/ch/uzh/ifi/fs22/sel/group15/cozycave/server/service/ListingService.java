@@ -1,6 +1,7 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
@@ -104,10 +105,6 @@ public class ListingService {
         log.debug("deleting listing with id {}", uuid);
 
         applicationRepository.deleteAllByListing_Id(uuid);
-
-        pictureRepository.deleteAll(findListingById(uuid).get().getPictures());
-
-        pictureRepository.deleteAll(findListingById(uuid).get().getFloorplan());
 
         listingRepository.deleteById(uuid);
 

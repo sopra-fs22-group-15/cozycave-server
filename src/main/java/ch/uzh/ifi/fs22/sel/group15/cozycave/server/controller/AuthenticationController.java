@@ -5,6 +5,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtTokenProvider;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +31,15 @@ public class AuthenticationController {
     private final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     private final UserService userService;
+    private final PictureService pictureService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthenticationController(UserService userService, PasswordEncoder passwordEncoder,
+    public AuthenticationController(UserService userService, PictureService pictureService,PasswordEncoder passwordEncoder,
         AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
+        this.pictureService = pictureService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -51,6 +54,11 @@ public class AuthenticationController {
         User toBeCreatedUser = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
 
         User user = userService.createUser(toBeCreatedUser, null);
+        // set default picture to gravatar profile picture
+        if (user.getDetails().getPicture() == null) {
+            //createdUser.getDetails().setPicture(setGravatarPicture(newUser));
+            user = pictureService.setGravatarPicture(user);
+        }
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 

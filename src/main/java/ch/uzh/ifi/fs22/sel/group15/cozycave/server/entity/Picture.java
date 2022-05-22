@@ -19,6 +19,7 @@ import org.hibernate.annotations.Type;
 public class Picture {
 
     public static final String ROOT_PATH = "http://database.imhof-lan.ch/CozyCave/";
+    public static final String GRAVATAR_PATH = "https://www.gravatar.com/avatar/";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,8 +31,8 @@ public class Picture {
     @Column(name = "creation_date", updatable = false)
     private Date creationDate;
 
-    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @JoinColumn(name = "user_id", nullable = false)
     private User uploader;
 
     @Column(name = "picture_url", nullable = false)

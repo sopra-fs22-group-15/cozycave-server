@@ -1,15 +1,14 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 public class FTPUploader {
 
@@ -29,11 +28,28 @@ public class FTPUploader {
         ftp.setFileType(FTP.BINARY_FILE_TYPE);
         ftp.enterLocalPassiveMode();
     }
-    public void uploadFile(String localFileFullName, String fileName, String hostDir)
-            throws Exception {
-        try(InputStream input = new FileInputStream(new File(localFileFullName))){
-            this.ftp.storeFile(hostDir + fileName, input);
+
+    public void uploadFile(MultipartFile file, String filename){
+        try{
+            InputStream input = new FileInputStream(multipartToFile(file, filename));
+            this.ftp.storeFile(filename, input);
+        } catch (SecurityException | IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "file couldn't be created");
         }
+    }
+
+    public void deleteFile(String filename) {
+        try {
+            this.ftp.deleteFile(filename);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "file couldn't be deleted");
+        }
+    }
+
+    public File multipartToFile(MultipartFile multipart, String fileName) throws IllegalStateException, IOException {
+        File convFile = new File(System.getProperty("java.io.tmpdir")+"/"+fileName);
+        multipart.transferTo(convFile);
+        return convFile;
     }
 
     public void disconnect(){
@@ -42,7 +58,7 @@ public class FTPUploader {
                 this.ftp.logout();
                 this.ftp.disconnect();
             } catch (IOException f) {
-                // do nothing as file is already saved to server
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "couldn't disconnect from storage");
             }
         }
     }
