@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.FTPUploader;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
@@ -7,6 +8,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationReposit
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +16,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import java.awt.image.RenderedImage;
+
 
 import javax.persistence.EntityNotFoundException;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 
 @Service
@@ -78,12 +87,13 @@ public class PictureService {
     }
 
 
-    public @NotNull Picture uploadUserPicture(Picture picture) {
+    public @NotNull Picture uploadUserPicture(Picture picture, MultipartFile file) {
         log.debug("upload Picture {}", picture);
-        checkIfDataIsValid(picture);
+        //checkIfDataIsValid(picture);
 
         picture.setId(UUID.randomUUID());
         picture.setCreationDate(new Date());
+        picture.setPictureUrl(Picture.ROOT_PATH + picture.getId().toString() + Files.getFileExtension(String.valueOf(file)));
 
         try {
             User uploader = userRepository.getOne(picture.getUploader().getId());
@@ -99,9 +109,22 @@ public class PictureService {
 
             uploader = userRepository.saveAndFlush(uploader);
 
+            // root path: http://database.imhof-lan.ch/CozyCave/00c2108d-0144-4077-99f7-c7fdaa4a0775.jpg
+
+            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
+            //FTP server path is relative. So if FTP account HOME directory is "/home/pankaj/public_html/" and you need to upload
+            // files to "/home/pankaj/public_html/wp-content/uploads/image2/", you should pass directory parameter as "/wp-content/uploads/image2/"
+            ftpUploader.uploadFile(Files.getNameWithoutExtension(String.valueOf(file)),
+                    picture.getId().toString() + Files.getFileExtension(String.valueOf(file)),
+                    "");
+            ftpUploader.disconnect();
+
+
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "User deos not exist");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return picture;

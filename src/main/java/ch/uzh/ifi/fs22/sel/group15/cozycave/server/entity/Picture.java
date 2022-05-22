@@ -18,7 +18,7 @@ import org.hibernate.annotations.Type;
 @AllArgsConstructor @Getter @Setter @NoArgsConstructor
 public class Picture {
 
-    public static final String ROOT_PATH = "https://sopra-fs22-group-15-server.herokuapp.com/pictures/";
+    public static final String ROOT_PATH = "http://database.imhof-lan.ch/CozyCave/";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -14,8 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -171,8 +177,32 @@ public class PictureController {
     @ResponseBody
     public PictureGetDto uploadUserPicture(
             @AuthenticationPrincipal String authUserId,
-            @RequestBody PicturePostDto picturePostDto
-    ) {
+            @RequestParam("pictures/users") MultipartFile file) throws IOException {
+        if (!file.isEmpty()) {
+            try {
+                byte[] bytes = file.getBytes();
+
+                // Creating the directory to store file
+                String rootPath = System.getProperty("catalina.home");
+                File dir = new File(rootPath + File.separator + "tmpFiles");
+                if (!dir.exists())
+                    dir.mkdirs();
+
+                // Create the file on server
+                File serverFile = new File(dir.getAbsolutePath()
+                        + File.separator);
+                BufferedOutputStream stream = new BufferedOutputStream(
+                        new FileOutputStream(serverFile));
+                stream.write(bytes);
+                stream.close();
+
+                log.info("Server File Location="
+                        + serverFile.getAbsolutePath());
+
+            } catch (Exception e) {
+            }
+        }
+
         User authUser = userService.findUserID(UUID.fromString(authUserId))
                 .orElseThrow(() -> {
                     log.error("user (authenticated user) with id {} not found while creating user", authUserId);
@@ -180,12 +210,14 @@ public class PictureController {
                             "error finding authenticated user");
                 });
 
-        Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+        //Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
+        /*Picture pictureInput = new Picture();
         pictureInput.setUploader(authUser);
 
-        Picture uploadedPicture = pictureService.uploadUserPicture(pictureInput);
+        Picture uploadedPicture = pictureService.uploadUserPicture(pictureInput, file);
 
-        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);
+        return PictureMapper.INSTANCE.pictureToPictureGetDto(uploadedPicture);*/
+        return null;
     }
 
     // get specific picture
