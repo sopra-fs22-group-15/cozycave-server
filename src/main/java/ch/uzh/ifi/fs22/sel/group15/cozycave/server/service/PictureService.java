@@ -4,11 +4,9 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.FTPUploader;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
-import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,35 +16,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import java.awt.image.RenderedImage;
 
 
 import javax.persistence.EntityNotFoundException;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @Slf4j
 public class PictureService {
 
-    private final ApplicationRepository applicationRepository;
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final PictureRepository pictureRepository;
 
     @Autowired
-    public PictureService(@Qualifier("pictureRepository") PictureRepository pictureRepository, ApplicationRepository applicationRepository, ListingRepository listingRepository, UserRepository userRepository) {
+    public PictureService(@Qualifier("pictureRepository") PictureRepository pictureRepository, ListingRepository listingRepository, UserRepository userRepository) {
         this.pictureRepository = pictureRepository;
-        this.applicationRepository = applicationRepository;
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
+    }
+
+    public List<Picture> getPictures() {
+        return this.pictureRepository.findAll();
     }
 
     // get all Pictures to a specific listing
@@ -90,7 +84,7 @@ public class PictureService {
     }
 
 
-    public @NotNull Picture uploadUserPicture(Picture picture, MultipartFile file) {
+    public @NotNull Picture uploadUserPicture(User user, Picture picture, MultipartFile file) {
         log.debug("upload Picture {}", picture);
 
         picture.setId(UUID.randomUUID());
@@ -101,7 +95,8 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            User uploader = userRepository.getOne(picture.getUploader().getId());
+            //User uploader = userRepository.getOne(picture.getUploader().getId());
+            User uploader = userRepository.getOne(user.getId());
 
             picture = pictureRepository.saveAndFlush(picture);
             log.debug("Uploaded new Picture: {}", picture);
@@ -139,7 +134,7 @@ public class PictureService {
 
         //create md5 hash from user email
         byte[] email = userToUpdate.getAuthenticationData().getEmail().toLowerCase().getBytes();
-        byte [] hash = null;
+        byte[] hash = null;
 
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -149,8 +144,7 @@ public class PictureService {
             e.printStackTrace();
         }
         StringBuilder strEmailHashedBuilder = new StringBuilder();
-        for(byte b : hash)
-        {
+        for (byte b : hash) {
             strEmailHashedBuilder.append(String.format("%02x", b));
         }
         String strEmailHashed = strEmailHashedBuilder.toString();
@@ -178,7 +172,7 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            User uploader = userRepository.getOne(picture.getUploader().getId());
+            //User uploader = userRepository.getOne(picture.getUploader().getId());
 
             Listing uploadListing = listingRepository.getOne(listing.getId());
 
@@ -217,7 +211,7 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            User uploader = userRepository.getOne(picture.getUploader().getId());
+            //User uploader = userRepository.getOne(picture.getUploader().getId());
 
             Listing uploadListing = listingRepository.getOne(listing.getId());
 
@@ -251,39 +245,44 @@ public class PictureService {
 
     public void deletePicture(Picture picture) {
         log.debug("delete Picture {}", picture);
+        String url = picture.getPictureUrl();
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+
+        this.pictureRepository.delete(picture);
+
 
         try {
             FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
-            String url = picture.getPictureUrl();
-            String filename = url.substring(url.lastIndexOf("/") + 1);
             ftpUploader.deleteFile(filename);
             ftpUploader.disconnect();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Connection couldn't be established to storage");
         }
 
-        this.pictureRepository.delete(picture);
     }
 
     public void deletePicture(UUID id) {
         log.debug("delete Picture {}", id);
+        String url = findPictureById(id).get().getPictureUrl();
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+
+        Optional<Picture> pictureToBeDeleted = findPictureById(id);
+        System.out.println(pictureToBeDeleted);
+        this.pictureRepository.deleteById(id);
 
         try {
             FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
-            String url = findPictureById(id).get().getPictureUrl();
-            String filename = url.substring(url.lastIndexOf("/") + 1);
             ftpUploader.deleteFile(filename);
             ftpUploader.disconnect();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Connection couldn't be established to storage");
         }
 
-        this.pictureRepository.deleteById(id);
     }
 
     public void deleteAll(List<Picture> picturesToBeDeleted) {
 
-        for(Picture picture : picturesToBeDeleted) {
+        for (Picture picture : picturesToBeDeleted) {
             this.deletePicture(picture);
             try {
                 Thread.sleep(100);
@@ -298,15 +297,15 @@ public class PictureService {
 
     private void checkIfDataIsValid(Picture pictureToBeUploaded) {
         // check if application has empty fiels
-        if (pictureToBeUploaded.getUploader() == null
-                || pictureToBeUploaded.getPictureUrl() == null) {
-            log.debug("values are not properly filled for picture, uploader: {}, url: {}",
-                    pictureToBeUploaded.getUploader(), pictureToBeUploaded.getPictureUrl());
+        if (pictureToBeUploaded.getPictureUrl() == null) {
+            log.debug("values are not properly filled for picture, url: {}",
+                    pictureToBeUploaded.getPictureUrl());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "mandatory fields must be filled before uploading");
         }
         // check if application has even sensible values
         userRepository.findById(pictureToBeUploaded.getUploader().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
     }
 }

@@ -8,6 +8,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;

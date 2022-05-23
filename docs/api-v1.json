@@ -4,7 +4,7 @@
   "info": {
     "title": "CozyCave.ch API Documentation",
     "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
-    "version": "1.2.0",
+    "version": "1.2.2",
     "version-explanation": "APIVersion.MayorVersion.MinorVersion"
   },
   "servers": [
@@ -538,6 +538,43 @@
         ],
         "required": false,
         "example": "STUDENT"
+      },
+      "PictureGet": {
+        "description": "Picture object with full information",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "creation_date": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "picture_url": {
+            "$ref": "#/components/schemas/Picture_url"
+          }
+        }
+      },
+      "PicturePost": {
+        "description": "Picture object with full information",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/file"
+          }
+        }
+      },
+      "Picture_url": {
+        "description": "Direct Link to where picture is stored / can be retrieved",
+        "type": "string",
+        "example": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png",
+        "required": true
+      },
+      "file": {
+        "description": "Picture file",
+        "type": "file",
+        "required": true
       }
     },
     "requestBodies": {
@@ -577,6 +614,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ApplicationPostPut"
+            }
+          }
+        }
+      },
+      "Picture": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PicturePost"
             }
           }
         }
@@ -705,6 +752,26 @@
             }
           }
         }
+      },
+      "PictureGet": {
+        "description": "Application object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PictureGet"
+            }
+          }
+        }
+      },
+      "PictureView": {
+        "description": "Single link to picture",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Picture_url"
+            }
+          }
+        }
       }
     },
     "parameters": {
@@ -737,6 +804,26 @@
           "$ref": "#/components/schemas/UUID"
         },
         "allowEmptyValue": false
+      },
+      "PictureId": {
+        "name": "PictureId",
+        "in": "path",
+        "description": "The unique identifier of a picture.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
+        },
+        "allowEmptyValue": false
+      },
+      "file": {
+        "name": "file",
+        "in": "header",
+        "description": "A single picture.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/file"
+        },
+        "allowEmptyValue": false
       }
     }
   },
@@ -756,6 +843,10 @@
     {
       "name": "applications",
       "description": "Application operations used for managing applications for listings."
+    },
+    {
+      "name": "pictures",
+      "description": "Picture operations used for uploading pictures for profile pictures as well as listing pictures."
     },
     {
       "name": "default",
@@ -1527,6 +1618,437 @@
           "listings",
           "applications"
         ]
+      }
+    },
+    "/v1/pictures": {
+      "get": {
+        "summary": "retrieves a list of all pictures, either profile or listing",
+        "description": "retrieves a list of pictures<br><h3>Permitted Roles</h3><ul><li>ADMIN</li></ul>",
+        "operationId": "getPictures",
+        "tags": [
+          "pictures"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of pictures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PictureGet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/{pictureId}": {
+      "get": {
+        "summary": "retrieves a specific picture, either profile or listing",
+        "description": "retrieves a single picture by id<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "findPicture",
+        "tags": [
+          "pictures"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PictureId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a specific picture",
+        "description": "deletes a specific picture by id<br><h3>Permitted Roles</h3><ul><li>STUDENT (only for it's own profile picture)</li><li>LANDLORD (only for it's own listing pictures)</li><li>ADMIN</li></ul>",
+        "operationId": "deletePicture",
+        "tags": [
+          "pictures"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PictureId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/{pictureId}/view": {
+      "get": {
+        "summary": "retrieves the url of a picture",
+        "description": "retrieves a single url of a picture<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getPictureView",
+        "tags": [
+          "pictures",
+          "users",
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PictureId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureView"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/users/{userId}": {
+      "get": {
+        "summary": "retrieves a profile picture",
+        "description": "retrieves a single picture by the id of the user<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getProfilePicture",
+        "tags": [
+          "pictures",
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/users": {
+      "post": {
+        "summary": "uploads a profile picture",
+        "description": "uploads a single picture to the profile of the authenticated user<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only for own profile)</li><li>STUDENT (only for own profile)</li><li>ADMIN</li></ul><br> The fallback profile picture, or when none is defined when creating a user, it always uses the Gravatar picture",
+        "operationId": "uploadUserPicture",
+        "tags": [
+          "pictures",
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/listing/{listingId}": {
+      "get": {
+        "summary": "retrieves a list of pictures for a specific listing",
+        "description": "retrieves a list of pictures by the id of the listing<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getPicturesListing",
+        "tags": [
+          "pictures",
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of pictures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PictureGet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "uploads a picture to a listing",
+        "description": "uploads a single picture to a listing<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only for own profile)</li></ul><br>",
+        "operationId": "uploadListingPicture",
+        "tags": [
+          "pictures",
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/pictures/listing/{listingId}/floorplan": {
+      "get": {
+        "summary": "retrieves a list of pictures of floorplans for a specific listing",
+        "description": "retrieves a list of pictures by the id of the listing<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getPicturesListingFloorplan",
+        "tags": [
+          "pictures",
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ListingId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of pictures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PictureGet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "uploads a floorplan picture to a listing",
+        "description": "uploads a single floorplan picture to a listing<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only for own profile)</li></ul><br>",
+        "operationId": "uploadListingFloorplanPicture",
+        "tags": [
+          "pictures",
+          "listings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PictureGet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
       }
     }
   }

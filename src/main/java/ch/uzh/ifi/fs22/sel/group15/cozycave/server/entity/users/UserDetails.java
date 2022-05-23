@@ -51,7 +51,7 @@ public class UserDetails implements Cloneable {
     @Column(name = "about", columnDefinition = "TEXT")
     private String about;
 
-    @OneToOne(cascade = CascadeType.DETACH)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "picture_id")
     private Picture picture;
 

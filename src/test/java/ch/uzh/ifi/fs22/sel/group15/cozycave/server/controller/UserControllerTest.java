@@ -10,6 +10,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationEnt
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -49,6 +50,8 @@ class UserControllerTest {
     private ListingService listingService;
     @MockBean
     ApplicationService applicationService;
+    @MockBean
+    PictureService pictureService;
 
     private User permittedTestUser;
     private User unpermittedTestUser;

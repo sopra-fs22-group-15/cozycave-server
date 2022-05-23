@@ -74,16 +74,16 @@ public class Listing implements Cloneable {
     @Column(name = "rooms")
     private Double rooms;
 
-    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
 
-    @OneToMany(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "picture_id")
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "picture_listing_id")
     private List<Picture> pictures = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "floorplan_id")
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "floorplan_listing_id")
     private List<Picture> floorplan = new ArrayList<>();
 
 

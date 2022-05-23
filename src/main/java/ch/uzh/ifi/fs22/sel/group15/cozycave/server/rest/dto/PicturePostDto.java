@@ -18,8 +18,6 @@ public class PicturePostDto implements Serializable {
     @JsonProperty("creation_date")
     private Date creationDate;
 
-    private UserGetPublicDto uploader;
-
     @JsonProperty("picture_url")
     private String pictureUrl;
 }
