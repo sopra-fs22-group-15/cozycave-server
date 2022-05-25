@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+// TODO: only accepts picture files
+
 @RestController
 @RequestMapping(value = "/v1")
 @Slf4j
@@ -96,11 +98,13 @@ public class PictureController {
         }
 
         // fallback profile picture should be gravatar
-        pictureService.deletePicture(pictureId);
-
-        if (authUser.getDetails().getPicture() == null) {
+        if (pictureId.equals(authUser.getDetails().getPicture().getId())) {
             User user = pictureService.setGravatarPicture(authUser);
+
+        } else {
+            pictureService.deletePicture(pictureId);
         }
+
 
         log.info("picture with id {} deleted", pictureId);
     }
@@ -131,10 +135,6 @@ public class PictureController {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found");
                 });
 
-        //TODO: Implement GRAVATAR API -> simply hash the lowercase email to an md5 and get the pictureUrl like
-        // https://www.gravatar.com/avatar/hash.jpg -> Easiest way would be when a user is created, it automatically
-        // always uses the gravatar picture
-
         return pictureService.getUserPictures(inputUser).stream()
                 .map(PictureMapper.INSTANCE::pictureToPictureGetDto)
                 .collect(Collectors.toList());
@@ -160,7 +160,6 @@ public class PictureController {
                             "error finding authenticated user");
                 });
 
-        //Picture pictureInput = PictureMapper.INSTANCE.picturePostDtoToPicture(picturePostDto);
         Picture pictureInput = new Picture();
         pictureInput.setUploader(authUser);
 

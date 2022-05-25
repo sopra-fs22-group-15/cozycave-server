@@ -95,7 +95,6 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            //User uploader = userRepository.getOne(picture.getUploader().getId());
             User uploader = userRepository.getOne(user.getId());
 
             picture = pictureRepository.saveAndFlush(picture);
@@ -109,7 +108,7 @@ public class PictureService {
 
             uploader = userRepository.saveAndFlush(uploader);
 
-            //TODO: Asynchronous upload
+            //TODO: Future Feature Asynchronous upload for better user experience and less latency
             FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.uploadFile(file, filename);
             ftpUploader.disconnect();
@@ -126,37 +125,48 @@ public class PictureService {
     }
 
     public User setGravatarPicture(User userToUpdate) {
-        userToUpdate = userRepository.getOne(userToUpdate.getId());
-        Picture profilePicture = new Picture();
-        profilePicture.setId(UUID.randomUUID());
-        profilePicture.setCreationDate(new Date());
-        profilePicture.setUploader(userToUpdate);
-
-        //create md5 hash from user email
-        byte[] email = userToUpdate.getAuthenticationData().getEmail().toLowerCase().getBytes();
-        byte[] hash = null;
 
         try {
+            userToUpdate = userRepository.getOne(userToUpdate.getId());
+            Picture profilePicture = new Picture();
+            profilePicture.setId(UUID.randomUUID());
+            profilePicture.setCreationDate(new Date());
+            profilePicture.setUploader(userToUpdate);
+
+            //create md5 hash from user email
+            byte[] email = userToUpdate.getAuthenticationData().getEmail().toLowerCase().getBytes();
+            byte[] hash = null;
+
+            if (userToUpdate.getDetails().getPicture() != null) {
+                String oldPictureUrl = userToUpdate.getDetails().getPicture().getPictureUrl();
+                deletePictureFromStorageServer(oldPictureUrl);
+            }
             MessageDigest md = MessageDigest.getInstance("MD5");
             hash = md.digest(email);
 
+            StringBuilder strEmailHashedBuilder = new StringBuilder();
+            for (byte b : hash) {
+                strEmailHashedBuilder.append(String.format("%02x", b));
+            }
+            String strEmailHashed = strEmailHashedBuilder.toString();
+
+            profilePicture.setPictureUrl(
+                    Picture.GRAVATAR_PATH +
+                            strEmailHashed +
+                            ".jpg");
+
+            profilePicture = pictureRepository.saveAndFlush(profilePicture);
+            userToUpdate.getDetails().setPicture(profilePicture);
+            userToUpdate = userRepository.saveAndFlush(userToUpdate);
+            return userToUpdate;
+
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        } catch (EntityNotFoundException e) {
+            log.debug("user: {} not found", userToUpdate);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Listing not available for new applications");
         }
-        StringBuilder strEmailHashedBuilder = new StringBuilder();
-        for (byte b : hash) {
-            strEmailHashedBuilder.append(String.format("%02x", b));
-        }
-        String strEmailHashed = strEmailHashedBuilder.toString();
-
-        profilePicture.setPictureUrl(
-                Picture.GRAVATAR_PATH +
-                        strEmailHashed +
-                        ".jpg");
-
-        profilePicture = pictureRepository.saveAndFlush(profilePicture);
-        userToUpdate.getDetails().setPicture(profilePicture);
-        userToUpdate = userRepository.saveAndFlush(userToUpdate);
         return userToUpdate;
     }
 
@@ -172,7 +182,6 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            //User uploader = userRepository.getOne(picture.getUploader().getId());
 
             Listing uploadListing = listingRepository.getOne(listing.getId());
 
@@ -211,7 +220,6 @@ public class PictureService {
         checkIfDataIsValid(picture);
 
         try {
-            //User uploader = userRepository.getOne(picture.getUploader().getId());
 
             Listing uploadListing = listingRepository.getOne(listing.getId());
 
@@ -243,14 +251,8 @@ public class PictureService {
         return pictureRepository.existsById(uuid);
     }
 
-    public void deletePicture(Picture picture) {
-        log.debug("delete Picture {}", picture);
-        String url = picture.getPictureUrl();
+    public void deletePictureFromStorageServer(String url) {
         String filename = url.substring(url.lastIndexOf("/") + 1);
-
-        this.pictureRepository.delete(picture);
-
-
         try {
             FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.deleteFile(filename);
@@ -258,25 +260,25 @@ public class PictureService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Connection couldn't be established to storage");
         }
+    }
+
+    public void deletePicture(Picture picture) {
+        log.debug("delete Picture {}", picture);
+        String url = picture.getPictureUrl();
+
+        this.pictureRepository.delete(picture);
+
+        deletePictureFromStorageServer(url);
 
     }
 
     public void deletePicture(UUID id) {
         log.debug("delete Picture {}", id);
         String url = findPictureById(id).get().getPictureUrl();
-        String filename = url.substring(url.lastIndexOf("/") + 1);
 
-        Optional<Picture> pictureToBeDeleted = findPictureById(id);
-        System.out.println(pictureToBeDeleted);
         this.pictureRepository.deleteById(id);
 
-        try {
-            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
-            ftpUploader.deleteFile(filename);
-            ftpUploader.disconnect();
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Connection couldn't be established to storage");
-        }
+        deletePictureFromStorageServer(url);
 
     }
 

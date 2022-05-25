@@ -137,8 +137,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user with id " + id + " not found");
         }
 
-        // delete user picture first
-        pictureService.deletePicture(userService.findUserID(id).get().getDetails().getPicture());
+        pictureService.deletePictureFromStorageServer(userService.findUserID(id).get().getDetails().getPicture().getPictureUrl());
         userService.deleteUser(id);
 
         log.info("listing with id {} deleted", id);

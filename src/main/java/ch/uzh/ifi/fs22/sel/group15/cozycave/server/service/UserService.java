@@ -11,15 +11,13 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationReposit
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -35,8 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-@Service @Transactional
-@ToString @EqualsAndHashCode
+@Service
+@Transactional
+@ToString
+@EqualsAndHashCode
 public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -49,11 +49,11 @@ public class UserService {
 
     @Autowired
     public UserService(
-        @Qualifier("userRepository") UserRepository userRepository,
-        ApplicationRepository applicationRepository,
-        PictureRepository pictureRepository,
-        PasswordEncoder passwordEncoder,
-        UniversityDomains universityDomains) {
+            @Qualifier("userRepository") UserRepository userRepository,
+            ApplicationRepository applicationRepository,
+            PictureRepository pictureRepository,
+            PasswordEncoder passwordEncoder,
+            UniversityDomains universityDomains) {
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
         this.pictureRepository = pictureRepository;
@@ -98,7 +98,7 @@ public class UserService {
         log.debug("updating user with id: {}", userInput.getId());
 
         User user = userRepository.findById(userInput.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         User mergedUser = mergeUser(user, userInput);
 
@@ -127,6 +127,8 @@ public class UserService {
         log.debug("deleting user with id: {}", uuid);
 
         applicationRepository.deleteAllByApplicant_Id(uuid);
+
+        pictureRepository.delete(findUserID(uuid).get().getDetails().getPicture());
 
         userRepository.deleteById(uuid);
 
@@ -198,7 +200,7 @@ public class UserService {
 
                 if (StringUtils.hasText(userInput.getDetails().getAddress().getApartmentNumber())) {
                     user.getDetails().getAddress()
-                        .setApartmentNumber(userInput.getDetails().getAddress().getApartmentNumber());
+                            .setApartmentNumber(userInput.getDetails().getAddress().getApartmentNumber());
                 }
 
                 if (StringUtils.hasText(userInput.getDetails().getAddress().getZipCode())) {
@@ -226,23 +228,23 @@ public class UserService {
         log.error("User {} is trying to update user {}", executedBy, user);
 
         Optional<User> userWithSameEmail = userRepository.findByAuthenticationData_Email(
-            user.getAuthenticationData().getEmail());
+                user.getAuthenticationData().getEmail());
         Optional<User> userWithSameId = user.getId() != null ? userRepository.findById(user.getId()) : Optional.empty();
         boolean userAlreadyExists = userWithSameId.isPresent();
 
         if (executedBy != null) {
             if (!executedBy.getId().equals(user.getId())
-                && !executedBy.getRole().isTeam()) {
+                    && !executedBy.getRole().isTeam()) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user1");
             }
         }
 
         if (!userAlreadyExists) {
             if (user.getAuthenticationData().getEmail() == null
-                || user.getAuthenticationData().getPassword() == null
-                || user.getDetails().getFirstName() == null
-                || user.getDetails().getLastName() == null
-                || user.getDetails().getGender() == null) {
+                    || user.getAuthenticationData().getPassword() == null
+                    || user.getDetails().getFirstName() == null
+                    || user.getDetails().getLastName() == null
+                    || user.getDetails().getGender() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "mandatory fields must be filled");
             }
         }
@@ -260,7 +262,7 @@ public class UserService {
             if (userAlreadyExists) {
                 if (!user.getRole().isTeam()) {
                     user.setRole(universityDomains.matchesEmail(
-                        user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+                            user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
                 }
             }
         }
@@ -274,7 +276,7 @@ public class UserService {
         // ROLE MANAGEMENT
         // internal execution or same user
         if (executedBy == null
-            || executedBy != null && executedBy.getId() == user.getId()) {
+                || executedBy != null && executedBy.getId() == user.getId()) {
             // user already exists
             if (userAlreadyExists) {
                 // user has new role
@@ -284,7 +286,7 @@ public class UserService {
             } else {
                 // user does not exist
                 user.setRole(universityDomains.matchesEmail(
-                    user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
+                        user.getAuthenticationData().getEmail()) ? Role.STUDENT : Role.LANDLORD);
             }
         } else if (executedBy != null && !executedBy.getId().equals(user.getId())) {
             // other user executing
@@ -330,7 +332,7 @@ public class UserService {
 
         if (user.getDetails().getBirthday() != null) {
             if (user.getDetails().getBirthday().after(
-                Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant())
             )) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "you are too young");
             }

@@ -200,6 +200,10 @@
             "example": "I am a very nice person",
             "required": false,
             "maxLength": 65535
+          },
+          "picture": {
+            "description": "Fallback profile picture is always the Gravatar Picture",
+            "$ref": "#/components/schemas/PictureGet"
           }
         }
       },
@@ -280,6 +284,44 @@
           },
           "publisher": {
             "$ref": "#/components/schemas/UserGetPublic"
+          },
+          "pictures": {
+            "type": "array",
+            "description": "pictures of a listing in a list",
+            "items": {
+              "$ref": "#/components/schemas/PictureGet"
+            },
+            "example": [
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              },
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              }
+            ]
+          },
+          "floorplan": {
+            "type": "array",
+            "description": "pictures of the floorplans to a listing in a list",
+            "items": {
+              "$ref": "#/components/schemas/PictureGet"
+            },
+            "example": [
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              },
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              }
+            ]
           }
         }
       },
@@ -368,6 +410,34 @@
           },
           "publisher": {
             "$ref": "#/components/schemas/UserGetPublic"
+          },
+          "pictures": {
+            "type": "array",
+            "description": "pictures of a listing in a list",
+            "items": {
+              "$ref": "#/components/schemas/PictureGet"
+            },
+            "example": [
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              }
+            ]
+          },
+          "floorplan": {
+            "type": "array",
+            "description": "pictures of the floorplans to a listing in a list",
+            "items": {
+              "$ref": "#/components/schemas/PictureGet"
+            },
+            "example": [
+              {
+                "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
+                "creation_date": "2020-05-14T02:41:20.182+00:00",
+                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+              }
+            ]
           }
         }
       },
