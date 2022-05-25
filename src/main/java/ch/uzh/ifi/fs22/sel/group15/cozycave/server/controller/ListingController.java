@@ -19,8 +19,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-import java.util.List;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
