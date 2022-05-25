@@ -6,22 +6,21 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-
-import java.util.*;
-import javax.persistence.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.*;
+import java.util.*;
+
 @Entity
 @Table(name = "listings")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class Listing implements Cloneable {
 
     @Id
@@ -89,12 +88,12 @@ public class Listing implements Cloneable {
 
     public boolean isReadyToPublish() {
         return StringUtils.hasText(title)
-            && StringUtils.hasText(getDescription())
-            && getAddress() != null && getAddress().isValid()
-            && getListingType() != null
-            && !AssertionsUtils.isEmpty(getAvailableTo())
-            && getAvailable() != null && getAvailable()
-            && getPublisher() != null;
+                && StringUtils.hasText(getDescription())
+                && getAddress() != null && getAddress().isValid()
+                && getListingType() != null
+                && !AssertionsUtils.isEmpty(getAvailableTo())
+                && getAvailable() != null && getAvailable()
+                && getPublisher() != null;
     }
 
     @Override
@@ -117,23 +116,23 @@ public class Listing implements Cloneable {
     @Override
     public Listing clone() {
         return new Listing(
-            this.getId(),
-            this.getCreationDate(),
-            this.getTitle(),
-            this.getDescription(),
-            this.getAddress(),
-            this.getPublished(),
-            this.getSqm(),
-            this.getListingType(),
-            this.getFurnished(),
-            List.copyOf(this.getAvailableTo()),
-            this.getAvailable(),
-            this.getRent(),
-            this.getDeposit(),
-            this.getRooms(),
-            this.getPublisher(),
-            this.getPictures(),
-            this.getFloorplan()
+                this.getId(),
+                this.getCreationDate(),
+                this.getTitle(),
+                this.getDescription(),
+                this.getAddress(),
+                this.getPublished(),
+                this.getSqm(),
+                this.getListingType(),
+                this.getFurnished(),
+                List.copyOf(this.getAvailableTo()),
+                this.getAvailable(),
+                this.getRent(),
+                this.getDeposit(),
+                this.getRooms(),
+                this.getPublisher(),
+                this.getPictures(),
+                this.getFloorplan()
         );
     }
 }

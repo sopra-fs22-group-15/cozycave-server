@@ -3,22 +3,23 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
-
-import java.util.*;
-import javax.persistence.*;
-
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
+
 @Entity
 @Table(name = "user_details")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class UserDetails implements Cloneable {
 
     @Id
@@ -74,15 +75,15 @@ public class UserDetails implements Cloneable {
 
     public UserDetails clone() {
         return new UserDetails(
-            this.id,
-            this.firstName,
-            this.lastName,
-            this.gender,
-            (Date) this.birthday.clone(),
-            this.address.clone(),
-            phoneNumber,
-            about,
-            this.picture
+                this.id,
+                this.firstName,
+                this.lastName,
+                this.gender,
+                (Date) this.birthday.clone(),
+                this.address.clone(),
+                phoneNumber,
+                about,
+                this.picture
         );
     }
 

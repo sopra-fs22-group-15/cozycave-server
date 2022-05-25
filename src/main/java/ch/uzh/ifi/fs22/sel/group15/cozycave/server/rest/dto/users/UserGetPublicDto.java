@@ -4,20 +4,25 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PictureGetDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor @NoArgsConstructor @Data
+import java.io.Serializable;
+import java.util.UUID;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class UserGetPublicDto implements Serializable {
 
     private UUID id;
 
     private UserDetailsDto details;
 
-    @AllArgsConstructor @NoArgsConstructor @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
     public static class UserDetailsDto implements Serializable {
 
         @JsonProperty("first_name")

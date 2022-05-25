@@ -1,25 +1,20 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 
-import java.util.Objects;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.*;
+import java.util.Objects;
+import java.util.UUID;
+
 @Entity
 @Table(name = "authentication_data")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class AuthenticationData implements Cloneable {
 
     @Id
@@ -56,10 +51,10 @@ public class AuthenticationData implements Cloneable {
 
     public AuthenticationData clone() {
         return new AuthenticationData(
-            this.id,
-            this.email,
-            this.password,
-            this.salt
+                this.id,
+                this.email,
+                this.password,
+                this.salt
         );
     }
 

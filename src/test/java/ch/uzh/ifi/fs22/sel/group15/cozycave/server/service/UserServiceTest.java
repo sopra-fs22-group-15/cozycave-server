@@ -104,13 +104,14 @@ class UserServiceTest {
     public void getUsersSuccess() {
 
     }
+
     @Test
     public void getUsersEmpty() {
 
     }
 
     @Test
-    public void getUsersException(){
+    public void getUsersException() {
 
     }
 

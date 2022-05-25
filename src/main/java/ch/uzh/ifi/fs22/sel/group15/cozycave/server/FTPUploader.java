@@ -1,7 +1,5 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server;
 
-import java.io.*;
-
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -10,15 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.*;
+
 public class FTPUploader {
 
     FTPClient ftp = null;
 
-    public FTPUploader(String host, String user, String pwd) throws Exception{
+    public FTPUploader(String host, String user, String pwd) throws Exception {
         ftp = new FTPClient();
         ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
         int reply;
-        ftp.connect(host,21);
+        ftp.connect(host, 21);
         reply = ftp.getReplyCode();
         if (!FTPReply.isPositiveCompletion(reply)) {
             ftp.disconnect();
@@ -29,8 +29,8 @@ public class FTPUploader {
         ftp.enterLocalPassiveMode();
     }
 
-    public void uploadFile(MultipartFile file, String filename){
-        try{
+    public void uploadFile(MultipartFile file, String filename) {
+        try {
             InputStream input = new FileInputStream(multipartToFile(file, filename));
             this.ftp.storeFile(filename, input);
         } catch (SecurityException | IOException e) {
@@ -47,12 +47,12 @@ public class FTPUploader {
     }
 
     public File multipartToFile(MultipartFile multipart, String fileName) throws IllegalStateException, IOException {
-        File convFile = new File(System.getProperty("java.io.tmpdir")+"/"+fileName);
+        File convFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
         multipart.transferTo(convFile);
         return convFile;
     }
 
-    public void disconnect(){
+    public void disconnect() {
         if (this.ftp.isConnected()) {
             try {
                 this.ftp.logout();

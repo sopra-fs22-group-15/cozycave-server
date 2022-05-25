@@ -5,13 +5,13 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PicturePostDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.Serializable;
+import java.util.Date;
 
 @Data
 public class UserPostPutDto implements Serializable {
@@ -24,7 +24,7 @@ public class UserPostPutDto implements Serializable {
     private UserDetailsDto details;
 
     public UserPostPutDto(@NotNull AuthenticationDataDto authenticationData, Role role,
-        @NotNull UserDetailsDto details) {
+                          @NotNull UserDetailsDto details) {
         this.authenticationData = authenticationData == null ? new AuthenticationDataDto() : authenticationData;
         this.details = details == null ? new UserDetailsDto() : details;
     }
@@ -42,7 +42,9 @@ public class UserPostPutDto implements Serializable {
         this.details = details == null ? new UserDetailsDto() : details;
     }
 
-    @AllArgsConstructor @NoArgsConstructor @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
     public static class AuthenticationDataDto implements Serializable {
 
         private String email;
@@ -50,7 +52,9 @@ public class UserPostPutDto implements Serializable {
         private String password;
     }
 
-    @AllArgsConstructor @NoArgsConstructor @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
     public static class UserDetailsDto implements Serializable {
 
         @JsonProperty("first_name")

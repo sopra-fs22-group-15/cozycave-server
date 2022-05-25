@@ -8,15 +8,18 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetPublicD
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor @NoArgsConstructor @Data
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class ListingGetDto implements Serializable {
 
     private UUID id;

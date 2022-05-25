@@ -2,10 +2,9 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller.ListingController.ListingFilter.FilterPair;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller.ListingController.ListingFilter.ListingFilters;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
@@ -19,16 +18,15 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -234,7 +232,7 @@ public class ListingController {
         // merge lists of pictures and list of floorplans into one and delete pictures first before listing GETS DELETED
         pictureService.deleteAll(
                 Stream.of(listingToBeDeleted.getPictures(), listingToBeDeleted.getFloorplan())
-                        .flatMap(x -> x.stream())
+                        .flatMap(Collection::stream)
                         .collect(Collectors.toList())
         );
 
@@ -415,12 +413,12 @@ public class ListingController {
 
     public enum OrderType {
         ASC,
-        DESC;
+        DESC
     }
 
     public enum Sorting {
         RENT,
-        SQM;
+        SQM
     }
 
     // filter listings
@@ -535,7 +533,7 @@ public class ListingController {
             MAX_SQM(Integer.class),
             AVAILABLE(Boolean.class);
 
-            private Class<?> type;
+            private final Class<?> type;
 
             ListingFilters(Class<?> type) {
                 this.type = type;
@@ -552,8 +550,8 @@ public class ListingController {
 
         public static class FilterPair {
 
-            private ListingFilters filter;
-            private Object value;
+            private final ListingFilters filter;
+            private final Object value;
 
             public FilterPair(ListingFilters filter, Object value) {
                 this.filter = filter;

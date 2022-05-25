@@ -1,11 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
-import javax.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +8,17 @@ import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
+
 @Entity
 @Table(name = "pictures")
-@AllArgsConstructor @Getter @Setter @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class Picture {
 
     public static final String ROOT_PATH = "http://database.imhof-lan.ch/CozyCave/";

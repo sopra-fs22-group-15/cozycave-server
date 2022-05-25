@@ -5,14 +5,17 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PicturePostDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor @NoArgsConstructor @Data
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class ListingPostPutDto implements Serializable {
 
     private UUID id;

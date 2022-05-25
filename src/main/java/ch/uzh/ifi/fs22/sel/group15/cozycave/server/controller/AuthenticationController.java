@@ -14,13 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -36,8 +30,8 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthenticationController(UserService userService, PictureService pictureService,PasswordEncoder passwordEncoder,
-        AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public AuthenticationController(UserService userService, PictureService pictureService, PasswordEncoder passwordEncoder,
+                                    AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
         this.pictureService = pictureService;
         this.passwordEncoder = passwordEncoder;
@@ -63,12 +57,12 @@ public class AuthenticationController {
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 
         Authentication authentication = createAuthentication(
-            user,
-            userPostPutDto.getAuthenticationData().getPassword()
+                user,
+                userPostPutDto.getAuthenticationData().getPassword()
         );
 
         result.getAuthenticationData().setToken(
-            jwtTokenProvider.generateToken(authentication)
+                jwtTokenProvider.generateToken(authentication)
         );
 
         log.info("new user registered with id: {}", user.getId());
@@ -83,21 +77,21 @@ public class AuthenticationController {
         log.debug("new user login try: {}", userPostPutDto.getAuthenticationData().getEmail());
 
         User user = userService.findUserByEmail(userPostPutDto.getAuthenticationData().getEmail())
-            .orElseThrow(() -> {
-                log.error("user with email {} not found while logging in",
-                    userPostPutDto.getAuthenticationData().getEmail());
-                return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid login data");
-            });
+                .orElseThrow(() -> {
+                    log.error("user with email {} not found while logging in",
+                            userPostPutDto.getAuthenticationData().getEmail());
+                    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid login data");
+                });
 
         UserGetDto result = UserMapper.INSTANCE.userToUserGetDto(user);
 
         Authentication authentication = createAuthentication(
-            user,
-            userPostPutDto.getAuthenticationData().getPassword()
+                user,
+                userPostPutDto.getAuthenticationData().getPassword()
         );
 
         result.getAuthenticationData().setToken(
-            jwtTokenProvider.generateToken(authentication)
+                jwtTokenProvider.generateToken(authentication)
         );
 
         log.info("new user logged in with id: {}", user.getId());
@@ -107,11 +101,11 @@ public class AuthenticationController {
 
     private Authentication createAuthentication(User user, String passwordRaw) {
         return authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                user.getId().toString(),
-                passwordRaw + user.getAuthenticationData().getSalt(),
-                user.getRole().generatePermittedAuthoritiesList()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        user.getId().toString(),
+                        passwordRaw + user.getAuthenticationData().getSalt(),
+                        user.getRole().generatePermittedAuthoritiesList()
+                )
         );
     }
 }
