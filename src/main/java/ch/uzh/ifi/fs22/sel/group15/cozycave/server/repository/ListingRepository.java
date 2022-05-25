@@ -1,5 +1,6 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
     @NotNull Optional<Listing> findById(@NotNull UUID id);
+
 }
