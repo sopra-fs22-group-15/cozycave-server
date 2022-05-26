@@ -7,6 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import com.sun.istack.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,10 +20,6 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
-import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UniversityDomains {
@@ -33,11 +34,13 @@ public class UniversityDomains {
         return ImmutableSet.copyOf(universities);
     }
 
-    public @Nullable University getUniversityByDomain(String domain) {
+    public @Nullable
+    University getUniversityByDomain(String domain) {
         return universities.stream().filter(u -> u.matchesDomain(domain)).findFirst().orElse(null);
     }
 
-    public @Nullable University getUniversityByEmail(String email) {
+    public @Nullable
+    University getUniversityByEmail(String email) {
         return universities.stream().filter(u -> u.matchesEmail(email)).findFirst().orElse(null);
     }
 
@@ -49,17 +52,18 @@ public class UniversityDomains {
         return universities.stream().anyMatch(u -> u.matchesEmail(email));
     }
 
-    private @NotNull HashSet<University> generateUniversities() {
+    private @NotNull
+    HashSet<University> generateUniversities() {
         final Logger logger = LoggerFactory.getLogger(UniversityDomains.class);
 
         HashSet<University> universities = new HashSet<>();
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .GET()
-            .uri(URI.create("http://universities.hipolabs.com/search?country=Switzerland"))
-            .timeout(Duration.ofSeconds(10))
-            .build();
+                .GET()
+                .uri(URI.create("http://universities.hipolabs.com/search?country=Switzerland"))
+                .timeout(Duration.ofSeconds(10))
+                .build();
 
         HttpResponse<String> response = null;
 
@@ -101,9 +105,9 @@ public class UniversityDomains {
     }
 
     private record University(
-        @NotNull String name,
-        @NotNull CountryCode county,
-        @NotNull ImmutableSet<String> domains
+            @NotNull String name,
+            @NotNull CountryCode county,
+            @NotNull ImmutableSet<String> domains
     ) {
 
         private University {
@@ -118,7 +122,8 @@ public class UniversityDomains {
             return domains.stream().anyMatch(d -> email.toLowerCase().endsWith("@" + d));
         }
 
-        @Override public boolean equals(Object o) {
+        @Override
+        public boolean equals(Object o) {
             if (this == o) {
                 return true;
             }
@@ -129,16 +134,18 @@ public class UniversityDomains {
             return name.equals(that.name) && county == that.county && domains.equals(that.domains);
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             return Objects.hash(name, county, domains);
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return "University{" +
-                "name='" + name + '\'' +
-                ", county=" + county +
-                ", domains=" + domains +
-                '}';
+                    "name='" + name + '\'' +
+                    ", county=" + county +
+                    ", domains=" + domains +
+                    '}';
         }
     }
 }

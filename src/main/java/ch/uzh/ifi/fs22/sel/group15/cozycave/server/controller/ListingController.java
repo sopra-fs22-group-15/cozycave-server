@@ -2,9 +2,9 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller.ListingController.ListingFilter.FilterPair;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller.ListingController.ListingFilter.ListingFilters;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
@@ -16,16 +16,17 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ApplicationMapper
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ListingMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-
-
-import java.util.*;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -37,11 +38,13 @@ public class ListingController {
     private final ListingService listingService;
     private final UserService userService;
     private final ApplicationService applicationService;
+    private final PictureService pictureService;
 
-    ListingController(ListingService listingService, UserService userService, ApplicationService applicationService) {
+    ListingController(ListingService listingService, UserService userService, ApplicationService applicationService, PictureService pictureService) {
         this.listingService = listingService;
         this.userService = userService;
         this.applicationService = applicationService;
+        this.pictureService = pictureService;
     }
 
     // Get all listings in a list and even e able to filter
@@ -224,6 +227,15 @@ public class ListingController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "listing with id " + id + " not found");
         }
 
+        Listing listingToBeDeleted = listingService.findListingById(id).get();
+
+        // merge lists of pictures and list of floorplans into one and delete pictures first before listing GETS DELETED
+        pictureService.deleteAll(
+                Stream.of(listingToBeDeleted.getPictures(), listingToBeDeleted.getFloorplan())
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList())
+        );
+
         listingService.deleteListing(id);
 
         log.info("listing with id {} deleted", id);
@@ -401,12 +413,12 @@ public class ListingController {
 
     public enum OrderType {
         ASC,
-        DESC;
+        DESC
     }
 
     public enum Sorting {
         RENT,
-        SQM;
+        SQM
     }
 
     // filter listings
@@ -521,7 +533,7 @@ public class ListingController {
             MAX_SQM(Integer.class),
             AVAILABLE(Boolean.class);
 
-            private Class<?> type;
+            private final Class<?> type;
 
             ListingFilters(Class<?> type) {
                 this.type = type;
@@ -538,8 +550,8 @@ public class ListingController {
 
         public static class FilterPair {
 
-            private ListingFilters filter;
-            private Object value;
+            private final ListingFilters filter;
+            private final Object value;
 
             public FilterPair(ListingFilters filter, Object value) {
                 this.filter = filter;

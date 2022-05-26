@@ -6,14 +6,17 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor @NoArgsConstructor @Data
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class UserGetDto implements Serializable {
 
     private UUID id;
@@ -28,7 +31,9 @@ public class UserGetDto implements Serializable {
 
     private UserDetailsDto details;
 
-    @AllArgsConstructor @NoArgsConstructor @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
     public static class AuthenticationDataDto implements Serializable {
 
         private String email;
@@ -37,7 +42,9 @@ public class UserGetDto implements Serializable {
         private String token;
     }
 
-    @AllArgsConstructor @NoArgsConstructor @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
     public static class UserDetailsDto implements Serializable {
 
         @JsonProperty("first_name")
@@ -61,5 +68,22 @@ public class UserGetDto implements Serializable {
 
         @JsonInclude(Include.NON_EMPTY)
         private String biography;
+
+        @JsonInclude(Include.NON_EMPTY)
+        private PictureDto picture;
     }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class PictureDto implements Serializable {
+        private UUID id;
+
+        @JsonProperty("creation_date")
+        private Date creationDate;
+
+        @JsonProperty("picture_url")
+        private String pictureUrl;
+    }
+
 }

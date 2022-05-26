@@ -4,37 +4,23 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.AssertionsUtils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-
-import java.util.*;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.*;
+import java.util.*;
+
 @Entity
 @Table(name = "listings")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class Listing implements Cloneable {
 
     @Id
@@ -91,14 +77,23 @@ public class Listing implements Cloneable {
     @JoinColumn(name = "publisher_id", nullable = false)
     private User publisher;
 
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "picture_listing_id")
+    private List<Picture> pictures = new ArrayList<>();
+
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "floorplan_listing_id")
+    private List<Picture> floorplan = new ArrayList<>();
+
+
     public boolean isReadyToPublish() {
         return StringUtils.hasText(title)
-            && StringUtils.hasText(getDescription())
-            && getAddress() != null && getAddress().isValid()
-            && getListingType() != null
-            && !AssertionsUtils.isEmpty(getAvailableTo())
-            && getAvailable() != null && getAvailable()
-            && getPublisher() != null;
+                && StringUtils.hasText(getDescription())
+                && getAddress() != null && getAddress().isValid()
+                && getListingType() != null
+                && !AssertionsUtils.isEmpty(getAvailableTo())
+                && getAvailable() != null && getAvailable()
+                && getPublisher() != null;
     }
 
     @Override
@@ -121,21 +116,23 @@ public class Listing implements Cloneable {
     @Override
     public Listing clone() {
         return new Listing(
-            this.getId(),
-            this.getCreationDate(),
-            this.getTitle(),
-            this.getDescription(),
-            this.getAddress(),
-            this.getPublished(),
-            this.getSqm(),
-            this.getListingType(),
-            this.getFurnished(),
-            List.copyOf(this.getAvailableTo()),
-            this.getAvailable(),
-            this.getRent(),
-            this.getDeposit(),
-            this.getRooms(),
-            this.getPublisher()
+                this.getId(),
+                this.getCreationDate(),
+                this.getTitle(),
+                this.getDescription(),
+                this.getAddress(),
+                this.getPublished(),
+                this.getSqm(),
+                this.getListingType(),
+                this.getFurnished(),
+                List.copyOf(this.getAvailableTo()),
+                this.getAvailable(),
+                this.getRent(),
+                this.getDeposit(),
+                this.getRooms(),
+                this.getPublisher(),
+                this.getPictures(),
+                this.getFloorplan()
         );
     }
 }

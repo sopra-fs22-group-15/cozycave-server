@@ -3,12 +3,8 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -22,9 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-@Service @Transactional
-@ToString @EqualsAndHashCode
+
+@Service
+@Transactional
+@ToString
+@EqualsAndHashCode
 public class ListingService {
 
     private final Logger log = LoggerFactory.getLogger(ListingService.class);
@@ -32,14 +35,16 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final PictureRepository pictureRepository;
 
     @Autowired
     public ListingService(
-        @Qualifier("listingRepository") ListingRepository listingRepository,
-        UserRepository userRepository, ApplicationRepository applicationRepository) {
+            @Qualifier("listingRepository") ListingRepository listingRepository,
+            UserRepository userRepository, ApplicationRepository applicationRepository, PictureRepository pictureRepository) {
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
+        this.pictureRepository = pictureRepository;
     }
 
     public List<Listing> getListings() {
@@ -69,7 +74,7 @@ public class ListingService {
         log.debug("updating listing {}", listingInput);
 
         Listing listing = listingRepository.findById(listingInput.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "listing not found"));
 
         Listing mergedListing = mergeListing(listing, listingInput);
 
@@ -86,6 +91,10 @@ public class ListingService {
         log.debug("deleting listing {}", listing);
 
         applicationRepository.deleteAllByListing_Id(listing.getId());
+
+        pictureRepository.deleteAll(listing.getPictures());
+
+        pictureRepository.deleteAll(listing.getFloorplan());
 
         listingRepository.delete(listing);
 
@@ -185,7 +194,7 @@ public class ListingService {
         if (listing.getPublished()) {
             if (!listing.isReadyToPublish()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "mandatory fields must be filled when listing is / will be published");
+                        "mandatory fields must be filled when listing is / will be published");
             }
         }
 
@@ -227,7 +236,7 @@ public class ListingService {
         if (listing.getAvailableTo() != null) {
             if (listing.getAvailableTo().size() == 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "invalid available to; at least one gender must be selected");
+                        "invalid available to; at least one gender must be selected");
             }
         }
 
@@ -240,14 +249,14 @@ public class ListingService {
         if (listing.getDeposit() != null) {
             if (listing.getDeposit() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "invalid deposit; deposit must be greater than 0");
+                        "invalid deposit; deposit must be greater than 0");
             }
         }
 
         if (listing.getRooms() != null) {
             if (listing.getRooms() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "invalid rooms; rooms must be greater than 0");
+                        "invalid rooms; rooms must be greater than 0");
             }
         }
     }

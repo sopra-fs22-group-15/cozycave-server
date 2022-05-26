@@ -1,35 +1,25 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.applications.ApplicationGetDto;
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.applications.ApplicationPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ApplicationMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/v1")
@@ -39,10 +29,12 @@ public class UserController {
 
     private final UserService userService;
     private final ApplicationService applicationService;
+    private final PictureService pictureService;
 
-    UserController(UserService userService, ApplicationService applicationService) {
+    UserController(UserService userService, ApplicationService applicationService, PictureService pictureService) {
         this.userService = userService;
         this.applicationService = applicationService;
+        this.pictureService = pictureService;
     }
 
     // get all users in a list
@@ -73,6 +65,12 @@ public class UserController {
         User userInput = UserMapper.INSTANCE.userPostPutDtoToUser(userPostPutDto);
 
         User createdUser = userService.createUser(userInput, authUser);
+
+        // set default picture to gravatar profile picture
+        if (createdUser.getDetails().getPicture() == null) {
+            //createdUser.getDetails().setPicture(setGravatarPicture(newUser));
+            userInput = pictureService.setGravatarPicture(userInput);
+        }
 
         return UserMapper.INSTANCE.userToUserGetDto(createdUser);
     }
@@ -128,6 +126,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user with id " + id + " not found");
         }
 
+        pictureService.deletePictureFromStorageServer(userService.findUserID(id).get().getDetails().getPicture().getPictureUrl());
         userService.deleteUser(id);
 
         log.info("listing with id {} deleted", id);

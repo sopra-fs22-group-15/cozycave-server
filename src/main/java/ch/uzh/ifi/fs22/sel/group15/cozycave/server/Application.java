@@ -8,10 +8,6 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,6 +21,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.UUID;
 
 @RestController
 @SpringBootApplication
@@ -53,8 +54,8 @@ public class Application {
 
     @Bean
     public CommandLineRunner createTestData(UserService userService,
-        UniversityDomains universityDomains,
-        @Value("${cozycave.debug.create_test_user}") boolean createTestUser, ListingService listingService) {
+                                            UniversityDomains universityDomains,
+                                            @Value("${cozycave.debug.create_test_user}") boolean createTestUser, ListingService listingService) {
         return args -> {
             if (!createTestUser) {
                 return;
@@ -65,36 +66,37 @@ public class Application {
             }
 
             userService.createUser(new User(
-                null,
-                null,
-                new AuthenticationData(
                     null,
-                    "test@uzh.ch",
-                    "password",
-                    null
-                ),
-                null,
-                new UserDetails(
-                    UUID.randomUUID(),
-                    "Erika",
-                    "Mustermann",
-                    Gender.FEMALE,
-                    Date.from(Instant.now().minus(9000, ChronoUnit.DAYS)),
-                    new Location(
-                        null,
-                        null,
-                        null,
-                        "Hauptstrasse",
-                        "24",
-                        null,
-                        "5312",
-                        "Döttingen",
-                        "Aargau",
-                        "Switzerland"
+                    null,
+                    new AuthenticationData(
+                            null,
+                            "test@uzh.ch",
+                            "password",
+                            null
                     ),
-                    "+41791234567",
-                    "bio"
-                )
+                    null,
+                    new UserDetails(
+                            UUID.randomUUID(),
+                            "Erika",
+                            "Mustermann",
+                            Gender.FEMALE,
+                            Date.from(Instant.now().minus(9000, ChronoUnit.DAYS)),
+                            new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Hauptstrasse",
+                                    "24",
+                                    null,
+                                    "5312",
+                                    "Döttingen",
+                                    "Aargau",
+                                    "Switzerland"
+                            ),
+                            "+41791234567",
+                            "bio",
+                            null
+                    )
             ), null);
         };
     }

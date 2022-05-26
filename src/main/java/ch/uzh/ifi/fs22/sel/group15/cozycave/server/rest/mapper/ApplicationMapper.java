@@ -3,13 +3,15 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.applications.ApplicationGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.applications.ApplicationPostPutDto;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(
-    unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL
 )
 public interface ApplicationMapper {
 

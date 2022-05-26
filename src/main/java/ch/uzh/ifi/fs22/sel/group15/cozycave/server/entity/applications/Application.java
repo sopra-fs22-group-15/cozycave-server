@@ -15,7 +15,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "applications")
-@AllArgsConstructor @Getter @Setter @ToString @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class Application {
 
     @Id

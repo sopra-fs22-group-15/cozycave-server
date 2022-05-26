@@ -62,6 +62,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'org.jetbrains:annotations:23.0.0'
     implementation 'com.neovisionaries:nv-i18n:1.29'
+
+    implementation 'commons-net:commons-net:3.8.0'
 }
 
 bootJar {
@@ -108,7 +110,7 @@ sonarqube {
         property "sonar.organization", "sopra-fs22-group-15"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", ["$buildDir/jacocoReportDir/test/jacocoTestReport.xml"]
-        property "sonar.cpd.exclusions", "**/entity/*.java,**/rest/dto/*.java"
+        property "sonar.cpd.exclusions", "**/entity/*.java,**/rest/*.java,**/exceptions/*.java"
     }
 }
 
