@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class UserPostPutDto implements Serializable {
@@ -68,6 +69,9 @@ public class UserPostPutDto implements Serializable {
         private Date birthday;
 
         private LocationDto address;
+
+        @JsonProperty("special_address")
+        private List<LocationDto> specialAddress;
 
         @JsonProperty("phone_number")
         private String phoneNumber;

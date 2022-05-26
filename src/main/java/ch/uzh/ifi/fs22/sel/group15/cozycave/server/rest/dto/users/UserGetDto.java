@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -61,6 +62,10 @@ public class UserGetDto implements Serializable {
 
         @JsonInclude(Include.NON_EMPTY)
         private LocationDto address;
+
+        @JsonInclude(Include.NON_EMPTY)
+        @JsonProperty("special_address")
+        private List<LocationDto> specialAddress;
 
         @JsonInclude(Include.NON_EMPTY)
         @JsonProperty("phone_number")

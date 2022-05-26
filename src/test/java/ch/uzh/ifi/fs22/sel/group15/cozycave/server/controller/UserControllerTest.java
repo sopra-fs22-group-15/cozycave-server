@@ -3,6 +3,7 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
@@ -75,6 +76,17 @@ class UserControllerTest {
                         "Mustermann",
                         Gender.FEMALE,
                         Date.from(Instant.now().minus(50 * 365, ChronoUnit.DAYS)),
+                        new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Bahnhofstrasse",
+                                    "1",
+                                    "10a",
+                                    "8000",
+                                    "Zürich",
+                                    "Zürich",
+                                    "Switzerland"),
                         null,
                         "+41 79 123 45 67",
                         "bio",
@@ -98,6 +110,17 @@ class UserControllerTest {
                         "Mustermann",
                         Gender.MALE,
                         Date.from(Instant.now().minus(45 * 365, ChronoUnit.DAYS)),
+                        new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Bahnhofstrasse",
+                                    "1",
+                                    "10a",
+                                    "8000",
+                                    "Z�rich",
+                                    "Z�rich",
+                                    "Switzerland"),
                         null,
                         "+41 76 123 45 67",
                         "bio",
