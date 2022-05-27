@@ -108,7 +108,7 @@ public class PictureService {
             uploader = userRepository.saveAndFlush(uploader);
 
             //TODO: Future Feature Asynchronous upload for better user experience and less latency
-            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
+            FTPUploader ftpUploader = new FTPUploader("database.cozycave.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.uploadFile(file, filename);
             ftpUploader.disconnect();
 
@@ -194,7 +194,7 @@ public class PictureService {
 
             uploadListing = listingRepository.saveAndFlush(uploadListing);
 
-            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
+            FTPUploader ftpUploader = new FTPUploader("database.cozycave.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.uploadFile(file, filename);
             ftpUploader.disconnect();
 
@@ -232,7 +232,7 @@ public class PictureService {
 
             uploadListing = listingRepository.saveAndFlush(uploadListing);
 
-            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
+            FTPUploader ftpUploader = new FTPUploader("database.cozycave.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.uploadFile(file, filename);
             ftpUploader.disconnect();
 
@@ -253,7 +253,7 @@ public class PictureService {
     public void deletePictureFromStorageServer(String url) {
         String filename = url.substring(url.lastIndexOf("/") + 1);
         try {
-            FTPUploader ftpUploader = new FTPUploader("database.imhof-lan.ch", "cozyserver", "cozyserver!!??");
+            FTPUploader ftpUploader = new FTPUploader("database.cozycave.ch", "cozyserver", "cozyserver!!??");
             ftpUploader.deleteFile(filename);
             ftpUploader.disconnect();
         } catch (Exception e) {
