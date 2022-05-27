@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Picture {
 
-    public static final String ROOT_PATH = "http://database.imhof-lan.ch/CozyCave/";
+    public static final String ROOT_PATH = "http://database.cozycave.ch/CozyCave/";
     public static final String GRAVATAR_PATH = "https://www.gravatar.com/avatar/";
 
     @Id

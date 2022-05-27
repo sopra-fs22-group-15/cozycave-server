@@ -1,12 +1,15 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.LocationDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.applications.ApplicationGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserPostPutDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.ApplicationMapper;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.LocationMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.mapper.UserMapper;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -131,6 +135,106 @@ public class UserController {
 
         log.info("listing with id {} deleted", id);
     }
+
+    // get specific special location userprofile
+    @GetMapping("/users/{id}/specialaddress")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<LocationDto> findSpecialLocations(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "error finding authenticated user");
+                });
+
+        return userService.getUsersSpecialAddress(id).stream()
+                .map(LocationMapper.INSTANCE::locationToLocationDto)
+                .collect(Collectors.toList());
+    }
+
+    // get specific special location userprofile
+    @PostMapping("/users/{id}/specialaddress")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public LocationDto addSpecialLocation(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id,
+            @RequestBody LocationDto locationDto) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "error finding authenticated user");
+                });
+
+        Location specialAddressInput = LocationMapper.INSTANCE.locationDtoToLocation(locationDto);
+        Location specialAddress = userService.addSpecialLocation(id, specialAddressInput);
+        return LocationMapper.INSTANCE.locationToLocationDto(specialAddress);
+    }
+
+    // get a specific special location
+    @GetMapping("/users/{id}/specialaddress/{specialaddressID}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public LocationDto getSpecificSpecialLocation(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id,
+            @PathVariable UUID specialaddressID) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "error finding authenticated user");
+                });
+
+        Optional<Location> specialAddress = userService.getUsersSpecialAddressById(id, specialaddressID);
+
+        return LocationMapper.INSTANCE.locationToLocationDto(specialAddress.get());
+    }
+
+    // update a specific special location
+    @PutMapping("/users/{id}/specialaddress/{specialaddressID}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public LocationDto updateSpecialLocation(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id,
+            @PathVariable UUID specialaddressID,
+            @RequestBody LocationDto locationDto) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "error finding authenticated user");
+                });
+
+        Location specialAddressInput = LocationMapper.INSTANCE.locationDtoToLocation(locationDto);
+        specialAddressInput.setId(specialaddressID);
+        Location specialAddressUpdated = userService.updateSpecialLocation(id, specialAddressInput);
+        return LocationMapper.INSTANCE.locationToLocationDto(specialAddressUpdated);
+    }
+
+    // update a specific special location
+    @DeleteMapping("/users/{id}/specialaddress/{specialaddressID}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void deleteSpecialLocation(
+            @AuthenticationPrincipal String authUserId,
+            @PathVariable UUID id,
+            @PathVariable UUID specialaddressID) {
+        User authUser = userService.findUserID(UUID.fromString(authUserId))
+                .orElseThrow(() -> {
+                    log.debug("user (authenticated user) with id {} not found while getting application", authUserId);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "error finding authenticated user");
+                });
+
+        userService.deleteSpecialLocation(id, specialaddressID);
+    }
+
 
     // get all applications of a user
     @GetMapping("/users/{id}/applications")
