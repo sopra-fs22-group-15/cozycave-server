@@ -67,14 +67,14 @@ public class UserService {
         return Collections.unmodifiableList(user.get().getDetails().getSpecialAddress());
     }
 
-    public Location getUsersSpecialAddressById(UUID userId, UUID specialaddressID) {
+    public Optional<Location> getUsersSpecialAddressById(UUID userId, UUID specialaddressID) {
         @NotNull Optional<User> user = findUserID(userId);
 
-        Location specialAddress = null;
+        Optional<Location> specialAddress = null;
 
         for (Location address : user.get().getDetails().getSpecialAddress()) {
             if (address.getId().equals(specialaddressID)) {
-                specialAddress = address;
+                specialAddress = Optional.of(address);
             }
         }
         return specialAddress;
@@ -147,7 +147,7 @@ public class UserService {
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        Location locationToBeUpdated = getUsersSpecialAddressById(id, specialAddressInput.getId());
+        Location locationToBeUpdated = getUsersSpecialAddressById(id, specialAddressInput.getId()).get();
         System.out.println();
 
         if (specialAddressInput.getName() != null) locationToBeUpdated.setName(specialAddressInput.getName());
@@ -173,9 +173,6 @@ public class UserService {
         if (specialAddressInput.getState() != null) locationToBeUpdated.setState(specialAddressInput.getState());
 
         if (specialAddressInput.getCountry() != null) locationToBeUpdated.setCountry(specialAddressInput.getCountry());
-
-
-        //userToUpdate.getDetails().setSpecialAddress(specialAddresses);
 
         userToUpdate = userRepository.saveAndFlush(userToUpdate);
         log.info("updated special Location: {} for user with id: {}", specialAddressInput, id);

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -189,9 +190,9 @@ public class UserController {
                             "error finding authenticated user");
                 });
 
-        Location specialAddress = userService.getUsersSpecialAddressById(id, specialaddressID);
+        Optional<Location> specialAddress = userService.getUsersSpecialAddressById(id, specialaddressID);
 
-        return LocationMapper.INSTANCE.locationToLocationDto(specialAddress);
+        return LocationMapper.INSTANCE.locationToLocationDto(specialAddress.get());
     }
 
     // update a specific special location
