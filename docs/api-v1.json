@@ -4,7 +4,7 @@
   "info": {
     "title": "CozyCave.ch API Documentation",
     "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
-    "version": "1.2.2",
+    "version": "1.2.4",
     "version-explanation": "APIVersion.MayorVersion.MinorVersion"
   },
   "servers": [
@@ -506,7 +506,7 @@
             "type": "string",
             "description": "name of the location",
             "example": "uni campus",
-            "required": false
+            "required": true
           },
           "description": {
             "type": "string",
@@ -594,7 +594,7 @@
         "format": "date-time",
         "description": "creation_date is always readOnly",
         "example": "2020-05-14T02:41:20.182+00:00",
-        "required": false
+        "required": true
       },
       "Role": {
         "type": "string",

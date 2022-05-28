@@ -43,7 +43,7 @@ public class UserDetails implements Cloneable {
     private Date birthday;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "location_id")
+    @JoinColumn(name = "location_id", nullable = false)
     private Location address;
 
     @Column(name = "phone_number")
