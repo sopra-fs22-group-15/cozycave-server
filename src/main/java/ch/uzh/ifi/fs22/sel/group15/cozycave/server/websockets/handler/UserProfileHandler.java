@@ -81,9 +81,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
         for (UUID id : webSocketSessions.keySet()) {
             Optional<User> oU = userService.findUserID(id);
 
-            if (oU.isPresent()) {
-                usersOnline.add(oU.get());
-            }
+            oU.ifPresent(usersOnline::add);
         }
 
         session.sendMessage(Action.JOINED_ALL_USERS.getTextMessageWithData(new Gson().toJsonTree(
@@ -231,7 +229,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 }
 
                 if (!webSocketSessions.containsKey(userUuid)) {
-                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    session.sendMessage(Action.ERROR_REQUESTED_USER_GONE.getTextMessage());
                     return;
                 }
 
@@ -280,7 +278,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 }
 
                 if (!webSocketSessions.containsKey(requesterUuid)) {
-                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    session.sendMessage(Action.ERROR_REQUESTED_USER_GONE.getTextMessage());
                     return;
                 }
 
@@ -354,7 +352,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
         ERROR_UNKNOWN_UUID(1005),
         ERROR_ALREADY_REQUESTED(1006),
         ERROR_INTERNAL_SERVER_ERROR(1007),
-        ERROR_REQUEST_USER_GONE(1008),
+        ERROR_REQUESTED_USER_GONE(1008),
         ERROR_REQUEST_NOT_FOUND(1009),
         ERROR_FORBIDDEN(1010);
 
