@@ -73,16 +73,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/v1/pictures/listings/{listingId}/floorplan/",
                         "/v1/pictures/listings/{listingId}",
                         "/v1/pictures/listings/{listingId}/",
-                        "/v1/pictures/listings",
-                        "/v1/pictures/listings/",
-                        "/v1/pictures/users",
-                        "/v1/pictures/users/",
-                        "/v1/pictures/users/{userId}",
-                        "/v1/pictures/users/{userId}/",
-                        "/v1/listings/{listingId}",
-                        "/v1/listings/{listingId}/"
+                    "/v1/pictures/listings",
+                    "/v1/pictures/listings/",
+                    "/v1/pictures/users",
+                    "/v1/pictures/users/",
+                    "/v1/pictures/users/{userId}",
+                    "/v1/pictures/users/{userId}/",
+                    "/v1/listings/{listingId}",
+                    "/v1/listings/{listingId}/",
+                    "/v1/gathertogether/**"
                 ).permitAll()
-                .anyRequest().authenticated()
+            .anyRequest().authenticated()
                 .and()
                 .formLogin().disable();
 

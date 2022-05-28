@@ -296,8 +296,8 @@ public class UserService {
                 }
             }
 
-            if (StringUtils.hasText(userInput.getDetails().getAbout())) {
-                user.getDetails().setAbout(userInput.getDetails().getAbout());
+            if (StringUtils.hasText(userInput.getDetails().getBiography())) {
+                user.getDetails().setBiography(userInput.getDetails().getBiography());
             }
         }
 
@@ -315,7 +315,7 @@ public class UserService {
         if (executedBy != null) {
             if (!executedBy.getId().equals(user.getId())
                     && !executedBy.getRole().isTeam()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user1");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user");
             }
         }
 
@@ -324,7 +324,9 @@ public class UserService {
                     || user.getAuthenticationData().getPassword() == null
                     || user.getDetails().getFirstName() == null
                     || user.getDetails().getLastName() == null
-                    || user.getDetails().getGender() == null) {
+                    || user.getDetails().getGender() == null
+                    || user.getDetails().getBirthday() == null
+                    || user.getDetails().getAddress() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "mandatory fields must be filled");
             }
         }
@@ -432,8 +434,8 @@ public class UserService {
             user.getDetails().setPhoneNumber(Utils.stripPhoneNumber(user.getDetails().getPhoneNumber()));
         }
 
-        if (StringUtils.hasText(user.getDetails().getAbout())) {
-            if (user.getDetails().getAbout().length() > 65535) {
+        if (StringUtils.hasText(user.getDetails().getBiography())) {
+            if (user.getDetails().getBiography().length() > 65535) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "about is too long");
             }
         }

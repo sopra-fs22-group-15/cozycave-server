@@ -41,7 +41,7 @@ public class UserDetails implements Cloneable {
     private Date birthday;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "location_id")
+    @JoinColumn(name = "location_id", nullable = false)
     private Location address;
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -51,8 +51,8 @@ public class UserDetails implements Cloneable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "about", columnDefinition = "TEXT")
-    private String about;
+    @Column(name = "biography", columnDefinition = "TEXT")
+    private String biography;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "picture_id")
@@ -85,7 +85,7 @@ public class UserDetails implements Cloneable {
                 this.address.clone(),
                 deepCopyLocation(this.specialAddress),
                 phoneNumber,
-                about,
+                biography,
                 this.picture
         );
     }
