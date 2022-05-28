@@ -13,6 +13,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -23,20 +29,15 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 @RequiredArgsConstructor
 @Slf4j
 public class UserProfileHandler extends TextWebSocketHandler {
 
     //Map<UUID, WebSocketSession> webSocketSessions = Collections.synchronizedMap(new HashMap<>());
     private final HashBiMap<UUID, WebSocketSession> webSocketSessions = HashBiMap.create();
-    private final Cache<UUID, UUID> requestCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build();
+    private final Cache<UUID, UUID> requestCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build();
 
     private final UserService userService;
 
@@ -79,16 +80,18 @@ public class UserProfileHandler extends TextWebSocketHandler {
         }
 
         session.sendMessage(Action.JOINED_ALL_USERS.getTextMessageWithData(new Gson().toJsonTree(
-                usersOnline.stream()
-                        .map(UserMapper.INSTANCE::userToUserGetGTPublicDto)
-                        .toList()
+            usersOnline.stream()
+                .map(UserMapper.INSTANCE::userToUserGetGTPublicDto)
+                .toList()
         )));
 
         webSocketSessions.put(uuid, session);
     }
 
     private @Nullable String getJwtFromRequest(WebSocketSession session) {
-        if (!session.getHandshakeHeaders().containsKey("Authorization")) return null;
+        if (!session.getHandshakeHeaders().containsKey("Authorization")) {
+            return null;
+        }
 
         String bearerToken = session.getHandshakeHeaders().getFirst("Authorization");
 
@@ -102,7 +105,9 @@ public class UserProfileHandler extends TextWebSocketHandler {
     private void sendUserJoinedToEveryone(UUID uuid) throws Exception {
         Optional<User> optionalUser = userService.findUserID(uuid);
 
-        if (optionalUser.isEmpty()) return;
+        if (optionalUser.isEmpty()) {
+            return;
+        }
 
         User user = optionalUser.get();
 
@@ -165,7 +170,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 UUID requestedUserUuid = UUID.fromString(json.getAsJsonObject("data").get("uuid").getAsString());
 
                 if (requestCache.getIfPresent(userUuid) != null
-                        && requestCache.getIfPresent(userUuid).equals(requestedUserUuid)) {
+                    && requestCache.getIfPresent(userUuid).equals(requestedUserUuid)) {
                     session.sendMessage(Action.ERROR_ALREADY_REQUESTED.getTextMessage());
                     return;
                 }
@@ -188,17 +193,87 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 UserGetGTPublicDto publicUser = UserMapper.INSTANCE.userToUserGetGTPublicDto(user);
 
                 webSocketSessions.get(requestedUserUuid).sendMessage(
-                        Action.REQUESTED_FROM_USER.getTextMessageWithData(new Gson().toJsonTree(publicUser)));
+                    Action.REQUESTED_FROM_USER.getTextMessageWithData(new Gson().toJsonTree(publicUser)));
                 return;
             }
             // TODO
-            // data: <UserGetGTPublicDto>
-            case REQUEST_ACCEPTED -> {
+            // data: {uuid: "<UUID>"}
+            // return: REQUEST_ACCEPTED.data: <UserGetGTDto>
+            case REQUEST_ACCEPT -> {
+                if (!json.getAsJsonObject("data").has("uuid")) {
+                    session.sendMessage(Action.ERROR_UNKNOWN_UUID.getTextMessage());
+                    return;
+                }
+
+                UUID requesterUuid = UUID.fromString(json.getAsJsonObject("data").get("uuid").getAsString());
+
+                if (requestCache.getIfPresent(requesterUuid) == null
+                    || !requestCache.getIfPresent(requesterUuid).equals(userUuid)) {
+                    session.sendMessage(Action.ERROR_REQUEST_NOT_FOUND.getTextMessage());
+                    return;
+                }
+
+                if (!webSocketSessions.containsKey(userUuid)) {
+                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    return;
+                }
+
+                requestCache.invalidate(userUuid);
+
+                // send data to requester
+                Optional<User> optionalRequestedUser = userService.findUserID(userUuid);
+                if (optionalRequestedUser.isEmpty()) {
+                    session.sendMessage(Action.ERROR_INTERNAL_SERVER_ERROR.getTextMessage());
+                    return;
+                }
+
+                UserGetGTDto requestedUserDto = UserMapper.INSTANCE.userToUserGetGTDto(optionalRequestedUser.get());
+
+                webSocketSessions.get(requesterUuid).sendMessage(
+                    Action.REQUEST_ACCEPTED.getTextMessageWithData(new Gson().toJsonTree(requestedUserDto)));
+
+                // send data to requested
+                Optional<User> optionalRequesterUser = userService.findUserID(userUuid);
+                if (optionalRequesterUser.isEmpty()) {
+                    session.sendMessage(Action.ERROR_INTERNAL_SERVER_ERROR.getTextMessage());
+                    return;
+                }
+
+                UserGetGTDto requesterUserDto = UserMapper.INSTANCE.userToUserGetGTDto(optionalRequesterUser.get());
+
+                webSocketSessions.get(userUuid).sendMessage(
+                    Action.REQUEST_ACCEPTED.getTextMessageWithData(new Gson().toJsonTree(requesterUserDto)));
 
                 return;
             }
             // data: {uuid: "<UUID>"}
-            case REQUEST_DENIED -> {
+            // return: REQUEST_DENIED.data: {uuid: "<UUID>"}
+            case REQUEST_DENY -> {
+                if (!json.getAsJsonObject("data").has("uuid")) {
+                    session.sendMessage(Action.ERROR_UNKNOWN_UUID.getTextMessage());
+                    return;
+                }
+
+                UUID requesterUuid = UUID.fromString(json.getAsJsonObject("data").get("uuid").getAsString());
+
+                if (requestCache.getIfPresent(requesterUuid) == null
+                    || !requestCache.getIfPresent(requesterUuid).equals(userUuid)) {
+                    session.sendMessage(Action.ERROR_REQUEST_NOT_FOUND.getTextMessage());
+                    return;
+                }
+
+                if (!webSocketSessions.containsKey(requesterUuid)) {
+                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    return;
+                }
+
+                requestCache.invalidate(requesterUuid);
+
+                JsonObject jsonResponse = new JsonObject();
+                jsonResponse.addProperty("uuid", userUuid.toString());
+                webSocketSessions.get(requesterUuid).sendMessage(Action.REQUEST_DENIED.getTextMessageWithData(
+                    jsonResponse
+                ));
 
                 return;
             }
@@ -210,27 +285,75 @@ public class UserProfileHandler extends TextWebSocketHandler {
         }
     }
 
+    private boolean validateRequestPayload(String payload) {
+        JsonElement json;
+
+        try {
+            System.out.println("PAYLOAD " + payload);
+            json = JsonParser.parseString(payload);
+        } catch (Exception e) {
+            return false;
+        }
+
+        if (json == null) {
+            return false;
+        }
+
+        if (!json.isJsonObject()) {
+            return false;
+        }
+
+        JsonObject jsonObject = json.getAsJsonObject();
+
+        if (!jsonObject.has("action_id")) {
+            return false;
+        }
+
+        return jsonObject.has("data");
+    }
+
+    private @Nullable JsonObject getJsonFromMessage(String json) {
+        if (!validateRequestPayload(json)) {
+            return null;
+        }
+
+        return JsonParser.parseString(json).getAsJsonObject();
+    }
+
     enum Action {
         NEW_USER(1),
         REMOVE_USER(2),
         REQUEST_USER(3),
         REQUESTED_FROM_USER(4),
-        REQUEST_ACCEPTED(5),
-        REQUEST_DENIED(6),
-        USER(7),
-        JOINED_ALL_USERS(8),
+        REQUEST_ACCEPT(5),
+        REQUEST_DENY(6),
+        REQUEST_ACCEPTED(7),
+        REQUEST_DENIED(8),
+        JOINED_ALL_USERS(9),
         ERROR_UNKNOWN_ACTION(1001),
         ERROR_UNAUTHORIZED(1002),
         ERROR_INVALID_DATA(1003),
         ERROR_ALREADY_CONNECTED(1004),
         ERROR_UNKNOWN_UUID(1005),
         ERROR_ALREADY_REQUESTED(1006),
-        ERROR_INTERNAL_SERVER_ERROR(1007);
+        ERROR_INTERNAL_SERVER_ERROR(1007),
+        ERROR_REQUEST_USER_GONE(1008),
+        ERROR_REQUEST_NOT_FOUND(1009);
 
-        private int id;
+        private final int id;
 
         Action(int id) {
             this.id = id;
+        }
+
+        public static Action getFrom(String value) {
+            return Action.valueOf(value.toUpperCase());
+        }
+
+        public static @Nullable Action getFrom(int id) {
+            return Arrays.stream(Action.values())
+                .filter(a -> a.getId() == id)
+                .findAny().orElseGet(() -> null);
         }
 
         public int getId() {
@@ -267,44 +390,5 @@ public class UserProfileHandler extends TextWebSocketHandler {
         public TextMessage getTextMessage() {
             return new TextMessage(getJson());
         }
-
-        public static Action getFrom(String value) {
-            return Action.valueOf(value.toUpperCase());
-        }
-
-        public static @Nullable Action getFrom(int id) {
-            return Arrays.stream(Action.values())
-                    .filter(a -> a.getId() == id)
-                    .findAny().orElseGet(() -> null);
-        }
-    }
-
-    private boolean validateRequestPayload(String payload) {
-        JsonElement json;
-
-        try {
-            System.out.println("PAYLOAD " + payload);
-            json = JsonParser.parseString(payload);
-        } catch (Exception e) {
-            return false;
-        }
-
-        if (json == null) return false;
-
-        if (!json.isJsonObject()) return false;
-
-        JsonObject jsonObject = json.getAsJsonObject();
-
-        if (!jsonObject.has("action_id")) return false;
-
-        if (!jsonObject.has("data")) return false;
-
-        return true;
-    }
-
-    private @Nullable JsonObject getJsonFromMessage(String json) {
-        if (!validateRequestPayload(json)) return null;
-
-        return JsonParser.parseString(json).getAsJsonObject();
     }
 }
