@@ -1,13 +1,11 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.PictureGetDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -20,17 +18,18 @@ public class UserGetGTDto implements Serializable {
 
     private UserDetailsDto details;
 
-    private AuthenticationDataDto authenticationDataDto;
+    @SerializedName(value = "authentication")
+    private AuthenticationDataDto authenticationData;
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
     public static class UserDetailsDto implements Serializable {
 
-        @JsonProperty("first_name")
+        @SerializedName(value = "first_name")
         private String firstName;
 
-        @JsonProperty("last_name")
+        @SerializedName(value = "last_name")
         private String lastName;
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -40,14 +39,14 @@ public class UserGetGTDto implements Serializable {
 
         private Long age;
 
-        @Column(name = "phone_number")
+        @SerializedName(value = "phone_number")
         private String phoneNumber;
 
         @AllArgsConstructor
         @NoArgsConstructor
         @Data
         public static class PictureGetGTDto implements Serializable {
-            @JsonProperty("picture_url")
+            @SerializedName(value = "picture_url")
             private String pictureUrl;
         }
     }
