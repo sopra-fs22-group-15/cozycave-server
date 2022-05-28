@@ -1,8 +1,8 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.config;
 
-import ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller.UserProfileHandler;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtTokenProvider;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.websockets.handler.UserProfileHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
