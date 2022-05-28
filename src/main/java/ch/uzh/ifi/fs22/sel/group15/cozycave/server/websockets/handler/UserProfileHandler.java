@@ -1,5 +1,6 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.websockets.handler;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetGTDto;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.rest.dto.users.UserGetGTPublicDto;
@@ -65,6 +66,12 @@ public class UserProfileHandler extends TextWebSocketHandler {
             return;
         }
 
+        Role role = getRoleOfUser(uuid);
+        if (role == null || role.lessThan(Role.STUDENT)) {
+            session.sendMessage(Action.ERROR_FORBIDDEN.getTextMessage());
+            return;
+        }
+
         // send new joined user info to every subscriber
         sendUserJoinedToEveryone(uuid);
 
@@ -74,9 +81,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
         for (UUID id : webSocketSessions.keySet()) {
             Optional<User> oU = userService.findUserID(id);
 
-            if (oU.isPresent()) {
-                usersOnline.add(oU.get());
-            }
+            oU.ifPresent(usersOnline::add);
         }
 
         session.sendMessage(Action.JOINED_ALL_USERS.getTextMessageWithData(new Gson().toJsonTree(
@@ -100,6 +105,16 @@ public class UserProfileHandler extends TextWebSocketHandler {
         }
 
         return null;
+    }
+
+    private @Nullable Role getRoleOfUser(UUID uuid) {
+        Optional<User> user = userService.findUserID(uuid);
+
+        if (user.isEmpty()) {
+            return null;
+        }
+
+        return user.get().getRole();
     }
 
     private void sendUserJoinedToEveryone(UUID uuid) throws Exception {
@@ -214,7 +229,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 }
 
                 if (!webSocketSessions.containsKey(userUuid)) {
-                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    session.sendMessage(Action.ERROR_REQUESTED_USER_GONE.getTextMessage());
                     return;
                 }
 
@@ -263,7 +278,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
                 }
 
                 if (!webSocketSessions.containsKey(requesterUuid)) {
-                    session.sendMessage(Action.ERROR_REQUEST_USER_GONE.getTextMessage());
+                    session.sendMessage(Action.ERROR_REQUESTED_USER_GONE.getTextMessage());
                     return;
                 }
 
@@ -337,8 +352,9 @@ public class UserProfileHandler extends TextWebSocketHandler {
         ERROR_UNKNOWN_UUID(1005),
         ERROR_ALREADY_REQUESTED(1006),
         ERROR_INTERNAL_SERVER_ERROR(1007),
-        ERROR_REQUEST_USER_GONE(1008),
-        ERROR_REQUEST_NOT_FOUND(1009);
+        ERROR_REQUESTED_USER_GONE(1008),
+        ERROR_REQUEST_NOT_FOUND(1009),
+        ERROR_FORBIDDEN(1010);
 
         private final int id;
 

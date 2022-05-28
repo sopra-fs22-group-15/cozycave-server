@@ -4,7 +4,7 @@
   "info": {
     "title": "CozyCave.ch API Documentation",
     "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "version-explanation": "APIVersion.MayorVersion.MinorVersion"
   },
   "servers": [
@@ -191,7 +191,9 @@
           "special_address": {
             "type": "array",
             "description": "special addresses for time calculations e.g. like universities and workplaces etc.",
-            "$ref": "#/components/schemas/Location"
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
           },
           "phone_number": {
             "type": "string",
@@ -635,8 +637,8 @@
         "type": "object",
         "readOnly": true,
         "properties": {
-          "file": {
-            "$ref": "#/components/schemas/file"
+          "File": {
+            "$ref": "#/components/schemas/File"
           }
         }
       },
@@ -646,10 +648,140 @@
         "example": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png",
         "required": true
       },
-      "file": {
+      "File": {
         "description": "Picture file",
         "type": "file",
         "required": true
+      },
+      "WebSocketsError": {
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "name of the error",
+            "example": "ERROR_UNKNOWN_ACTION"
+          },
+          "action_id": {
+            "type": "number",
+            "description": "id of the action, starting on errors from 1000",
+            "example": 1000
+          }
+        }
+      },
+      "UserGetGT": {
+        "description": "User object with all information provided when accepting an request.",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "authentication": {
+            "description": "Authentication data object",
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "email of the user",
+                "example": "erika.mustermann@uzh.ch",
+                "required": true
+              }
+            }
+          },
+          "details": {
+            "description": "User details object",
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "first name of the user",
+                "example": "Erika",
+                "required": true,
+                "maxLength": 255
+              },
+              "last_name": {
+                "type": "string",
+                "description": "last name of the user",
+                "example": "Mustermann",
+                "required": true,
+                "maxLength": 255
+              },
+              "gender": {
+                "$ref": "#/components/schemas/Gender"
+              },
+              "age": {
+                "type": "number",
+                "description": "age of the user",
+                "example": 22
+              },
+              "phone_number": {
+                "type": "string",
+                "description": "phone number of the user",
+                "example": "+41791234567",
+                "required": false
+              },
+              "biography": {
+                "type": "string",
+                "description": "biography of the user",
+                "example": "I am a very nice person",
+                "required": false,
+                "maxLength": 65535
+              },
+              "picture": {
+                "$ref": "#/components/schemas/PictureGet"
+              }
+            }
+          }
+        }
+      },
+      "UserGetPublicGT": {
+        "description": "User object with all information provided when accepting an request.",
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "details": {
+            "description": "User details object",
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "description": "first name of the user",
+                "example": "Erika",
+                "required": true,
+                "maxLength": 255
+              },
+              "last_name": {
+                "type": "string",
+                "description": "last name of the user",
+                "example": "Mustermann",
+                "required": true,
+                "maxLength": 255
+              },
+              "gender": {
+                "$ref": "#/components/schemas/Gender"
+              },
+              "age": {
+                "type": "number",
+                "description": "age of the user",
+                "example": 22
+              },
+              "biography": {
+                "type": "string",
+                "description": "biography of the user",
+                "example": "I am a very nice person",
+                "required": false,
+                "maxLength": 65535
+              },
+              "picture": {
+                "$ref": "#/components/schemas/PictureGet"
+              }
+            }
+          }
+        }
       }
     },
     "requestBodies": {
@@ -709,6 +841,39 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Location"
+            }
+          }
+        }
+      },
+      "GatherTogetherDataUuid": {
+        "description": "request bodies are represented in responses with ids",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "example": 1,
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                },
+                "data": {
+                  "description": "the data (here: uuid)",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/components/schemas/UUID"
+                    }
+                  },
+                  "required": true
+                }
+              }
             }
           }
         }
@@ -867,6 +1032,243 @@
             }
           }
         }
+      },
+      "GatherTogetherDataUuid": {
+        "description": "an object containing a uuid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "example": 1,
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                },
+                "data": {
+                  "description": "the data (here: uuid)",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/components/schemas/UUID"
+                    }
+                  },
+                  "required": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "GatherTogetherDataUserGetGT": {
+        "description": "an object with the data of a user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "default": 7,
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                },
+                "data": {
+                  "$ref": "#/components/schemas/UserGetGT"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GatherTogetherDataUserGetGTPublic": {
+        "description": "an object with the data of a user but with reduced information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "default": 4,
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                },
+                "data": {
+                  "$ref": "#/components/schemas/UserGetPublicGT"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GatherTogetherDataUserGetGTPublicMultiple": {
+        "description": "an object with the data of a user but with reduced information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "default": 4,
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                },
+                "data": {
+                  "description": "the data",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGetPublicGT"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GatherTogetherDataEmpty": {
+        "description": "an object without data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action_id": {
+                  "type": "number",
+                  "description": "the action id",
+                  "required": true
+                },
+                "action": {
+                  "type": "string",
+                  "description": "the action written as in text",
+                  "readOnly": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "GatherTogetherUnknownActionError": {
+        "description": "the action id is unknown",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherUnauthorizedError": {
+        "description": "no or an invalid token was provided",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherInvalidDataError": {
+        "description": "the data provided is invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherAlreadyConnectedError": {
+        "description": "the user is already connected to the service",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherUnknownUuidError": {
+        "description": "the uuid provided is unknown",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherAlreadyRequestedError": {
+        "description": "the user has already requested the provided user. this can only be done every 10 minutes",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherInternalServerErrorError": {
+        "description": "an internal server error occured",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherRequestedUserGoneError": {
+        "description": "the requested user is no longer connected to the service",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherRequestNotFoundError": {
+        "description": "the request was not found (invalid provided uuid)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
+      },
+      "GatherTogetherForbiddenError": {
+        "description": "the user is not allowed to do this action",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WebSocketsError"
+            }
+          }
+        }
       }
     },
     "parameters": {
@@ -910,18 +1312,18 @@
         },
         "allowEmptyValue": false
       },
-      "file": {
+      "File": {
         "name": "file",
         "in": "header",
         "description": "A single picture.",
         "required": true,
         "schema": {
-          "$ref": "#/components/schemas/file"
+          "$ref": "#/components/schemas/File"
         },
         "allowEmptyValue": false
       },
-      "SpecialaddressId": {
-        "name": "specialaddressId",
+      "SpecialAddressId": {
+        "name": "specialAddressId",
         "in": "path",
         "description": "The unique identifier of a special location.",
         "required": true,
@@ -956,6 +1358,14 @@
     {
       "name": "pictures",
       "description": "Picture operations used for uploading pictures for profile pictures as well as listing pictures."
+    },
+    {
+      "name": "gathertogether",
+      "description": "GatherTogether operations used for managing gather togethers."
+    },
+    {
+      "name": "websockets",
+      "description": "Websocket operations used for managing websockets."
     },
     {
       "name": "default",
@@ -1233,9 +1643,9 @@
         }
       }
     },
-    "/v1/users/{userId}/specialaddress": {
+    "/v1/users/{userId}/specialAddress": {
       "get": {
-        "summary": "retrieve a lit of all specialaddresses a user has specified",
+        "summary": "retrieve a lit of all specialAddresses a user has specified",
         "description": "retrieves a list of special address a user has specified by user id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "operationId": "findSpecialLocations",
         "tags": [
@@ -1326,9 +1736,9 @@
         }
       }
     },
-    "/v1/users/{userId}/specialaddress/{specialaddressId}": {
+    "/v1/users/{userId}/specialaddress/{specialAddressId}": {
       "get": {
-        "summary": "retrieve a lit of all specialaddresses a user has specified",
+        "summary": "retrieve a lit of all specialAddresses a user has specified",
         "description": "retrieves a list of special address a user has specified by user id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
         "operationId": "getSpecificSpecialLocation",
         "tags": [
@@ -1339,7 +1749,7 @@
             "$ref": "#/components/parameters/UserId"
           },
           {
-            "$ref": "#/components/parameters/SpecialaddressId"
+            "$ref": "#/components/parameters/SpecialAddressId"
           }
         ],
         "responses": {
@@ -1381,7 +1791,7 @@
             "$ref": "#/components/parameters/UserId"
           },
           {
-            "$ref": "#/components/parameters/SpecialaddressId"
+            "$ref": "#/components/parameters/SpecialAddressId"
           }
         ],
         "requestBody": {
@@ -1426,7 +1836,7 @@
             "$ref": "#/components/parameters/UserId"
           },
           {
-            "$ref": "#/components/parameters/SpecialaddressId"
+            "$ref": "#/components/parameters/SpecialAddressId"
           }
         ],
         "responses": {
@@ -1660,7 +2070,6 @@
               "type": "string"
             }
           }
-
         ],
         "tags": [
           "listings",
@@ -2255,7 +2664,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/file"
+            "$ref": "#/components/parameters/File"
           }
         ],
         "responses": {
@@ -2347,7 +2756,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/file"
+            "$ref": "#/components/parameters/File"
           }
         ],
         "responses": {
@@ -2439,7 +2848,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/file"
+            "$ref": "#/components/parameters/File"
           }
         ],
         "responses": {
@@ -2466,6 +2875,253 @@
           },
           "default": {
             "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/gathertogether": {
+      "get": {
+        "summary": "retrieved messages",
+        "description": "post is just used to represent a send message, get is used to represent retrieved messages<br><br>        NEW_USER(1),<br>        REMOVE_USER(2),<br>        REQUEST_USER(3),<br>        REQUESTED_FROM_USER(4),<br>        REQUEST_ACCEPT(5),<br>        REQUEST_DENY(6),<br>        REQUEST_ACCEPTED(7),<br>        REQUEST_DENIED(8),<br>        JOINED_ALL_USERS(9),<br>        ERROR_UNKNOWN_ACTION(1001),<br>        ERROR_UNAUTHORIZED(1002),<br>        ERROR_INVALID_DATA(1003),<br>        ERROR_ALREADY_CONNECTED(1004),<br>        ERROR_UNKNOWN_UUID(1005),<br>        ERROR_ALREADY_REQUESTED(1006),<br>        ERROR_INTERNAL_SERVER_ERROR(1007),<br>        ERROR_REQUESTED_USER_GONE(1008),<br>        ERROR_REQUEST_NOT_FOUND(1009),<br>        ERROR_FORBIDDEN(1010);<br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getGatherTogetherRetrievedMessages",
+        "tags": [
+          "gathertogether",
+          "sockets"
+        ],
+        "responses": {
+          "1": {
+            "description": "new user connected to the service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 4,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserGetPublicGT"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "2": {
+            "description": "sent when a user disconnects from the service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 2,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "description": "the data (here: uuid)",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "$ref": "#/components/schemas/UUID"
+                        }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4": {
+            "description": "send when some user requested data from a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 4,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "description": "the data (here: uuid)",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "$ref": "#/components/schemas/UUID"
+                        }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "7": {
+            "description": "send when some user accepted data from a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 4,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserGetGT"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "8": {
+            "description": "sent when a request was denied from user with uuid \"id\"",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 8,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "description": "the data (here: uuid)",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "$ref": "#/components/schemas/UUID"
+                        }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "9": {
+            "description": "all users connected to the service (send when joining the service)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "number",
+                      "description": "the action id",
+                      "default": 9,
+                      "required": true
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "the action written as in text",
+                      "readOnly": true
+                    },
+                    "data": {
+                      "description": "users that are connected to the service",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserGetPublicGT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "1001": {
+            "$ref": "#/components/responses/GatherTogetherUnknownActionError"
+          },
+          "1002": {
+            "$ref": "#/components/responses/GatherTogetherUnauthorizedError"
+          },
+          "1003": {
+            "$ref": "#/components/responses/GatherTogetherInvalidDataError"
+          },
+          "1004": {
+            "$ref": "#/components/responses/GatherTogetherAlreadyConnectedError"
+          },
+          "1005": {
+            "$ref": "#/components/responses/GatherTogetherUnknownUuidError"
+          },
+          "1006": {
+            "$ref": "#/components/responses/GatherTogetherAlreadyRequestedError"
+          },
+          "1007": {
+            "$ref": "#/components/responses/GatherTogetherInternalServerErrorError"
+          },
+          "1008": {
+            "$ref": "#/components/responses/GatherTogetherRequestedUserGoneError"
+          },
+          "1009": {
+            "$ref": "#/components/responses/GatherTogetherRequestNotFoundError"
+          },
+          "1010": {
+            "$ref": "#/components/responses/GatherTogetherForbiddenError"
+          }
+        }
+      },
+      "post": {
+        "summary": "send messages",
+        "description": "post is just used to represent a send message, get is used to represent retrieved messages<br><br>        NEW_USER(1),<br>        REMOVE_USER(2),<br>        REQUEST_USER(3),<br>        REQUESTED_FROM_USER(4),<br>        REQUEST_ACCEPT(5),<br>        REQUEST_DENY(6),<br>        REQUEST_ACCEPTED(7),<br>        REQUEST_DENIED(8),<br>        JOINED_ALL_USERS(9),<br>        ERROR_UNKNOWN_ACTION(1001),<br>        ERROR_UNAUTHORIZED(1002),<br>        ERROR_INVALID_DATA(1003),<br>        ERROR_ALREADY_CONNECTED(1004),<br>        ERROR_UNKNOWN_UUID(1005),<br>        ERROR_ALREADY_REQUESTED(1006),<br>        ERROR_INTERNAL_SERVER_ERROR(1007),<br>        ERROR_REQUESTED_USER_GONE(1008),<br>        ERROR_REQUEST_NOT_FOUND(1009),<br>        ERROR_FORBIDDEN(1010);<br><h3>Permitted Roles</h3><ul><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getGatherTogetherSentMessages",
+        "tags": [
+          "gathertogether",
+          "sockets"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GatherTogetherDataUuid"
+        },
+        "responses": {
+          "3": {
+            "$ref": "#/components/responses/GatherTogetherDataUuid"
+          },
+          "5": {
+            "$ref": "#/components/responses/GatherTogetherDataUuid"
+          },
+          "6": {
+            "$ref": "#/components/responses/GatherTogetherDataUuid"
           }
         }
       }
