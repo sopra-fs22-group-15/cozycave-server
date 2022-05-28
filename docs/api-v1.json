@@ -300,12 +300,12 @@
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               },
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               }
             ]
           },
@@ -319,12 +319,12 @@
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               },
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               }
             ]
           }
@@ -426,7 +426,7 @@
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               }
             ]
           },
@@ -440,7 +440,7 @@
               {
                 "id": "f9a8f8e0-c8e0-4e5f-b8e0-f9a8f8e0c8e0",
                 "creation_date": "2020-05-14T02:41:20.182+00:00",
-                "picture_url": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
+                "picture_url": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png"
               }
             ]
           }
@@ -643,7 +643,7 @@
       "Picture_url": {
         "description": "Direct Link to where picture is stored / can be retrieved",
         "type": "string",
-        "example": "http://database.imhof-lan.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png",
+        "example": "http://database.cozycave.ch/CozyCave/334c4c58-a788-4dc9-a65d-14c7df57fe7d.png",
         "required": true
       },
       "file": {
@@ -1659,8 +1659,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "SEARCH",
+            "in": "query",
+            "description": "Used for the search functionality, will search the description, title, city and the zip code for the entered term",
+            "schema": {
+              "type": "string"
+            }
           }
-
         ],
         "tags": [
           "listings",
