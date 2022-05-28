@@ -52,7 +52,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
         // check auth and add to list
         String authToken = getJwtFromRequest(session);
 
-        if (authToken == null || !StringUtils.hasText(authToken) || !jwtTokenProvider.validateToken(authToken)) {
+        if (!StringUtils.hasText(authToken) || !jwtTokenProvider.validateToken(authToken)) {
             session.sendMessage(Action.ERROR_UNAUTHORIZED.getTextMessage());
             session.close(CloseStatus.NOT_ACCEPTABLE);
             return;
@@ -95,17 +95,26 @@ public class UserProfileHandler extends TextWebSocketHandler {
     }
 
     private @Nullable String getJwtFromRequest(WebSocketSession session) {
-        if (!session.getHandshakeHeaders().containsKey("Authorization")) {
+        if (!session.getHandshakeHeaders().containsKey("Authorization")
+            && (session.getUri() == null
+            || session.getUri().getQuery() == null
+            || session.getUri().getQuery().equalsIgnoreCase("token"))) {
             return null;
         }
 
-        String bearerToken = session.getHandshakeHeaders().getFirst("Authorization");
+        if (session.getHandshakeHeaders().containsKey("Authorization")) {
+            String bearerToken = session.getHandshakeHeaders().getFirst("Authorization");
 
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+            if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            }
+
+            return null;
         }
 
-        return null;
+        return session.getUri().getQuery()
+            .substring(session.getUri().getQuery().indexOf("token=") + 6)
+            .split("&")[0];
     }
 
     private @Nullable Role getRoleOfUser(UUID uuid) {
