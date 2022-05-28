@@ -2286,7 +2286,7 @@
         }
       }
     },
-    "/v1/pictures/listing/{listingId}": {
+    "/v1/pictures/listings/{listingId}": {
       "get": {
         "summary": "retrieves a list of pictures for a specific listing",
         "description": "retrieves a list of pictures by the id of the listing<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",
@@ -2378,7 +2378,7 @@
         }
       }
     },
-    "/v1/pictures/listing/{listingId}/floorplan": {
+    "/v1/pictures/listings/{listingId}/floorplan": {
       "get": {
         "summary": "retrieves a list of pictures of floorplans for a specific listing",
         "description": "retrieves a list of pictures by the id of the listing<br><h3>Permitted Roles</h3><ul><li>ANONYMOUS</li><li>LANDLORD</li><li>STUDENT</li><li>TEAM</li><li>ADMIN</li></ul>",

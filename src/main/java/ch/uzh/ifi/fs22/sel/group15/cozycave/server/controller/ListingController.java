@@ -62,7 +62,8 @@ public class ListingController {
             @RequestParam(name = "MAX_SQM") Optional<Integer> maxSqm,
             @RequestParam(name = "AVAILABLE") Optional<String> available,
             @RequestParam(name = "SORT") Optional<String> sort,
-            @RequestParam(name = "ORDER") Optional<String> order
+            @RequestParam(name = "ORDER") Optional<String> order,
+            @RequestParam(name = "SEARCH") Optional<String> search
     ) {
         HashMap<String, Object> filtersMap = new HashMap<String, Object>();
         List<Listing> allListings = listingService.getListings();
@@ -95,6 +96,13 @@ public class ListingController {
         if (maxSqm.isPresent()) filtersMap.put("MAX_SQM", maxSqm.get());
 
         if (available.isPresent()) filtersMap.put("AVAILABLE", Boolean.parseBoolean(available.get()));
+
+        // TODO loop it and Zueri
+        if (search.isPresent()) filtersMap.put("SEARCH", search.get().toLowerCase()
+                .replace("ä", "ae")
+                .replace("ö", "oe")
+                .replace("ü", "ue"));
+
 
         if (filtersMap.size() > 0) {
             List<FilterPair> filterPairs = filtersMap.entrySet().stream()
@@ -451,6 +459,7 @@ public class ListingController {
                     case MIN_SQM -> filterByMinSqm(f.getIntegerValue());
                     case MAX_SQM -> filterByMaxSqm(f.getIntegerValue());
                     case AVAILABLE -> filterByAvailable(f.getBooleanValue());
+                    case SEARCH -> filterBySearchQuery(f.getStringValue());
                 }
             }
 
@@ -520,6 +529,63 @@ public class ListingController {
             return this;
         }
 
+        /*
+        .filter(listing -> !Collections.disjoint(
+                            Arrays.stream(listing.getDescription().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(search.split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getTitle().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(search.split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getAddress().getCity().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(search.split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getAddress().getZipCode().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(search.split(" ")).toList())
+                    ).distinct()
+                    .collect(toList());
+        */
+        // string is already in lowercase
+        public ListingFilter filterBySearchQuery(String search) {
+            StringBuilder newSearch = new StringBuilder(search);
+
+            for (String s : search.split(" ")) {
+                newSearch.append(" ");
+                newSearch.append(s
+                        .replace("ae", "ä")
+                        .replace("ue", "ü")
+                        .replace("oe", "ö"));;
+                newSearch.append(" ");
+                newSearch.append(s
+                        .replace("ä", "ae")
+                        .replace("ü", "ue")
+                        .replace("ö", "oe"));
+                newSearch.append(" ");
+                newSearch.append(s
+                        .replace("ä", "a")
+                        .replace("ü", "u")
+                        .replace("ö", "o"));
+            }
+
+            this.listings = listings.stream()
+                    .filter(listing -> !Collections.disjoint(
+                            Arrays.stream(listing.getDescription().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(newSearch.toString().split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getTitle().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(newSearch.toString().split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getAddress().getCity().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(newSearch.toString().split(" ")).toList()) ||
+                            !Collections.disjoint(
+                            Arrays.stream(listing.getAddress().getZipCode().toLowerCase().split(" ")).toList(),
+                            Arrays.stream(newSearch.toString().split(" ")).toList())
+                    )
+                    .collect(toList());
+            System.out.println(Arrays.stream(search.toLowerCase().split(" ")).toList());
+            return this;
+        }
+
 
         public enum ListingFilters {
 
@@ -531,7 +597,8 @@ public class ListingController {
             ZIP_CODE(String.class),
             MIN_SQM(Integer.class),
             MAX_SQM(Integer.class),
-            AVAILABLE(Boolean.class);
+            AVAILABLE(Boolean.class),
+            SEARCH(String.class);
 
             private final Class<?> type;
 
