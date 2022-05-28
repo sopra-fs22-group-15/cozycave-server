@@ -529,23 +529,6 @@ public class ListingController {
             return this;
         }
 
-        /*
-        .filter(listing -> !Collections.disjoint(
-                            Arrays.stream(listing.getDescription().toLowerCase().split(" ")).toList(),
-                            Arrays.stream(search.split(" ")).toList()) ||
-                            !Collections.disjoint(
-                            Arrays.stream(listing.getTitle().toLowerCase().split(" ")).toList(),
-                            Arrays.stream(search.split(" ")).toList()) ||
-                            !Collections.disjoint(
-                            Arrays.stream(listing.getAddress().getCity().toLowerCase().split(" ")).toList(),
-                            Arrays.stream(search.split(" ")).toList()) ||
-                            !Collections.disjoint(
-                            Arrays.stream(listing.getAddress().getZipCode().toLowerCase().split(" ")).toList(),
-                            Arrays.stream(search.split(" ")).toList())
-                    ).distinct()
-                    .collect(toList());
-        */
-        // string is already in lowercase
         public ListingFilter filterBySearchQuery(String search) {
             StringBuilder newSearch = new StringBuilder(search);
 
