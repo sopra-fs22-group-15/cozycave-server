@@ -1381,7 +1381,7 @@
             "$ref": "#/components/parameters/UserId"
           },
           {
-            "$ref": "#/components/parameters/specialaddressId"
+            "$ref": "#/components/parameters/SpecialaddressId"
           }
         ],
         "requestBody": {
@@ -1426,7 +1426,7 @@
             "$ref": "#/components/parameters/UserId"
           },
           {
-            "$ref": "#/components/parameters/specialaddressId"
+            "$ref": "#/components/parameters/SpecialaddressId"
           }
         ],
         "responses": {
