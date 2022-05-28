@@ -4,7 +4,7 @@
   "info": {
     "title": "CozyCave.ch API Documentation",
     "description": "This is the REST API documentation for the backend of cozycave.ch.<br><br>For all endpoints: if something is required, the you have to send it on POST, if something is explicitly non-required you don't have to set it at all but if somewhere the required require statement is not set, it may be required to e.g. publish the entity but not necessary for POST. Please see description then. <br>Sending a PUT endpoint usually doesn't require any property, if otherwise, it's marked on the description of the object. <br><br>(auto set) := set by the server automatically even when not send.",
-    "version": "1.2.2",
+    "version": "1.2.4",
     "version-explanation": "APIVersion.MayorVersion.MinorVersion"
   },
   "servers": [
@@ -186,6 +186,11 @@
             "$ref": "#/components/schemas/Date"
           },
           "address": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "special_address": {
+            "type": "array",
+            "description": "special addresses for time calculations e.g. like universities and workplaces etc.",
             "$ref": "#/components/schemas/Location"
           },
           "phone_number": {
@@ -506,7 +511,7 @@
             "type": "string",
             "description": "name of the location",
             "example": "uni campus",
-            "required": false
+            "required": true
           },
           "description": {
             "type": "string",
@@ -594,7 +599,7 @@
         "format": "date-time",
         "description": "creation_date is always readOnly",
         "example": "2020-05-14T02:41:20.182+00:00",
-        "required": false
+        "required": true
       },
       "Role": {
         "type": "string",
@@ -694,6 +699,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/PicturePost"
+            }
+          }
+        }
+      },
+      "Location": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Location"
             }
           }
         }
@@ -842,6 +857,16 @@
             }
           }
         }
+      },
+      "Location": {
+        "description": "Single Address of a specific location",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Location"
+            }
+          }
+        }
       }
     },
     "parameters": {
@@ -892,6 +917,16 @@
         "required": true,
         "schema": {
           "$ref": "#/components/schemas/file"
+        },
+        "allowEmptyValue": false
+      },
+      "SpecialaddressId": {
+        "name": "specialaddressId",
+        "in": "path",
+        "description": "The unique identifier of a special location.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UUID"
         },
         "allowEmptyValue": false
       }
@@ -1174,6 +1209,224 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/users/{userId}/specialaddress": {
+      "get": {
+        "summary": "retrieve a lit of all specialaddresses a user has specified",
+        "description": "retrieves a list of special address a user has specified by user id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "findSpecialLocations",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of Locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "adds a special location to a user",
+        "description": "creates a special location user by id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "addSpecialLocation",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/responses/Location"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Location"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      }
+    },
+    "/v1/users/{userId}/specialaddress/{specialaddressId}": {
+      "get": {
+        "summary": "retrieve a lit of all specialaddresses a user has specified",
+        "description": "retrieves a list of special address a user has specified by user id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "getSpecificSpecialLocation",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/SpecialaddressId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Location"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "put": {
+        "summary": "updates a special location to a user",
+        "description": "updates a special location user by id<br><h3>Permitted Roles</h3><ul><li>LANDLORD (only on self)</li><li>STUDENT (only on self)</li><li>TEAM</li><li>ADMIN</li></ul>",
+        "operationId": "updateSpecialLocation",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/SpecialaddressId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/schemas/Location"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Location"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/UndefinedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a specific location of a user",
+        "description": "deletes a specific Location of a user by id<br><h3>Permitted Roles</h3><ul><li>ADMIN</li></ul>",
+        "operationId": "deleteSpecialLocation",
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/SpecialaddressId"
           }
         ],
         "responses": {

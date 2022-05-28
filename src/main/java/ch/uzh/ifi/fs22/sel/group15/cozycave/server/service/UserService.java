@@ -4,6 +4,7 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.Utils;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.config.SecurityConfig;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
@@ -26,10 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -62,6 +60,26 @@ public class UserService {
     public List<User> getUsers() {
         return this.userRepository.findAll();
     }
+
+
+    public List<Location> getUsersSpecialAddress(UUID id) {
+        @NotNull Optional<User> user = findUserID(id);
+        return Collections.unmodifiableList(user.get().getDetails().getSpecialAddress());
+    }
+
+    public Optional<Location> getUsersSpecialAddressById(UUID userId, UUID specialaddressID) {
+        @NotNull Optional<User> user = findUserID(userId);
+
+        Optional<Location> specialAddress = null;
+
+        for (Location address : user.get().getDetails().getSpecialAddress()) {
+            if (address.getId().equals(specialaddressID)) {
+                specialAddress = Optional.of(address);
+            }
+        }
+        return specialAddress;
+    }
+
 
     public @NotNull User createUser(@NotNull User newUser, @Nullable User createdBy) {
         log.debug("creating user {}", newUser);
@@ -108,6 +126,70 @@ public class UserService {
 
         return updatedUser;
     }
+
+    public Location addSpecialLocation(UUID id, Location specialAddressInput) {
+        log.debug("adding special Location: {} for user with id: {}", specialAddressInput, id);
+
+        User userToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+        userToUpdate.getDetails().getSpecialAddress().add(specialAddressInput);
+        userToUpdate = userRepository.saveAndFlush(userToUpdate);
+
+        List<Location> specialAddresses = findUserID(id).get().getDetails().getSpecialAddress();
+
+        log.info("added special Location: {} for user with id: {}", specialAddressInput, id);
+
+        return specialAddresses.get(specialAddresses.size() - 1);
+    }
+
+    public Location updateSpecialLocation(UUID id, Location specialAddressInput) {
+        log.debug("updating special Location: {} for user with id: {}", specialAddressInput, id);
+        User userToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        Location locationToBeUpdated = getUsersSpecialAddressById(id, specialAddressInput.getId()).get();
+        System.out.println();
+
+        if (specialAddressInput.getName() != null) locationToBeUpdated.setName(specialAddressInput.getName());
+
+        if (specialAddressInput.getDescription() != null)
+            locationToBeUpdated.setDescription(specialAddressInput.getName());
+
+        if (specialAddressInput.getStreet() != null) locationToBeUpdated.setStreet(specialAddressInput.getStreet());
+
+        if (specialAddressInput.getHouseNumber() != null)
+            locationToBeUpdated.setHouseNumber(specialAddressInput.getHouseNumber());
+
+        if (specialAddressInput.getApartmentNumber() != null)
+            locationToBeUpdated.setApartmentNumber(specialAddressInput.getApartmentNumber());
+
+        if (specialAddressInput.getApartmentNumber() != null)
+            locationToBeUpdated.setApartmentNumber(specialAddressInput.getApartmentNumber());
+
+        if (specialAddressInput.getZipCode() != null) locationToBeUpdated.setZipCode(specialAddressInput.getZipCode());
+
+        if (specialAddressInput.getCity() != null) locationToBeUpdated.setCity(specialAddressInput.getCity());
+
+        if (specialAddressInput.getState() != null) locationToBeUpdated.setState(specialAddressInput.getState());
+
+        if (specialAddressInput.getCountry() != null) locationToBeUpdated.setCountry(specialAddressInput.getCountry());
+
+        userToUpdate = userRepository.saveAndFlush(userToUpdate);
+        log.info("updated special Location: {} for user with id: {}", specialAddressInput, id);
+        return locationToBeUpdated;
+    }
+
+    public void deleteSpecialLocation(UUID userid, UUID specialaddressID) {
+        log.debug("deleted special Location: {} for user with id: {}", specialaddressID, userid);
+        User userToUpdate = userRepository.findById(userid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        userToUpdate.getDetails().getSpecialAddress().remove(getUsersSpecialAddressById(userid, specialaddressID));
+
+        log.info("removed special Location: {} for user with id: {}", specialaddressID, userid);
+        userRepository.saveAndFlush(userToUpdate);
+    }
+
 
     public void deleteUser(User user) {
         log.debug("deleting user with id: {}", user.getId());
@@ -233,7 +315,7 @@ public class UserService {
         if (executedBy != null) {
             if (!executedBy.getId().equals(user.getId())
                     && !executedBy.getRole().isTeam()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user1");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you are not allowed to edit this user");
             }
         }
 
@@ -242,7 +324,9 @@ public class UserService {
                     || user.getAuthenticationData().getPassword() == null
                     || user.getDetails().getFirstName() == null
                     || user.getDetails().getLastName() == null
-                    || user.getDetails().getGender() == null) {
+                    || user.getDetails().getGender() == null
+                    || user.getDetails().getBirthday() == null
+                    || user.getDetails().getAddress() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "mandatory fields must be filled");
             }
         }

@@ -8,11 +8,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class LocationDto implements Serializable {
+
+    @JsonInclude(Include.NON_EMPTY)
+    private UUID id;
 
     @JsonInclude(Include.NON_EMPTY)
     private String name;

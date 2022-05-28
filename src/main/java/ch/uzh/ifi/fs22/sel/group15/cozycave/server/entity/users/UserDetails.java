@@ -9,9 +9,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "user_details")
@@ -43,8 +41,12 @@ public class UserDetails implements Cloneable {
     private Date birthday;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "location_id")
+    @JoinColumn(name = "location_id", nullable = false)
     private Location address;
+
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "special_location_id")
+    private List<Location> specialAddress;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -81,10 +83,19 @@ public class UserDetails implements Cloneable {
                 this.gender,
                 (Date) this.birthday.clone(),
                 this.address.clone(),
+                deepCopyLocation(this.specialAddress),
                 phoneNumber,
                 biography,
                 this.picture
         );
+    }
+
+    private List<Location> deepCopyLocation(List<Location> addressesOriginal) {
+        List<Location> addressCopied = new ArrayList<>();
+        for (Location address : addressesOriginal) {
+            addressCopied.add(address.clone());
+        }
+        return addressCopied;
     }
 
     @PrePersist

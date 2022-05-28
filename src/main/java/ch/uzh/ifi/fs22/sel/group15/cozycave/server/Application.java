@@ -24,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -64,6 +65,18 @@ public class Application {
             if (userService.existsUser("test@uzh.ch")) {
                 return;
             }
+            List<Location> specialAddress = new ArrayList<Location>();
+            specialAddress.add(new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Pfingstweidstrasse",
+                                    "106",
+                                    null,
+                                    "8005",
+                                    "Zürich",
+                                    "Zürich",
+                                    "Switzerland"));
 
             userService.createUser(new User(
                     null,
@@ -85,14 +98,14 @@ public class Application {
                                     null,
                                     null,
                                     null,
-                                    "Hauptstrasse",
-                                    "24",
-                                    null,
-                                    "5312",
-                                    "Döttingen",
-                                    "Aargau",
-                                    "Switzerland"
-                            ),
+                                    "Bahnhofstrasse",
+                                    "1",
+                                    "10a",
+                                    "8000",
+                                    "Zürich",
+                                    "Zürich",
+                                    "Switzerland"),
+                            specialAddress,
                             "+41791234567",
                             "bio",
                             null
