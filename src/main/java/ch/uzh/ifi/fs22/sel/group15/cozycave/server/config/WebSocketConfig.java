@@ -21,7 +21,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        webSocketHandlerRegistry.addHandler(new UserProfileHandler(userService, jwtTokenProvider), "/v1/gathertogether");
+        webSocketHandlerRegistry.addHandler(new UserProfileHandler(userService, jwtTokenProvider), "/v1/gathertogether")
+            .setAllowedOrigins("*");
     }
 
 
