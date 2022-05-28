@@ -214,8 +214,8 @@ public class UserService {
                 }
             }
 
-            if (StringUtils.hasText(userInput.getDetails().getAbout())) {
-                user.getDetails().setAbout(userInput.getDetails().getAbout());
+            if (StringUtils.hasText(userInput.getDetails().getBiography())) {
+                user.getDetails().setBiography(userInput.getDetails().getBiography());
             }
         }
 
@@ -350,8 +350,8 @@ public class UserService {
             user.getDetails().setPhoneNumber(Utils.stripPhoneNumber(user.getDetails().getPhoneNumber()));
         }
 
-        if (StringUtils.hasText(user.getDetails().getAbout())) {
-            if (user.getDetails().getAbout().length() > 65535) {
+        if (StringUtils.hasText(user.getDetails().getBiography())) {
+            if (user.getDetails().getBiography().length() > 65535) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "about is too long");
             }
         }

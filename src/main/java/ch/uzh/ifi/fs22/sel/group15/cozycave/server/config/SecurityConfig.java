@@ -80,9 +80,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/v1/pictures/users/{userId}",
                         "/v1/pictures/users/{userId}/",
                         "/v1/listings/{listingId}",
-                        "/v1/listings/{listingId}/"
+                        "/v1/listings/{listingId}/",
+                        "/v1/gathertogether/**"
                 ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 .and()
                 .formLogin().disable();
 

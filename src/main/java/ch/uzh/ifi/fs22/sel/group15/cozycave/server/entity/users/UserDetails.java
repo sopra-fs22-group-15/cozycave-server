@@ -49,8 +49,8 @@ public class UserDetails implements Cloneable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "about", columnDefinition = "TEXT")
-    private String about;
+    @Column(name = "biography", columnDefinition = "TEXT")
+    private String biography;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "picture_id")
@@ -82,7 +82,7 @@ public class UserDetails implements Cloneable {
                 (Date) this.birthday.clone(),
                 this.address.clone(),
                 phoneNumber,
-                about,
+                biography,
                 this.picture
         );
     }
