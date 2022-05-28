@@ -69,6 +69,7 @@ public class UserProfileHandler extends TextWebSocketHandler {
         Role role = getRoleOfUser(uuid);
         if (role == null || role.lessThan(Role.STUDENT)) {
             session.sendMessage(Action.ERROR_FORBIDDEN.getTextMessage());
+            session.close(CloseStatus.NOT_ACCEPTABLE);
             return;
         }
 
