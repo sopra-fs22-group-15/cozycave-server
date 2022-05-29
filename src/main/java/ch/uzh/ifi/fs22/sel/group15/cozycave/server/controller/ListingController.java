@@ -565,7 +565,6 @@ public class ListingController {
                             Arrays.stream(newSearch.toString().split(" ")).toList())
                     )
                     .collect(toList());
-            System.out.println(Arrays.stream(search.toLowerCase().split(" ")).toList());
             return this;
         }
 
