@@ -36,6 +36,7 @@ public class DTOUserMapper {
     private UserGetPublicDto userGetPublicDto;
     private UserGetGTDto userGetGTDto;
     private UserGetGTPublicDto userGetGTPublicDto;
+    private Picture profilepicture;
 
 
     @BeforeEach
@@ -64,6 +65,15 @@ public class DTOUserMapper {
                         null
                 )
         );
+
+        profilepicture = new Picture(
+                                UUID.randomUUID(),
+                                new Date(),
+                                user,
+                "http://database.cozycave.ch/CozyCave/595e1d18-dd6e-4a8a-ac08-7ddff4d9c06d.jpg"
+                        );
+
+        user.getDetails().setPicture(profilepicture);
 
         userGetDto = new UserGetDto(
                 UUID.randomUUID(),
@@ -120,7 +130,9 @@ public class DTOUserMapper {
                         "uzh",
                         "BIO",
                         Gender.FEMALE,
-                        null,
+                        new UserGetGTDto.UserDetailsDto.PictureGetGTDto(
+                                "http://database.cozycave.ch/CozyCave/595e1d18-dd6e-4a8a-ac08-7ddff4d9c06d.jpg"
+                        ),
                         null,
                         "+41123456789"
                 ),
@@ -212,6 +224,10 @@ public class DTOUserMapper {
         assertEquals(user.getDetails().getFirstName(), userGetGTDto.getDetails().getFirstName());
         assertEquals(user.getDetails().getLastName(), userGetGTDto.getDetails().getLastName());
         assertEquals(user.getAuthenticationData().getEmail(), userGetGTDto.getAuthenticationData().getEmail());
+        assertEquals(user.getDetails().getBiography(), userGetGTDto.getDetails().getBiography());
+        assertEquals(user.getDetails().getGender(), userGetGTDto.getDetails().getGender());
+        assertEquals(user.getDetails().getPhoneNumber(), userGetGTDto.getDetails().getPhoneNumber());
+        assertEquals(user.getDetails().getPicture().getPictureUrl(), userGetGTDto.getDetails().getPicture().getPictureUrl());
 
     }
 
