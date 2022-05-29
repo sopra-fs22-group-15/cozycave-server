@@ -189,11 +189,6 @@ public class ApplicationService {
             }
         }
 
-        //TODO: Observer Pattern to notify subscriber
-
-        // IDEAS: have a list of applications in the Listing
-        // send notification to all applications by iterating through them applications
-
         return applicationRepository.saveAndFlush(updatedApplication);
     }
 
