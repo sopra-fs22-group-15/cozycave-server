@@ -1,6 +1,24 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,16 +26,12 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
-
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
 @ToString
+@Builder
 public class User implements Cloneable {
 
     @Id

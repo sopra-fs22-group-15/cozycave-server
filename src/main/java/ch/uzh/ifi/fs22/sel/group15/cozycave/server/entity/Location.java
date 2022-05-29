@@ -1,14 +1,24 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity;
 
-import lombok.*;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.Transient;
 import org.springframework.util.StringUtils;
-
-import javax.persistence.*;
-import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "location")
@@ -17,6 +27,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @NoArgsConstructor
+@Builder
 public class Location implements Cloneable {
 
     @Id

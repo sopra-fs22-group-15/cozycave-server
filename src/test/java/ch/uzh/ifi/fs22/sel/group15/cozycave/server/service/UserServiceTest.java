@@ -1,164 +1,311 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import static org.mockito.BDDMockito.doAnswer;
+import static org.mockito.BDDMockito.doReturn;
+
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.UniversityDomains;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationEntryPoint;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtAuthenticationFilter;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.security.JwtTokenProvider;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.server.ResponseStatusException;
 
+@TestPropertySource("classpath:application-test.properties")
 class UserServiceTest {
-
 
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ListingRepository listingRepository;
+
+    @Mock
+    private ApplicationRepository applicationRepository;
+
+    @Mock
+    private PictureRepository pictureRepository;
+
+    @MockBean
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+    @MockBean
+    private AuthenticationManager authenticationManager;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private UniversityDomains universityDomains;
+
+
     @InjectMocks
     private UserService userService;
 
-    private User testUser;
-    private AuthenticationData testAuthenticationData;
-    private UserDetails testUserDetails;
-    private Location testLocation;
+    @InjectMocks
+    private ListingService listingService;
 
-    // create test user before each setup
+    @InjectMocks
+    private ApplicationService applicationService;
+
+    @InjectMocks
+    private PictureService pictureService;
+    @MockBean
+    private CommandLineRunner stupidMock;
+
+
+    private User insertedUser;
+    private User testUser1;
+    private User testUser2;
+
+
     @BeforeEach
-    public void setup() {
-        /*MockitoAnnotations.openMocks(this);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        Date dNow = new Date();
-        UUID userId = UUID.randomUUID();
-        UUID locationId = UUID.randomUUID();
-        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", "8000", "Zurich",
-            "Switzerland");
-        testAuthenticationData = new AuthenticationData(userId, "testUser@uzh.ch", "Test1234!?", "Test1234!?");
-        testUserDetails = new UserDetails(userId, "Test", "User", Gender.OTHER, dNow, testLocation,
-            "Simple Bioagraphy of the TestUser");
-        testUser = new User(userId, dNow, testAuthenticationData, Role.STUDENT, testUserDetails);
+        insertedUser = new User(
+            UUID.randomUUID(),
+            Date.from(Instant.now()),
+            new AuthenticationData(
+                UUID.randomUUID(),
+                "test@test.uzh.ch",
+                new BCryptPasswordEncoder().encode("password" + "SALT"),
+                "SALT"
+            ),
+            Role.STUDENT,
+            new UserDetails(
+                UUID.randomUUID(),
+                "Erika",
+                "Mustermann",
+                Gender.FEMALE,
+                Date.from(Instant.now().minus(10000, ChronoUnit.DAYS)),
+                new Location(
+                    null,
+                    null,
+                    null,
+                    "Universitätsstrasse",
+                    "78",
+                    null,
+                    "8001",
+                    "Zürich",
+                    "Zürich",
+                    "Switzerland"
+                ),
+                null,
+                "+411234567",
+                "im erika :)",
+                null
+            )
+        );
+        doReturn(Optional.of(insertedUser))
+            .when(userRepository).findById(insertedUser.getId());
+        doReturn(Optional.of(insertedUser))
+            .when(userRepository).findByAuthenticationData_Email(insertedUser.getAuthenticationData().getEmail());
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(insertedUser));
 
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);*/
+        testUser1 = new User(
+            UUID.randomUUID(),
+            Date.from(Instant.now()),
+            new AuthenticationData(
+                UUID.randomUUID(),
+                "test2@test.uzh.ch",
+                new BCryptPasswordEncoder().encode("password" + "SALT2"),
+                "SALT2"
+            ),
+            Role.STUDENT,
+            new UserDetails(
+                UUID.randomUUID(),
+                "Erika2",
+                "Mustermann",
+                Gender.FEMALE,
+                Date.from(Instant.now().minus(10000, ChronoUnit.DAYS)),
+                new Location(
+                    null,
+                    null,
+                    null,
+                    "Universitätsstrasse",
+                    "78",
+                    null,
+                    "8001",
+                    "Zürich",
+                    "Zürich",
+                    "Switzerland"
+                ),
+                null,
+                "+411234567",
+                "im erika :)",
+                null
+            )
+        );
+
+
+        testUser2 = new User(
+            UUID.randomUUID(),
+            Date.from(Instant.now()),
+            new AuthenticationData(
+                UUID.randomUUID(),
+                "test3@test.uzh.ch",
+                new BCryptPasswordEncoder().encode("password" + "SALT3"),
+                "SALT3"
+            ),
+            Role.STUDENT,
+            new UserDetails(
+                UUID.randomUUID(),
+                "Erika3",
+                "Mustermann",
+                Gender.FEMALE,
+                Date.from(Instant.now().minus(10000, ChronoUnit.DAYS)),
+                new Location(
+                    null,
+                    null,
+                    null,
+                    "Universitätsstrasse",
+                    "78",
+                    null,
+                    "8001",
+                    "Zürich",
+                    "Zürich",
+                    "Switzerland"
+                ),
+                null,
+                "+411234567",
+                "im erika :)",
+                null
+            )
+        );
+
+        doReturn(testUser2).when(userRepository).saveAndFlush(testUser2);
+
+        doAnswer(invocation -> {
+            doReturn(testUser1).when(userRepository).saveAndFlush(testUser1);
+            doReturn(Optional.of(testUser1))
+                .when(userRepository).findById(testUser1.getId());
+            doReturn(Optional.of(testUser1))
+                .when(userRepository).findByAuthenticationData_Email(testUser1.getAuthenticationData().getEmail());
+            Mockito.when(userRepository.findAll()).thenReturn(List.of(insertedUser, testUser1));
+
+            doReturn(Optional.of(testUser2))
+                .when(userRepository).findById(testUser2.getId());
+            doReturn(Optional.of(testUser2))
+                .when(userRepository).findByAuthenticationData_Email(testUser2.getAuthenticationData().getEmail());
+            Mockito.when(userRepository.findAll()).thenReturn(List.of(insertedUser, testUser1, testUser2));
+            return null;
+        }).when(userRepository).saveAndFlush(testUser2);
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
     }
 
     @Test
-    public void createUserSuccess() {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        // compare emails of user
-        assertEquals(testUser.getAuthenticationData().getEmail(), createdUser.getAuthenticationData().getEmail());*/
+    void getUsers() {
+        Assertions.assertEquals(1, userRepository.findAll().size());
+
+        Assertions.assertEquals(1, userService.getUsers().size());
+        Assertions.assertEquals(insertedUser, userService.getUsers().get(0));
     }
 
     @Test
-    public void createUserEmpty() {
-
+    void getUsersSpecialAddress() {
     }
 
     @Test
-    public void createUserDuplicateEmailException() {
-        /*userService.createUser(testUser);
-
-        // when -> setup additional mocks for UserRepository
-        Mockito.when(userRepository.findByAuthenticationData_Email(Mockito.any())).thenReturn(Optional.ofNullable(testUser));
-        Mockito.when(userRepository.findByAuthenticationData_Email(Mockito.any())).thenReturn(null);
-
-        // then -> attempt to create second user with same user -> check that an error
-        // is thrown
-        assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));*/
+    void getUsersSpecialAddressById() {
     }
 
     @Test
-    public void deleteUserSuccess() throws ResponseStatusException {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        Mockito.when(userService.findUserByEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
-
-        userService.deleteUser(createdUser);
-
-        given(userService.findUserByEmail(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
-
-        assertThrows(ResponseStatusException.class, () -> userService.findUserByEmail(testUser.getAuthenticationData().getEmail()));*/
-
+    void createUser_successful() {
+        Assertions.assertDoesNotThrow(() -> userService.createUser(testUser1, null));
     }
 
     @Test
-    public void deleteUserEmpty() {
-
+    void createUser_duplicate() {
+        Assertions.assertDoesNotThrow(() -> userService.createUser(testUser1, null));
+        Assertions.assertThrows(ResponseStatusException.class,
+            () -> userService.createUser(testUser1, null));
     }
 
     @Test
-    public void deleteUserException() throws ResponseStatusException {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        Mockito.when(userService.findUserEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
-
-        given(userService.deleteUser(createdUser)).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
-
-        assertThrows(ResponseStatusException.class, () -> userService.deleteUser(testUser));*/
-
+    void createUser_wrongData() {
+        testUser2.getDetails().setGender(null);
+        Assertions.assertThrows(ResponseStatusException.class,
+            () -> userService.createUser(testUser2, null));
     }
 
     @Test
-    public void getUsersSuccess() {
-
+    void findUserID() {
+        Assertions.assertNotNull(userService.findUserID(insertedUser.getId()));
+        Assertions.assertEquals(Optional.of(insertedUser), userService.findUserID(insertedUser.getId()));
+        Assertions.assertTrue(userService.findUserID(UUID.randomUUID()).isEmpty());
     }
 
     @Test
-    public void getUsersEmpty() {
-
+    void findUserByEmail() {
+        Assertions.assertNotNull(userService.findUserByEmail(insertedUser.getAuthenticationData().getEmail()));
+        Assertions.assertEquals(Optional.of(insertedUser), userService.findUserByEmail(
+            insertedUser.getAuthenticationData().getEmail()));
+        Assertions.assertTrue(userService.findUserByEmail("random@email.lol").isEmpty());
     }
 
     @Test
-    public void getUsersException() {
-
+    void updateUser() {
     }
 
     @Test
-    public void findUserIDSuccess() {
-
+    void addSpecialLocation() {
     }
 
     @Test
-    public void findUserIDEmpty() {
-
+    void updateSpecialLocation() {
     }
 
     @Test
-    public void findUserIDNonSuccess() {
-
+    void deleteSpecialLocation() {
     }
 
     @Test
-    public void findUserEmailSuccess() {
-
+    void deleteUser() {
     }
 
     @Test
-    public void findUserEmailEmpty() {
-
+    void testDeleteUser() {
     }
 
     @Test
-    public void findUserEmailNonSuccess() {
-
+    void existsUser() {
     }
 
     @Test
-    public void updateUserSuccess() {
-
+    void testExistsUser() {
     }
-
-    @Test
-    public void updateUserException() {
-
-    }
-
-    @Test
-    public void updateUserNonSuccess() {
-
-    }
-
-
 }

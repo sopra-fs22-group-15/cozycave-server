@@ -1,4 +1,4 @@
-package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
+package ch.uzh.ifi.fs22.sel.group15.cozycave.server.old.service;
 
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
@@ -15,6 +15,10 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationReposit
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
