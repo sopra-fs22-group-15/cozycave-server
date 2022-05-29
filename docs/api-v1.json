@@ -3037,7 +3037,7 @@
                       "description": "the data (here: uuid)",
                       "type": "object",
                       "properties": {
-                        "id": {
+                        "uuid": {
                           "$ref": "#/components/schemas/UUID"
                         }
                       },

@@ -3,15 +3,31 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import lombok.*;
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "applications")
@@ -20,6 +36,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @NoArgsConstructor
+@Builder
 public class Application {
 
     @Id

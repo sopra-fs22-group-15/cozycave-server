@@ -314,7 +314,6 @@ public class UserProfileHandler extends TextWebSocketHandler {
         JsonElement json;
 
         try {
-            System.out.println("PAYLOAD " + payload);
             json = JsonParser.parseString(payload);
         } catch (Exception e) {
             return false;

@@ -1,10 +1,9 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server;
 
-import org.checkerframework.checker.index.qual.Positive;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import org.checkerframework.checker.index.qual.Positive;
 
 public class Utils {
 
@@ -26,13 +25,13 @@ public class Utils {
             random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            return (Math.random() * (SALT_LENGTH + 2) + "").substring(1, SALT_LENGTH + 1);
+            return (Math.random() * (length + 2) + "").substring(1, length + 1);
         }
 
         byte[] bytes = new byte[length];
         random.nextBytes(bytes);
 
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, SALT_LENGTH);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, length);
     }
 
     /**

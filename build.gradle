@@ -44,8 +44,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'mysql:mysql-connector-java'
+    testRuntimeOnly 'com.h2database:h2'
 
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.6.7') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
@@ -72,8 +73,9 @@ dependencies {
     implementation 'org.webjars:stomp-websocket:2.3.3'
     implementation 'org.webjars:bootstrap:3.3.7'
     implementation 'org.webjars:jquery:3.1.1-1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test:5.6.3'
 }
 
 bootJar {
@@ -120,7 +122,7 @@ sonarqube {
         property "sonar.organization", "sopra-fs22-group-15"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", ["$buildDir/jacocoReportDir/test/jacocoTestReport.xml"]
-        property "sonar.cpd.exclusions", "**/entity/*.java,**/rest/*.java,**/exceptions/*.java"
+        property "sonar.cpd.exclusions", "**/entity/*.java,**/dto/*.java,**/exceptions/*.java,**/constant/ApplicationStatus.java,**/constant/Gender.java,**/constant/ListingType.java,**/config/*.java"
     }
 }
 

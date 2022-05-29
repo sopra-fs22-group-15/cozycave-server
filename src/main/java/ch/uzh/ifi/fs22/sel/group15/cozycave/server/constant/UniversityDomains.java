@@ -7,11 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import com.sun.istack.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,9 +14,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.Objects;
+import javax.annotation.Nullable;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 @Component
+@ToString
+@EqualsAndHashCode
 public class UniversityDomains {
 
     private final HashSet<University> universities;
@@ -104,13 +106,13 @@ public class UniversityDomains {
         return universities;
     }
 
-    private record University(
-            @NotNull String name,
-            @NotNull CountryCode county,
-            @NotNull ImmutableSet<String> domains
+    record University(
+        @NotNull String name,
+        @NotNull CountryCode county,
+        @NotNull ImmutableSet<String> domains
     ) {
 
-        private University {
+        University {
             domains = domains.stream().map(String::toLowerCase).collect(ImmutableSet.toImmutableSet());
         }
 
@@ -120,32 +122,6 @@ public class UniversityDomains {
 
         public boolean matchesEmail(String email) {
             return domains.stream().anyMatch(d -> email.toLowerCase().endsWith("@" + d));
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof University)) {
-                return false;
-            }
-            University that = (University) o;
-            return name.equals(that.name) && county == that.county && domains.equals(that.domains);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, county, domains);
-        }
-
-        @Override
-        public String toString() {
-            return "University{" +
-                    "name='" + name + '\'' +
-                    ", county=" + county +
-                    ", domains=" + domains +
-                    '}';
         }
     }
 }

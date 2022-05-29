@@ -6,13 +6,37 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
-import lombok.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.springframework.util.StringUtils;
-
-import javax.persistence.*;
-import java.util.*;
 
 @Entity
 @Table(name = "listings")
@@ -21,6 +45,7 @@ import java.util.*;
 @Setter
 @ToString
 @NoArgsConstructor
+@Builder
 public class Listing implements Cloneable {
 
     @Id
