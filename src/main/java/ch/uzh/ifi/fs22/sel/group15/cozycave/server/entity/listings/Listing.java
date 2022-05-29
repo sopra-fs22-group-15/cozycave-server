@@ -122,23 +122,6 @@ public class Listing implements Cloneable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
-            return false;
-        }
-        Listing listing = (Listing) o;
-        return id != null && Objects.equals(id, listing.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
-    @Override
     public Listing clone() {
         return new Listing(
                 this.getId(),
