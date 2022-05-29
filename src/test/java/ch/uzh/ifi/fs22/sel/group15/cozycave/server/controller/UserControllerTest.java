@@ -2,8 +2,10 @@ package ch.uzh.ifi.fs22.sel.group15.cozycave.server.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +29,8 @@ import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ApplicationService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.ListingService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.PictureService;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.List;
@@ -43,12 +47,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -132,6 +138,9 @@ class UserControllerTest {
         Mockito.when(userService.existsUser(insertedUser.getId())).thenReturn(true);
         Mockito.when(userService.getUsers()).thenReturn(List.of(insertedUser));
         Mockito.when(userService.createUser(Mockito.any(), Mockito.any())).thenReturn(insertedUser);
+
+
+        Mockito.doNothing().when(pictureService).deletePictureFromStorageServer(Mockito.any());
     }
 
     @Test
@@ -148,7 +157,8 @@ class UserControllerTest {
         // then
         mockMvc.perform(getRequest)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(insertedUser.getId().toString())));
     }
 
     @Test
@@ -156,15 +166,54 @@ class UserControllerTest {
     }
 
     @Test
-    void findUser() {
+    void findUser() throws Exception {
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/v1/users/" + insertedUser.getId().toString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + jwtTokenProvider.generateToken(
+                insertedUser.getId(),
+                List.of(Role.ADMIN)
+            ));
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(insertedUser.getId().toString())));
     }
 
     @Test
-    void updateUser() {
+    void updateUser() throws Exception {
+//        // when
+//
+//        MockHttpServletRequestBuilder getRequest = put("/v1/users/" + insertedUser.getId().toString())
+//            .contentType(MediaType.APPLICATION_JSON)
+//            .accept(MediaType.APPLICATION_JSON)
+//            .header("Authorization", "Bearer " + jwtTokenProvider.generateToken(
+//                insertedUser.getId(),
+//                List.of(Role.ADMIN)
+//            ))
+//            .content("{\"details\": {\"gender\": \"MALE\"}}");
+//
+//        // then
+//        mockMvc.perform(getRequest)
+//            .andExpect(status().isOk());
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser() throws Exception {
+        // when
+        MockHttpServletRequestBuilder getRequest = delete("/v1/users/" + insertedUser.getId().toString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + jwtTokenProvider.generateToken(
+                insertedUser.getId(),
+                List.of(Role.ADMIN)
+            ));
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -197,5 +246,15 @@ class UserControllerTest {
 
     @Test
     void deleteApplication() {
+    }
+
+    private String asJsonString(final Object object) {
+        try {
+            return new ObjectMapper().writeValueAsString(object);
+        }
+        catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                String.format("The request body could not be created.%s", e.toString()));
+        }
     }
 }
