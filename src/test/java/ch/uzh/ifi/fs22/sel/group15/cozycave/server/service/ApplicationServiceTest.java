@@ -1,15 +1,36 @@
 package ch.uzh.ifi.fs22.sel.group15.cozycave.server.service;
 
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ApplicationStatus;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Gender;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.ListingType;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.constant.Role;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Location;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.Picture;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.applications.Application;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.listings.Listing;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.AuthenticationData;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.User;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.entity.users.UserDetails;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ApplicationRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.ListingRepository;
+import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.PictureRepository;
 import ch.uzh.ifi.fs22.sel.group15.cozycave.server.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ApplicationServiceTest {
 
@@ -17,10 +38,31 @@ class ApplicationServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ListingRepository listingRepository;
+
+    @Mock
+    private ApplicationRepository applicationRepository;
+
+    @Mock
+    private PictureRepository pictureRepository;
+
     @InjectMocks
     private UserService userService;
 
-    private User testUser;
+    @InjectMocks
+    private ListingService listingService;
+
+    @InjectMocks
+    private ApplicationService applicationService;
+
+    @InjectMocks
+    private PictureService pictureService;
+
+    private User testUserStudent;
+    private User testUserLandlord;
+    private Application testapplication;
+    private Listing testlisting;
     private AuthenticationData testAuthenticationData;
     private UserDetails testUserDetails;
     private Location testLocation;
@@ -28,137 +70,212 @@ class ApplicationServiceTest {
     // create test user before each setup
     @BeforeEach
     public void setup() {
-        /*MockitoAnnotations.openMocks(this);
+        testUserStudent = new User(
+                UUID.randomUUID(),
+                new Date(),
+                new AuthenticationData(
+                        UUID.randomUUID(),
+                        "max.mustermann@uzh.ch",
+                        "password",
+                        "rand0m"
+                ),
+                Role.STUDENT,
+                new UserDetails(
+                        UUID.randomUUID(),
+                        "Max",
+                        "Mustermann",
+                        Gender.MALE,
+                        Date.from(Instant.now().minus(45 * 365, ChronoUnit.DAYS)),
+                        new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Bahnhofstrasse",
+                                    "1",
+                                    "10a",
+                                    "8000",
+                                    "Zürich",
+                                    "Zürich",
+                                    "Switzerland"),
+                        null,
+                        "+41 76 123 45 67",
+                        "bio",
+                        null
+                )
+        );
 
-        Date dNow = new Date();
-        UUID userId = UUID.randomUUID();
-        UUID locationId = UUID.randomUUID();
-        testLocation = new Location(locationId, "Test", "TestAddress", "Mainstreet", "1", "8000", "Zurich",
-            "Switzerland");
-        testAuthenticationData = new AuthenticationData(userId, "testUser@uzh.ch", "Test1234!?", "Test1234!?");
-        testUserDetails = new UserDetails(userId, "Test", "User", Gender.OTHER, dNow, testLocation,
-            "Simple Bioagraphy of the TestUser");
-        testUser = new User(userId, dNow, testAuthenticationData, Role.STUDENT, testUserDetails);
+        testUserLandlord = new User(
+                UUID.randomUUID(),
+                new Date(),
+                new AuthenticationData(
+                        UUID.randomUUID(),
+                        "max.mustermann@uzh.ch",
+                        "password",
+                        "rand0m"
+                ),
+                Role.LANDLORD,
+                new UserDetails(
+                        UUID.randomUUID(),
+                        "Max",
+                        "Mustermann",
+                        Gender.MALE,
+                        Date.from(Instant.now().minus(45 * 365, ChronoUnit.DAYS)),
+                        new Location(
+                                    null,
+                                    null,
+                                    null,
+                                    "Bahnhofstrasse",
+                                    "1",
+                                    "10a",
+                                    "8000",
+                                    "Zürich",
+                                    "Zürich",
+                                    "Switzerland"),
+                        null,
+                        "+41 76 123 45 67",
+                        "bio",
+                        null
+                )
+        );
 
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);*/
-    }
+        List<Gender> availableTo = new ArrayList<>();
+        availableTo.add(Gender.MALE);
 
-    @Test
-    public void createUserSuccess() {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        // compare emails of user
-        assertEquals(testUser.getAuthenticationData().getEmail(), createdUser.getAuthenticationData().getEmail());*/
-    }
+        List<Picture> pictures = new ArrayList<>();
+        pictures.add(new Picture(UUID.randomUUID(),
+                        new Date(),
+                        testUserLandlord,
+                        "https://google.ch/"));
 
-    @Test
-    public void createUserEmpty() {
+        List<Picture> floorplan = new ArrayList<>();
+        floorplan.add(new Picture(UUID.randomUUID(),
+                        new Date(),
+                        testUserLandlord,
+                        "https://google.ch/"));
 
-    }
+        testlisting = new Listing(
+                UUID.randomUUID(),
+                new Date(),
+                "Test Flat",
+                "Test Description Flat",
+                new Location(
+                        UUID.randomUUID(),
+                        "Test Flat Location",
+                        "Test Flat Location Description",
+                        "Bahnhofstrasse",
+                        "1a",
+                        "10",
+                        "8005",
+                        "Zürich",
+                        "Zürich",
+                        "Switzerland"
+                ),
+                true,
+                150.0,
+                ListingType.DORM,
+                true,
+                availableTo,
+                true,
+                700.0,
+                1500.0,
+                1.5,
+                testUserLandlord,
+                pictures,
+                floorplan);
 
-    @Test
-    public void createUserDuplicateEmailException() {
-        /*userService.createUser(testUser);
+        testapplication = new Application(
+                UUID.randomUUID(),
+                new Date(),
+                testUserStudent,
+                testlisting,
+                ApplicationStatus.PENDING
+        );
 
-        // when -> setup additional mocks for UserRepository
-        Mockito.when(userRepository.findByAuthenticationData_Email(Mockito.any())).thenReturn(Optional.ofNullable(testUser));
-        Mockito.when(userRepository.findByAuthenticationData_Email(Mockito.any())).thenReturn(null);
-
-        // then -> attempt to create second user with same user -> check that an error
-        // is thrown
-        assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));*/
-    }
-
-    @Test
-    public void deleteUserSuccess() throws ResponseStatusException {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        Mockito.when(userService.findUserByEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
-
-        userService.deleteUser(createdUser);
-
-        given(userService.findUserByEmail(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
-
-        assertThrows(ResponseStatusException.class, () -> userService.findUserByEmail(testUser.getAuthenticationData().getEmail()));*/
-
-    }
-
-    @Test
-    public void deleteUserEmpty() {
-
-    }
-
-    @Test
-    public void deleteUserException() throws ResponseStatusException {
-        /*User createdUser = userService.createUser(testUser);
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
-        Mockito.when(userService.findUserEmail(Mockito.any())).thenReturn(Optional.of(createdUser));
-
-        given(userService.deleteUser(createdUser)).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
-
-        assertThrows(ResponseStatusException.class, () -> userService.deleteUser(testUser));*/
-
-    }
-
-    @Test
-    public void getUsersSuccess() {
-
-    }
-
-    @Test
-    public void getUsersEmpty() {
-
-    }
-
-    @Test
-    public void getUsersException() {
-
-    }
-
-    @Test
-    public void findUserIDSuccess() {
-
-    }
-
-    @Test
-    public void findUserIDEmpty() {
-
-    }
-
-    @Test
-    public void findUserIDNonSuccess() {
-
-    }
-
-    @Test
-    public void findUserEmailSuccess() {
-
-    }
-
-    @Test
-    public void findUserEmailEmpty() {
-
-    }
-
-    @Test
-    public void findUserEmailNonSuccess() {
-
-    }
-
-    @Test
-    public void updateUserSuccess() {
-
-    }
-
-    @Test
-    public void updateUserException() {
 
     }
 
     @Test
-    public void updateUserNonSuccess() {
+    public void findApplicationsOfUser_success() {
+        Mockito.when(applicationRepository.findByApplicant_Id(testUserStudent.getId())).then(List.of(testapplication));
+
 
     }
+
+    @Test
+    public void findApplicationsOfUser_none() {
+
+    }
+
+    @Test
+    public void findApplicationsToListing_success() {
+
+    }
+
+    @Test
+    public void findApplicationsToListing_none() {
+
+    }
+
+    @Test
+    public void findApplicationById_success() {
+
+    }
+
+    @Test
+    public void findApplicationById_none() {
+
+    }
+
+    @Test
+    public void createApplication_success() {
+
+    }
+
+    @Test
+    public void createApplication_throws() {
+
+    }
+
+    @Test
+    public void createApplication_none() {
+
+    }
+
+    @Test
+    public void updateApplication_success() {
+
+    }
+
+    @Test
+    public void updateApplication_none() {
+
+    }
+
+    @Test
+    public void updateApplication_throw() {
+
+    }
+
+    @Test
+    public void deleteApplication_success() {
+
+    }
+
+    @Test
+    public void deleteApplication_none() {
+
+    }
+
+    @Test
+    public void decideOnApplication_success() {
+
+    }
+
+    @Test
+    public void decideOnApplication_throw() {
+
+    }
+
 
 
 }

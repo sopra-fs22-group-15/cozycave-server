@@ -33,9 +33,9 @@ import java.util.*;
 class UserControllerTest {
 
     @MockBean
-    ApplicationService applicationService;
+    private ApplicationService applicationService;
     @MockBean
-    PictureService pictureService;
+    private PictureService pictureService;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
