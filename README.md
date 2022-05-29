@@ -137,7 +137,9 @@ For our customers (e.g Universities), which could need to make a revenue through
 
 The application needs to be stress tested for a lot of requests and users. Also it would make sense to have a failover cluster and use a loadbalancer to ensure the availability of Cozy Cave.
 
+# Authors and acknowledgment
 
+[David Coita](https://github.com/davidcoita), [Lukas Herz](https://github.com/lukasherz),  [Slava-Berasneu](https://github.com/Slava-Berasneu), [Matthias Imhof](https://github.com/matthias-imhof)
 
 # License
 
