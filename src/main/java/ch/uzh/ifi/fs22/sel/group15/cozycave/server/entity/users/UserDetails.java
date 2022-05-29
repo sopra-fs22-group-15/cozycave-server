@@ -116,7 +116,10 @@ public class UserDetails implements Cloneable {
     }
 
     private List<Location> deepCopyLocation(List<Location> addressesOriginal) {
+        if (addressesOriginal == null) return null;
+
         List<Location> addressCopied = new ArrayList<>();
+
         for (Location address : addressesOriginal) {
             addressCopied.add(address.clone());
         }

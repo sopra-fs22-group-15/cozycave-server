@@ -116,6 +116,9 @@ public class UserService {
         User user = userRepository.findById(userInput.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
+        System.out.println(user.getId());
+        System.out.println(userInput.getId());
+
         User mergedUser = mergeUser(user, userInput);
 
         checkIfDataIsValid(mergedUser, updatedBy);
