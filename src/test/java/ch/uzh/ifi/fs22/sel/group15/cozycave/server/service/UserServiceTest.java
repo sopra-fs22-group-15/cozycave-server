@@ -97,7 +97,7 @@ class UserServiceTest {
             Date.from(Instant.now()),
             new AuthenticationData(
                 UUID.randomUUID(),
-                "test@test.uzh.ch",
+                "test@uzh.ch",
                 new BCryptPasswordEncoder().encode("password" + "SALT"),
                 "SALT"
             ),
@@ -110,11 +110,11 @@ class UserServiceTest {
                 Date.from(Instant.now().minus(10000, ChronoUnit.DAYS)),
                 new Location(
                     null,
-                    null,
-                    null,
+                    "work",
+                    "uni addresss",
                     "Universitätsstrasse",
                     "78",
-                    null,
+                    "2C",
                     "8001",
                     "Zürich",
                     "Zürich",
@@ -130,6 +130,9 @@ class UserServiceTest {
             .when(userRepository).findById(insertedUser.getId());
         doReturn(Optional.of(insertedUser))
             .when(userRepository).findByAuthenticationData_Email(insertedUser.getAuthenticationData().getEmail());
+        doReturn(true).when(userRepository).existsById(insertedUser.getId());
+        doReturn(true).when(userRepository)
+            .existsByAuthenticationData_Email(insertedUser.getAuthenticationData().getEmail());
         Mockito.when(userRepository.findAll()).thenReturn(List.of(insertedUser));
 
         testUser1 = new User(
@@ -137,7 +140,7 @@ class UserServiceTest {
             Date.from(Instant.now()),
             new AuthenticationData(
                 UUID.randomUUID(),
-                "test2@test.uzh.ch",
+                "test2@uzh.ch",
                 new BCryptPasswordEncoder().encode("password" + "SALT2"),
                 "SALT2"
             ),
@@ -167,13 +170,12 @@ class UserServiceTest {
             )
         );
 
-
         testUser2 = new User(
             UUID.randomUUID(),
             Date.from(Instant.now()),
             new AuthenticationData(
                 UUID.randomUUID(),
-                "test3@test.uzh.ch",
+                "test3@uzh.ch",
                 new BCryptPasswordEncoder().encode("password" + "SALT3"),
                 "SALT3"
             ),
@@ -249,6 +251,11 @@ class UserServiceTest {
     }
 
     @Test
+    void createUser_unauthorized() {
+        Assertions.assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser1, insertedUser));
+    }
+
+    @Test
     void createUser_duplicate() {
         Assertions.assertDoesNotThrow(() -> userService.createUser(testUser1, null));
         Assertions.assertThrows(ResponseStatusException.class,
@@ -279,6 +286,41 @@ class UserServiceTest {
 
     @Test
     void updateUser() {
+        doReturn(true).when(universityDomains).matchesEmail(Mockito.any());
+
+        Mockito.when(userRepository.saveAndFlush(Mockito.any())).thenReturn(User.builder()
+            .id(insertedUser.getId())
+            .build());
+
+        Assertions.assertDoesNotThrow(() -> userService.updateUser(
+            User.builder()
+                .id(insertedUser.getId())
+                .authenticationData(AuthenticationData.builder()
+                    .email("sada@uzh.ch")
+                    .password("asdadasdsadasd")
+                    .build()
+                )
+                .details(UserDetails.builder()
+                    .firstName("Gustav")
+                    .lastName("Toll")
+                    .biography("hey hey hey")
+                    .birthday(Date.from(Instant.now().minus(61851, ChronoUnit.DAYS)))
+                    .gender(Gender.MALE)
+                    .phoneNumber("+41999999")
+                    .address(Location.builder()
+                        .name("wor2")
+                        .description("my second work")
+                        .apartmentNumber("dsa")
+                        .state("AG")
+                        .city("Aargau")
+                        .houseNumber("22")
+                        .street("Jutestrasse")
+                        .zipCode("5451")
+                        .country("Swiss")
+                        .build()
+                    )
+                    .build())
+                .build(), insertedUser));
     }
 
     @Test
@@ -295,17 +337,27 @@ class UserServiceTest {
 
     @Test
     void deleteUser() {
+        userService.deleteUser(insertedUser);
+
+        doReturn(List.of()).when(userRepository).findAll();
+        Assertions.assertEquals(0, userService.getUsers().size());
     }
 
     @Test
     void testDeleteUser() {
+        userService.deleteUser(insertedUser.getId());
+
+        doReturn(List.of()).when(userRepository).findAll();
+        Assertions.assertEquals(0, userService.getUsers().size());
     }
 
     @Test
     void existsUser() {
+        Assertions.assertTrue(userService.existsUser(insertedUser.getId()));
     }
 
     @Test
     void testExistsUser() {
+        Assertions.assertTrue(userService.existsUser(insertedUser.getAuthenticationData().getEmail()));
     }
 }

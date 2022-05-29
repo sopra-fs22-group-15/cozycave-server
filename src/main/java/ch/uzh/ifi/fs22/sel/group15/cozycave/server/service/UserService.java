@@ -116,9 +116,6 @@ public class UserService {
         User user = userRepository.findById(userInput.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        System.out.println(user.getId());
-        System.out.println(userInput.getId());
-
         User mergedUser = mergeUser(user, userInput);
 
         checkIfDataIsValid(mergedUser, updatedBy);
@@ -151,7 +148,6 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         Location locationToBeUpdated = getUsersSpecialAddressById(id, specialAddressInput.getId()).get();
-        System.out.println();
 
         if (specialAddressInput.getName() != null) locationToBeUpdated.setName(specialAddressInput.getName());
 
