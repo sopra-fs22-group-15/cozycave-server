@@ -33,7 +33,7 @@ import org.hibernate.annotations.Type;
 @Builder
 public class Picture {
 
-    public static final String ROOT_PATH = "http://database.cozycave.ch/CozyCave/";
+    public static final String ROOT_PATH = "https://pics.cozycave.ch/";
     public static final String GRAVATAR_PATH = "https://www.gravatar.com/avatar/";
 
     @Id
