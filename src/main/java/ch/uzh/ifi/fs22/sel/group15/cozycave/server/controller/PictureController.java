@@ -22,8 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-// TODO: only accepts picture files
-
 @RestController
 @RequestMapping(value = "/v1")
 @Slf4j
