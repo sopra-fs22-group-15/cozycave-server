@@ -16,11 +16,7 @@ With the unique filtering, students can find the properties they’re interested
 
 ## Technologies & Blueprint
 
-* SPRING
-
 * JAVA Version 17 and additional Frameworks:
-  
-  * SPRING
   
   * Lombok https://projectlombok.org/
   
@@ -35,6 +31,14 @@ Identify your project’s 3-5 main components. What is their role?
 How are they correlated? Reference the main class, file, or function in the README text
 
 with a link.
+
+The [main class](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/Application.java) is starting the server
+* For the [User](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/Application.java) we have splitted it up into three parts, the [authentication]
+* For the [Listing]()
+* For the [Applications]()
+* For the [Picture]() We're using the 
+* For our RealtimeCollaborative Feature [Gathertogether](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/websockets/handler/UserProfileHandler.java) we're using Java Websockets, such that the clients and prospective tenants can easily connect with one another. We defined our own message packages which are sent between the subscribers, such that not the whole profile with all of their details is exposed and first has to be approved by the other user. 
+
 
 ## Launch & Deployment
 
