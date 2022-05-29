@@ -12,10 +12,6 @@ With the unique filtering, students can find the properties they’re interested
 
 Last but not least, external APIs are used to display the location of listings on a map for the user, and also calculate travel times from the user's important addresses (e.g. work address) to the listing's location, which is very convenient to avoid repetitive Google Maps searches when browsing through listings.
 
-## Contributors
-
-@davidcoita, @lukasherz,  @Slava-Berasneu, @matthias-imhof
-
 ## Technologies & Blueprint
 
 * SPRING
