@@ -1,6 +1,9 @@
 # CozyCave.ch Server
 
-Made in Zürich with love! Made by Students of the Software Engineering Praktikum Course at the departments of Informatics @ UZH. 
+![our logo](https://raw.githubusercontent.com/sopra-fs22-group-15/cozycave-server/main/pictures/logo.svg)
+
+Made in Zürich with love! 
+Made by Students of the Software Engineering Praktikum Course at the departments of Informatics @ UZH. 
 
 ## Introduction
 
@@ -12,30 +15,28 @@ With the unique filtering, students can find the properties they’re interested
 
 Last but not least, external APIs are used to display the location of listings on a map for the user, and also calculate travel times from the user's important addresses (e.g. work address) to the listing's location, which is very convenient to avoid repetitive Google Maps searches when browsing through listings.
 
+## Illustrations
+![this is how an connection to the websocket is used](https://raw.githubusercontent.com/sopra-fs22-group-15/cozycave-server/main/pictures/websockets.gif)
+![this is our great api](https://raw.githubusercontent.com/sopra-fs22-group-15/cozycave-server/main/pictures/API.png)
+
 ## Technologies & Blueprint
 
 * JAVA Version 17 and additional Frameworks:
-  
-  * Lombok https://projectlombok.org/
-  
+  * Project Lombok
   * WebSockets
-  
-  * ....
+  * Spring Boot
+  * Spring Security with JWT
+  * JPA, Hibernate
+  * ...
 
 ## High-level components
 
-Identify your project’s 3-5 main components. What is their role?
-
-How are they correlated? Reference the main class, file, or function in the README text
-
-with a link.
-
 The [main class](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/Application.java) is starting the server
-* For the [User](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/Application.java) we have splitted it up into three parts, the [authentication]
-* For the [Listing]()
-* For the [Applications]()
-* For the [Picture]() We're using the 
-* For our RealtimeCollaborative Feature [Gathertogether](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/websockets/handler/UserProfileHandler.java) we're using Java Websockets, such that the clients and prospective tenants can easily connect with one another. We defined our own message packages which are sent between the subscribers, such that not the whole profile with all of their details is exposed and first has to be approved by the other user. 
+* For the [User](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/entity/users/User.java) we have split it up into two parts, the [authentication](https://github.com/sopra-fs22-group-15/cozycave-server/tree/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/security) and the [user management](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/controller/UserController.java).
+* For the [Listing](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/entity/listings/Listing.java) 
+* For the [Applications](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/entity/applications/Application.java)
+* For the [Picture](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/entity/Picture.java) We're using the 
+* For our RealtimeCollaborative Feature [GatherTogether](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/websockets/handler/UserProfileHandler.java) we're using Java Websockets, such that the clients and prospective tenants can easily connect with one another. We defined our own message packages which are sent between the subscribers, such that not the whole profile with all of their details is exposed and first has to be approved by the other user. 
 
 
 ## Launch & Deployment
@@ -106,14 +107,13 @@ do the following:
 
 ## Database
 
-LOREM IPSUM
+A MySQL database is required. The login credentials has to be configured in the [application.properties](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/resources/application.properties).
 
 ## File Storage
 
-LOREM IPSUM
-
-
-
+An FTP upload storage is also required.
+To configure the ftp upload, the login credentials have to be set in the [PictureService](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/service/PictureService.java).
+The path to the webserver has to be set in [Picture](https://github.com/sopra-fs22-group-15/cozycave-server/blob/main/src/main/java/ch/uzh/ifi/fs22/sel/group15/cozycave/server/entity/Picture.java).
 
 
 # Roadmap
@@ -123,19 +123,19 @@ LOREM IPSUM
 This is one of our User-Stories, which still needs to be implemented. Unfortunately we couldn't achieve this, because we were lacking a fifth programmer in our group since Milestone 1.
 
 
-### Picture Upload Safety & Ethical Concerns
+### PICTURE UPLOAD SAFETY & ETHICAL CONCERNS
 
 As a matter of fact, a lot of such services are being abused to distribute illegal content such as pornographic material, drug distribution etc. Thus we would need some kind of logic to check the uploaded pictures, such that our platform does not distribute these contents over the web.
 
 
-### IMPLEMENTATION OF A BUSINESS MODELL
+### IMPLEMENTATION OF A BUSINESS MODEL
 
 For our customers (e.g Universities), which could need to make a revenue through Cozy Cave to offset maintenance costs, we need to design and implement a business model. For instance, the easiest and most simple way would be to display commercials next to the AD of our listings. A more advanced and unethical way is to sell the profile data and search preferences of our customers to third parties (e.g. what a customer would be willing to pay for a flat, where the student is looking for accomodation etc.).
 
 
 ### SCALE UP
 
-The application needs to be stress tested for a lot of requests and users. Also it would make sense to have a failover cluster and use a loadbalancer to ensure the availability of Cozy Cave.
+The application needs to be stress tested for a lot of requests and users. Also, it would make sense to have a failover cluster and use a loadbalancer to ensure the availability of Cozy Cave.
 
 # Authors and acknowledgment
 
@@ -143,4 +143,5 @@ The application needs to be stress tested for a lot of requests and users. Also 
 
 # License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+The project license can be seen in the [LICENSE.md](LICENSE.md) file.
+The logo is copyrighted by Pascal Kanzinger.

@@ -1,0 +1,1 @@
+All rights reserved. (2022, Matthias Imhof, Lukas Herz)
