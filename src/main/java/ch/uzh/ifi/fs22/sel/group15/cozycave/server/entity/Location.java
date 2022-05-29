@@ -63,23 +63,6 @@ public class Location implements Cloneable {
     @Column(name = "country", nullable = false)
     private String country;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
-            return false;
-        }
-        Location location = (Location) o;
-        return id != null && Objects.equals(id, location.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
     // TODO: check if address exists in real world
     @Transient
     public boolean isValid() {

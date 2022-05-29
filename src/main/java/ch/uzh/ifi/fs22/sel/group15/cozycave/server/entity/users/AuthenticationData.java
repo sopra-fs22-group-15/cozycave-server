@@ -43,23 +43,6 @@ public class AuthenticationData implements Cloneable {
     @Column(name = "salt", nullable = false, unique = true, updatable = false, length = 16)
     private String salt;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
-            return false;
-        }
-        AuthenticationData that = (AuthenticationData) o;
-        return id != null && Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
     public AuthenticationData clone() {
         return new AuthenticationData(
                 this.id,

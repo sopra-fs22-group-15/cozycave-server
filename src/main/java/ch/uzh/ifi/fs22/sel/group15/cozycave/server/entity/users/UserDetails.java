@@ -83,23 +83,6 @@ public class UserDetails implements Cloneable {
     @JoinColumn(name = "picture_id")
     private Picture picture;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
-            return false;
-        }
-        UserDetails that = (UserDetails) o;
-        return id != null && Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
     public UserDetails clone() {
         return new UserDetails(
                 this.id,
