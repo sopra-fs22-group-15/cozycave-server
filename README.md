@@ -4,11 +4,13 @@ Made in Zürich with love! Made by Students of the Software Engineering Praktiku
 
 ## Introduction
 
-Cozy Cave is designed to provide a platform for people looking for a place to live, to connect with landlords and shared accommodations that are looking for prospective tenants. Those looking for tenants will be able to create new listings, and tenants can apply to these AD with the details they have in their profile. Students can easily apply to a listing with a single click and in turn the landlords can see at a glance who applied to a specific listing and can approve or deny them. 
+Cozy Cave is designed to provide a platform for people looking for a place to live, to connect with landlords and shared accommodations that are looking for prospective tenants. Those looking for tenants will be able to create new listings, and students can apply to these listings with the details they have in their profile - this only takes a single click. In turn, the landlords can see at a glance who applied to one of their listing, view their profile, and can accept or deny them - in both cases, the student is notified about the decision. 
 
-Especially intuitive is the way that students get directly identified through their email address and that only students can apply to properties. Furthermore the real time collaborative feature allows students to connect with other students who then in turn can apply for a listing. 
+Especially intuitive is the way that students get automatically identified through their email address by the system, which then ensures that only students can apply to properties. Furthermore, the real-time collaborative feature allows students to connect with each other and exchange contact details, for example to look for accomodation together, or just as a way to find like-minded people to form a new flatshare with.
 
-With the unique filtering, students can find the properties they’re interested in, let’s say a student wants to live in a house with other people of the same gender, Cozy Cave got the student covered through its filtering mechanism.
+With the unique filtering, students can find the properties they’re interested in. - e.g. if someone wants to live in a house with only other people of the same gender, Cozy Cave got the student covered through its filtering mechanism.
+
+Last but not least, external APIs are used to display the location of listings on a map for the user, and also calculate travel times from the user's important addresses (e.g. work address) to the listing's location, which is very convenient to avoid repetitive Google Maps searches when browsing through listings.
 
 ## Contributors
 
@@ -123,12 +125,12 @@ This is one of our User-Stories, which still needs to be implemented. Unfortunat
 
 ### Picture Upload Safety & Ethical Concerns
 
-As a matter of fact, a lot of such services are being abused to distribute illegal content such as pornographic material, drug distribution etc. Thus we would need some kind of logic to especially check the uploaded pictures, such that our platform, does not distribute these content over the web.
+As a matter of fact, a lot of such services are being abused to distribute illegal content such as pornographic material, drug distribution etc. Thus we would need some kind of logic to check the uploaded pictures, such that our platform does not distribute these contents over the web.
 
 
 ### IMPLEMENTATION OF A BUSINESS MODELL
 
-For our customers, which in return needs to make a revenue with Cozy Cave, we need to design and implement a business model. For instance, the easiest and most simple way would be to display commercials next to the AD of our listings. A more advanced and unethical way is to sell the profile data and search preferences of our customers to third parties (e.g. what a customer would be willing to pay for a flat, where the student is looking for etc.).
+For our customers (e.g Universities), which could need to make a revenue through Cozy Cave to offset maintenance costs, we need to design and implement a business model. For instance, the easiest and most simple way would be to display commercials next to the AD of our listings. A more advanced and unethical way is to sell the profile data and search preferences of our customers to third parties (e.g. what a customer would be willing to pay for a flat, where the student is looking for accomodation etc.).
 
 
 ### SCALE UP
