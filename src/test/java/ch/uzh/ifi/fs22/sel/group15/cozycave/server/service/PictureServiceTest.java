@@ -310,5 +310,14 @@ class PictureServiceTest {
         assertFalse(pictureService.existsPicture(testPicture.getId()));
     }
 
+    @Test
+    public void clonePictureTest() {
+        Picture picture = testPicture.clone();
+        assertEquals(picture.getPictureUrl(), testPicture.getPictureUrl());
+        assertEquals(picture.getId(), testPicture.getId());
+        assertEquals(picture.getUploader(), testPicture.getUploader());
+        assertEquals(picture.getCreationDate(), testPicture.getCreationDate());
+    }
+
 
 }
