@@ -4,10 +4,6 @@ import java.util.Map;
 
 public class AssertionsUtils {
 
-    public static boolean isNull(Object o) {
-        return o == null;
-    }
-
     public static boolean isEmpty(Iterable<?> i) {
         return i == null || !i.iterator().hasNext();
     }
