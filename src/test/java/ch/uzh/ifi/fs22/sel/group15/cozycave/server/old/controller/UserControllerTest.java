@@ -33,13 +33,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
 @WebMvcTest(UserController.class)
 class UserControllerTest {
 
     @MockBean
-    ApplicationService applicationService;
+    private ApplicationService applicationService;
     @MockBean
-    PictureService pictureService;
+    private PictureService pictureService;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
